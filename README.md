@@ -7,6 +7,7 @@ opensource solution to track and analize tweets easely
 this project is at alpha stage and includes other python packages. Check requirements.txt for dependecies control.
 
 to use the package just clone the repo
+    $ git clone https://github.com/ekergy/tweemanager.git
 
 create a python's virtualenv
 
