@@ -14,7 +14,13 @@ create a python's virtualenv
    
     $ virtualenv -p <path/to/python2.7> .env
 
+actualiza el pip (si es necesario):
+
+    $ pip install --upgrade pip
+
 install requirements
+
+    $ pip install -r requirements.txt
 
 type
 python tweemanager --help
