@@ -11,6 +11,8 @@ to use the package just clone the repo
     $ git clone https://github.com/ekergy/tweemanager.git
 
 create a python's virtualenv
+   
+    $ virtualenv -p <path/to/python2.7> .env
 
 install requirements
 
