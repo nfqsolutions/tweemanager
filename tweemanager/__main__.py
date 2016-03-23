@@ -46,22 +46,6 @@ def configparserhandler(ReadOrWrite = True,configfilepath = None):
     """
     configdata = ConfigParser.ConfigParser()
 
-    def configdefaultdata():
-        """
-        if no data is given use this as default
-        """
-        configdata = ConfigParser.ConfigParser()
-        configdata.add_section('TwitterAPIcredentials')
-        configdata.set('TwitterAPIcredentials','consumer_key',"RB4h96LxIM7h0UzAOz8iGUvBX")
-        configdata.set('TwitterAPIcredentials','consumer_secret',"GaebMjdmr783zaVqxDmh4H3JtII6hik0YzKcK7aVRC8346S8iv")
-        configdata.set('TwitterAPIcredentials','access_key',"868696656-WzV9WWua1CvNDp77VK4YfhuMj5N766s4L3SPc1rr")
-        configdata.set('TwitterAPIcredentials','access_secret',"Av3qqc3jpiJtjxiab0iM9tCNwT8iZJbnh1hECbitvWpCx")
-        configdata.add_section('TwitterAPITrackQuery')
-        configdata.set('TwitterAPITrackQuery','TrackQuery',"caixa")
-        configdata.add_section('Elasticsearch')
-        configdata.set('Elasticsearch','ES_URL',"http://192.168.80.221")
-        configdata.set('Elasticsearch','ES_PORT',"9200")
-        return configdata
 
 
     if ReadOrWrite:
