@@ -12,6 +12,10 @@ Create a python's virtualenv:
    
     $ virtualenv -p <path/to/python2.7> .env
 
+Activate the virtual env:
+   
+    $ source  .env/bin/activate
+
 Upgrade pip (if required):
 
     $ pip install --upgrade pip
