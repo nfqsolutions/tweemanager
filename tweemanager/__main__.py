@@ -312,13 +312,24 @@ def loadelastic(dumpedjson):
 
                 ## Filter
                 try:
-                    text_low = tweet["text"]
-                    text_low = text_low.lower()
+
+
                     toexclude = configdata.get('Patterns','toexclude')
                     toinclude = configdata.get('Patterns','toinclude')
                     languagetoexclude = configdata.get('Patterns','languagetoexclude')
                     languagetoinclude = configdata.get('Patterns','languagetoinclude')
 
+                    # if we want to include tweets from a date
+                    anno = configdata.get('Patterns','year')
+                    mes = configdata.get('Patterns','month')
+                    dia = configdata.get('Patterns','day')
+                    fecha = datetime.datetime(year=year,mont=mes,day=dia)
+
+                    # Format fields to compare
+                    time = tweet.tweettime
+                    time_naive = time.replace(tzinfo=None)
+                    text_low = tweet["text"]
+                    text_low = text_low.lower()
 
                     for word in toexclude:
                         if word in text_low:
@@ -328,7 +339,6 @@ def loadelastic(dumpedjson):
                         if word in text_low:
                             filtro = True
 
-
                     for language in languagetoexclude:
                         if json_data["lang"] == language:
                             filtro = False
@@ -336,6 +346,9 @@ def loadelastic(dumpedjson):
                     for language in languagetoinclude:
                         if json_data["lang"] == language:
                             filtro = True
+
+                    if time < fecha:
+                        filtro = False
 
                 except:
                     filtro = False
