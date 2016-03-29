@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from datetime import datetime
 from elasticsearch_dsl import DocType, String, Date, Integer, Mapping, GeoPoint
 from elasticsearch_dsl.connections import connections
@@ -18,7 +19,7 @@ class TweetForElastic(DocType):
 
     # index will be parsed from name tweet_for_elastic
     class Meta:
-        index = 'twitter_collector'
+        index = 'twitter_caixa_collector'
 
     def save(self, ** kwargs):
         return super(TweetForElastic, self).save(** kwargs)

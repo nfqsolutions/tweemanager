@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import datetime
 import tweepy
@@ -9,6 +10,14 @@ class MyStreamListener(tweepy.StreamListener):
 
     """
     """
+
+    toexclude = None;
+    toinclude = None;
+    languagetoexclude = None;
+    languagetoinclude = None;
+
+    def on_error(self,code):
+        print code
 
     def on_status(self, status):
         """
@@ -27,7 +36,6 @@ class MyStreamListener(tweepy.StreamListener):
         
         try:
             if json_data["place"]:
-                print json_data["place"]
                 geolocator = Nominatim()
                 loc = geolocator.geocode(json_data["place"]["full_name"])
                 if loc:
@@ -36,44 +44,49 @@ class MyStreamListener(tweepy.StreamListener):
             pass
 
         ## If you want to show the tweet, uncomment this
-        # try:
-        #     print(json_data["id"])
-        #     print tweet["text"]
-        # except:
-        #     pass        
+        try:
+            print(json_data["id"])
+            print tweet["text"]
+        except:
+            pass        
 
         ## Filter
         try:
             text_low = tweet["text"]
             text_low = text_low.lower()
-            toexclude = configdata.get('Patterns','toexclude')
-            toinclude = configdata.get('Patterns','toinclude')
-            languagetoexclude = configdata.get('Patterns','languagetoexclude')
-            languagetoinclude = configdata.get('Patterns','languagetoinclude')
 
-
-            for word in toexclude:
+            for word in self.toexclude:
+                # print "pasa por aquí 1"
                 if word in text_low:
+                    # print "pasa por aquí 2 (false)"
                     filtro = False
 
-            for word in toinclude:
+            for word in self.toinclude:
+                # print "pasa por aquí 3"
                 if word in text_low:
+                    # print "pasa por aquí 4 (true)"
                     filtro = True
 
 
-            for language in languagetoexclude:
+            for language in self.languagetoexclude:
+                # print "pasa por aquí 5"
                 if json_data["lang"] == language:
+                    # print "pasa por aquí 6 (false)"
                     filtro = False
 
-            for language in languagetoinclude:
+            for language in self.languagetoinclude:
+                # print "pasa por aquí 7"
                 if json_data["lang"] == language:
+                    # print "pasa por aquí 8 (true)"
                     filtro = True
 
-        except:
+        except Exception as e:
+            print e
             filtro = False
 
         if filtro == True:      
             try:
+                # print "pasa por aquí 9"
                 tweet.save()
             except:
                 raise        
@@ -83,7 +96,7 @@ def letsgo(configdata):
     """
     """
     #
-    print configdata._dict()
+    # print configdata._dict()
     startTweetForElastic(configdata)
     #
     auth = tweepy.OAuthHandler(configdata.get("TwitterAPIcredentials","consumer_key") ,
@@ -91,9 +104,15 @@ def letsgo(configdata):
     auth.set_access_token(configdata.get("TwitterAPIcredentials","access_key")
         , configdata.get("TwitterAPIcredentials","access_secret"))
     myStreamListener = MyStreamListener()
+    myStreamListener.toexclude = configdata.get('Patterns','toexclude')
+    myStreamListener.toinclude = configdata.get('Patterns','toinclude')
+    myStreamListener.languagetoexclude = configdata.get('Patterns','languagetoexclude')
+    myStreamListener.languagetoinclude = configdata.get('Patterns','languagetoinclude')
     api = tweepy.API(auth)
     myStream = tweepy.Stream(auth = api.auth, listener=myStreamListener)
-    myStream.filter(track=configdata.get("TwitterAPITrackQuery","trackquery"))
+    listapalabras = list()
+    listapalabras.append(configdata.get('TwitterAPITrackQuery','trackquery'))
+    myStream.filter(track=listapalabras)
 
 def letsquery(configdata,max_tweets):
     """

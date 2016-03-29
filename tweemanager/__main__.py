@@ -156,6 +156,7 @@ def getoldertweets(configdata,maxTweets=None):
             # print t.geoText
 
             tweet = TweetForElastic(meta={'id': t.id})
+            tweet.text = t.text.replace("# ","#").replace("@ ","@")
             tweet.favorite_count = t.favorites
             tweet.retweet_count = t.retweets
             tweet.user = {"name": "None"}
@@ -231,7 +232,7 @@ def dumpelastic(NombreArchivo,indextodump):
     tweets = res['hits']['hits']
 
     for hit in tweets:
-        hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ")
+        hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ").replace("# ","#").replace("@ ","@")
         outputFile.write('%s\n' % (json.dumps(hit,ensure_ascii=False, encoding='utf8')))
 
        
@@ -242,15 +243,14 @@ def dumpelastic(NombreArchivo,indextodump):
         tweets = res['hits']['hits']
 
         for hit in tweets:
-            hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ")
+            hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ").replace("# ","#").replace("@ ","@")
             outputFile.write('%s\n' % (json.dumps(hit,ensure_ascii=False, encoding='utf8')))
 
     outputFile.close()
 
     return
 
-
-def loadelastic(dumpedjson):
+def loadelastic(configdata,dumpedjson):
     """
     This function try to load data to the Elasticsearch server by importing tweets from a json
     """
@@ -263,103 +263,104 @@ def loadelastic(dumpedjson):
 
 
         # Streaming
-        startTweetForElastic()
+        startTweetForElastic(configdata)
 
-        for archivo in dumpedjson:
+        tweets = open(dumpedjson, "r")
+
+        contador = 0
+
+        for t in tweets:
+            t = json.loads(t)
+
+            tweet = TweetForElastic(meta={'id': t['_source']['id']})
             
-            tweets = open(archivo, "r")
-
-            startTweetForElastic()
-            contador = 0
-
-            for t in tweets:
-                t = json.loads(t)
-
-                tweet = TweetForElastic(meta={'id': t['_source']['id']})
-                
-                for key, value in t["_source"].iteritems():
-                    try:
-                        tweet[key] = eval(value)
-                    except:
-                        tweet[key] = value
-
+            for key, value in t["_source"].iteritems():
                 try:
-                    tweet.tweettime = t['_source']['tweettime']
-                    print t['_source']['tweettime']
+                    tweet[key] = eval(value)
                 except:
-                    tweet.tweettime = datetime.datetime.strptime(t['_source']['created_at'],'%a %b %d %H:%M:%S +0000 %Y');
-                    print datetime.datetime.strptime(t['_source']['created_at'],'%a %b %d %H:%M:%S +0000 %Y');
+                    tweet[key] = value
 
-                try:
-                    tweet.location = t['_source']['location']
-                    print tweet.location
-                except Exception as e:
-                    loc = None
+            try:
+                tweet.tweettime = t['_source']['tweettime']
+                print t['_source']['tweettime']
+            except:
+                tweet.tweettime = datetime.datetime.strptime(t['_source']['created_at'],'%a %b %d %H:%M:%S +0000 %Y');
+                print t['_source']['created_at']
 
-                try:
-                    urls = t['_source']['entities']['urls']
-                    # This script just save the first url
-                    url = urls[0]
-                    ex_url = url['expanded_url']
-                    tweet.url = ex_url
-                except:
-                    pass
+            try:
+                tweet.location = t['_source']['location']
+                # print tweet.location
+            except Exception as e:
+                loc = None
 
-                try:
-                    tweet["text"] = t['_source']['text']
-                except:
-                    raise
+            try:
+                urls = t['_source']['entities']['urls']
+                # This script just save the first url
+                url = urls[0]
+                ex_url = url['expanded_url']
+                tweet.url = ex_url
+            except:
+                pass
 
-                ## Filter
-                try:
+            try:
+                tweet["text"] = t['_source']['text']
+            except:
+                raise
+
+            ## Filter
+            try:
 
 
-                    toexclude = configdata.get('Patterns','toexclude')
-                    toinclude = configdata.get('Patterns','toinclude')
-                    languagetoexclude = configdata.get('Patterns','languagetoexclude')
-                    languagetoinclude = configdata.get('Patterns','languagetoinclude')
+                toexclude = configdata.get('Patterns','toexclude')
+                toinclude = configdata.get('Patterns','toinclude')
+                languagetoexclude = configdata.get('Patterns','languagetoexclude')
+                languagetoinclude = configdata.get('Patterns','languagetoinclude')
 
-                    # if we want to include tweets from a date
-                    anno = configdata.get('Patterns','year')
-                    mes = configdata.get('Patterns','month')
-                    dia = configdata.get('Patterns','day')
-                    fecha = datetime.datetime(year=year,mont=mes,day=dia)
+                ## if we want to include tweets from a date
+                # anno = configdata.get('Patterns','year')
+                # mes = configdata.get('Patterns','month')
+                # dia = configdata.get('Patterns','day')
+                # fecha = datetime.datetime(year=anno,mont=mes,day=dia)
 
-                    # Format fields to compare
-                    time = tweet.tweettime
-                    time_naive = time.replace(tzinfo=None)
-                    text_low = tweet["text"]
-                    text_low = text_low.lower()
+                # Format fields to compare
+                time = tweet.tweettime
+                time_naive = time.replace(tzinfo=None)
+                text_low = tweet["text"]
+                text_low = text_low.lower()
 
-                    for word in toexclude:
-                        if word in text_low:
-                            filtro = False
-
-                    for word in toinclude:
-                        if word in text_low:
-                            filtro = True
-
-                    for language in languagetoexclude:
-                        if json_data["lang"] == language:
-                            filtro = False
-
-                    for language in languagetoinclude:
-                        if json_data["lang"] == language:
-                            filtro = True
-
-                    if time < fecha:
+                for word in toexclude:
+                    print word
+                    print text_low
+                    if word in text_low:
                         filtro = False
 
-                except:
-                    filtro = False
+                for word in toinclude:
+                    if word in text_low:
+                        filtro = True
 
-                if filtro == True:      
-                    try:
-                        tweet.save()
-                        print("tweet saved")
-                        print contador
-                        contador += 1
-                    except:
+                for language in languagetoexclude:
+                    if json_data["lang"] == language:
+                        filtro = False
+
+                for language in languagetoinclude:
+                    if json_data["lang"] == language:
+                        filtro = True
+
+                # if time < fecha:
+                #     filtro = False
+
+            except Exception as e:
+                print e
+                filtro = False
+                raise
+
+            if filtro == True:      
+                try:
+                    tweet.save()
+                    print("tweet saved")
+                    print contador
+                    contador += 1
+                except:
                     raise      
         
     except:
@@ -387,9 +388,9 @@ elif arguments['getoldertweets']:
     getoldertweets(configdata=configdata,maxTweets=10)
 elif arguments['dumpelastic']:
     print('dumpelastic')
-    dumpelastic(NombreArchivo,indextodump):
+    dumpelastic(NombreArchivo,indextodump)
 elif arguments['loadelastic']:
     print('loadelastic')
-    loadelastic(dumpedjson)
+    loadelastic(configdata,arguments['<dumpedjson>'])
 else:
     pass
