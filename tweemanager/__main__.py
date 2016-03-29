@@ -14,8 +14,6 @@ Usage:
   tweemanager listener [options]
   tweemanager getoldtweets
   tweemanager getoldertweets [<username> <since> <until> <querySearch> <maxTweets>]
-  tweemanager updatetweets [<startdate> <enddate>]
-  tweemanager geotweets [<startdate> <enddate>]
   tweemanager genconfig [<cfgfilepath>]
   tweemanager dumpelastic <indextodump>
   tweemanager loadelastic <dumpedjson>
@@ -23,12 +21,12 @@ Usage:
   tweemanager --version
 
 Commands:
-  listener      Raise the tweepy listener
-  getoldtweets  Access old tweeters (more than a week)
-  updatetweets  Will sniff tweets in database and update tweet date
-  geotweets     Will sniff tweets and use a "logic" to get geoinfo
-  genconfig     Generate the tweemanager.cfg
-  dumpelastic   Generate the tweemanager.cfg
+  listener       Raise the tweepy listener
+  getoldtweets   Access old tweeters (less than 10 days)
+  getoldertweets Access old tweeters (unofficial API)
+  genconfig      Generate the tweemanager.cfg
+  dumpelastic    Download tweets from Elasticsearch into a json
+  loadelastic    Upload tweets to Elasticsearch from a json
 
 Options:
   -h --help                      Show this screen
@@ -98,136 +96,262 @@ def configparserhandler(ReadOrWrite = True,configfilepath = None):
             return configdata
 
 
-
 def listener(configdata):
     """
+    Set up a listener which save tweets from a query
     """
     from tweepywrapper import letsgo
     letsgo(configdata)
     return
 
-def getoldtweets(configdata):
+def getoldtweets(configdata,max_tweets):
     """
+    Get old tweets with the official API. Limited to 10 days
     """
     from tweepywrapper import letsquery
-    query = 'lacaixa OR CaixaBank'
-    max_tweets = 1000
-    letsquery(configdata,query,max_tweets)
+    letsquery(configdata,max_tweets)
     
     return
 
-def getoldertweets(configdata,username=None,since=None,until=None,querySearch=None,maxTweets=None):
+def getoldertweets(configdata,maxTweets=None):
     """
+    Get old tweets with an unofficial API. Just limited by Twitter servers' capacity
     """
-    print("debug1")
     try:
         import got
         import json
         from geopy.geocoders import Nominatim
         from tweepywrapper import TweetForElastic,startTweetForElastic
         tweetCriteria = got.manager.TweetCriteria()
+        
         if (username):
-            tweetCriteria.username = username
+            tweetCriteria.username = configdata.get("TwitterAPITrackQuery","username")
         if (since):
-            tweetCriteria.since = since
+            tweetCriteria.since = configdata.get("TwitterAPITrackQuery","since")
         if (until):
-            tweetCriteria.until = until
+            tweetCriteria.until = configdata.get("TwitterAPITrackQuery","until")
         if (querySearch):
-            tweetCriteria.querySearch = querySearch
+            # The query is the same as the listener. Otherwise, change it
+            tweetCriteria.querySearch = configdata.get("TwitterAPITrackQuery","trackquery")
         if (maxTweets):
             tweetCriteria.maxTweets = maxTweets
         else:
             tweetCriteria.maxTweets = 2000
 
         #geolocator = Nominatim()
-        print("debug2")
         startTweetForElastic(configdata)
-        print("debug3")
-        for t in got.manager.TweetManager.getTweets(tweetCriteria):
 
-#https://twitter.com/agungw132/status/704413977447563264            print t.id
-            print t.permalink
-            print t.username
-            print t.text
-            print t.text.replace("# ","#").replace("@ ","@")
-            print type(t.date)
-            print t.date
-            print t.retweets 
-            print t.favorites
-            print t.mentions 
-            print t.hashtags
-            print t.geoText
-            # tweet = TweetForElastic(meta={'id': t.id})
-            # if not hasattr(tweet,"body"):
-            #     tweet.body = json.dumps({"text":t.text,"id":t.id},ensure_ascii=False, encoding='utf8')
-            #     #tweet._source = json.dumps({"text":t.text,"id":t.id},ensure_ascii=False, encoding='utf8')
-            # if not hasattr(tweet,"tweettime"):
-            #     tweet.tweettime = t.date
-            # else:
-            #     if not tweet.tweettime:
-            #         tweet.tweettime = t.date
-            #         print(t.date)
-            # if (t.geoText):
-            #     geolocator = Nominatim()
-            #     loc = geolocator.geocode(t.geoText)
-            #     if loc:
-            #         print t.id,t.geoText,(loc.latitude,loc.longitude)
-            #         tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
-            # tweet.tweettext = json.dumps(t.text)
-            # tweet.save()
+        for t in got.manager.TweetManager.getTweets(tweetCriteria):
+            ## If you want to show the tweet, uncomment this
+            # print t.permalink
+            # print t.username
+            # print t.text
+            # print t.text.replace("# ","#").replace("@ ","@")
+            # print type(t.date)
+            # print t.date
+            # print t.retweets 
+            # print t.favorites
+            # print t.mentions 
+            # print t.hashtags
+            # print t.geoText
+
+            tweet = TweetForElastic(meta={'id': t.id})
+            tweet.favorite_count = t.favorites
+            tweet.retweet_count = t.retweets
+            tweet.user = {"name": "None"}
+            tweet.user.name = t.username
+
+            if not hasattr(tweet,"tweettime"):
+                tweet.tweettime = t.date
+            else:
+                if not tweet.tweettime:
+                    tweet.tweettime = t.date
+                    print(t.date)
+
+            if (t.geoText):
+                geolocator = Nominatim()
+                loc = geolocator.geocode(t.geoText)
+                if loc:
+                    print t.id,t.geoText,(loc.latitude,loc.longitude)
+                    tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
+            tweet.text = json.dumps(t.text,ensure_ascii=False, encoding='utf8')
+
+            ## Filter
+            try:
+                text_low = tweet.text
+                text_low = text_low.lower()
+                toexclude = configdata.get('Patterns','toexclude')
+                toinclude = configdata.get('Patterns','toinclude')
+                languagetoexclude = configdata.get('Patterns','languagetoexclude')
+                languagetoinclude = configdata.get('Patterns','languagetoinclude')
+
+
+                for word in toexclude:
+                    if word in text_low:
+                        filtro = False
+
+                for word in toinclude:
+                    if word in text_low:
+                        filtro = True
+
+
+                for language in languagetoexclude:
+                    if json_data["lang"] == language:
+                        filtro = False
+
+                for language in languagetoinclude:
+                    if json_data["lang"] == language:
+                        filtro = True
+
+            except:
+                filtro = False
+
+            if filtro == True:      
+                try:
+                    tweet.save()
+                except:
+                    raise                 
+
     except:
         raise
 
-
-
-def updatetweets():
+def dumpelastic(NombreArchivo,indextodump):
     """
+    Dump tweets from an index into a json in a bulk of 500 tweets
     """
-    # will try to get more data from tweets.
-
-    return
-
-
-def geotweets():
-    """
-    """
-    # will try to geolocate the tweet using a basic logic.
-
-    return
-
-
-def dumpelastic():
-    """
-    """
-    # 
+    import json
     from elasticsearch import Elasticsearch
-    #
-    es = Elasticsearch([{"host":"192.168.80.221"}])
-    # check the number of dumps and do the 
+    import io
 
-    # dump in a 5000 records iteration.
-    verver = es.search(index="twitter_caixa_v2",doc_type="twitter_twp",scroll="25m")
-    valor = True
-    while (valor == True):
-        try:
-            if len(verver['hits']['hits']) > 0:
-                for element in verver['hits']['hits']:
-                    print element
-                verver = es.scroll(scroll_id=verver['_scroll_id'],scroll="25m")
-            else:
-                valor = False
-        except:
-            valor = False
-            return
+    es = Elasticsearch([{'host':configdata.get("Elasticsearch","ES_URL")}])
+    outputFile = io.open(NombreArchivo, "w+", encoding='utf8')
+
+    res = es.search(index=indextodump, size=500, doc_type="tweet_for_elastic", body={"query": {"match_all": {}}}, scroll='10m')
+    
+    tweets = res['hits']['hits']
+
+    for hit in tweets:
+        hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ")
+        outputFile.write('%s\n' % (json.dumps(hit,ensure_ascii=False, encoding='utf8')))
+
+       
+    while (len(tweets)>0):
+        # Keep with the search until no more tweets are found
+        sid = res['_scroll_id']
+        res = es.scroll(scroll_id = sid, scroll = '10m')
+        tweets = res['hits']['hits']
+
+        for hit in tweets:
+            hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ")
+            outputFile.write('%s\n' % (json.dumps(hit,ensure_ascii=False, encoding='utf8')))
+
+    outputFile.close()
+
     return
 
 
 def loadelastic(dumpedjson):
     """
+    This function try to load data to the Elasticsearch server by importing tweets from a json
     """
-    # will try to load data using bulk api in a 5000 records iteration.
+    try:
+        import got
+        import json
+        import datetime
+        from geopy.geocoders import Nominatim
+        from tweepywrapper import TweetForElastic,startTweetForElastic
 
-    return
+
+        # Streaming
+        startTweetForElastic()
+
+        for archivo in dumpedjson:
+            
+            tweets = open(archivo, "r")
+
+            startTweetForElastic()
+            contador = 0
+
+            for t in tweets:
+                t = json.loads(t)
+
+                tweet = TweetForElastic(meta={'id': t['_source']['id']})
+                
+                for key, value in t["_source"].iteritems():
+                    try:
+                        tweet[key] = eval(value)
+                    except:
+                        tweet[key] = value
+
+                try:
+                    tweet.tweettime = t['_source']['tweettime']
+                    print t['_source']['tweettime']
+                except:
+                    tweet.tweettime = datetime.datetime.strptime(t['_source']['created_at'],'%a %b %d %H:%M:%S +0000 %Y');
+                    print datetime.datetime.strptime(t['_source']['created_at'],'%a %b %d %H:%M:%S +0000 %Y');
+
+                try:
+                    tweet.location = t['_source']['location']
+                    print tweet.location
+                except Exception as e:
+                    loc = None
+
+                try:
+                    urls = t['_source']['entities']['urls']
+                    # This script just save the first url
+                    url = urls[0]
+                    ex_url = url['expanded_url']
+                    tweet.url = ex_url
+                except:
+                    pass
+
+                try:
+                    tweet["text"] = t['_source']['text']
+                except:
+                    raise
+
+                ## Filter
+                try:
+                    text_low = tweet["text"]
+                    text_low = text_low.lower()
+                    toexclude = configdata.get('Patterns','toexclude')
+                    toinclude = configdata.get('Patterns','toinclude')
+                    languagetoexclude = configdata.get('Patterns','languagetoexclude')
+                    languagetoinclude = configdata.get('Patterns','languagetoinclude')
+
+
+                    for word in toexclude:
+                        if word in text_low:
+                            filtro = False
+
+                    for word in toinclude:
+                        if word in text_low:
+                            filtro = True
+
+
+                    for language in languagetoexclude:
+                        if json_data["lang"] == language:
+                            filtro = False
+
+                    for language in languagetoinclude:
+                        if json_data["lang"] == language:
+                            filtro = True
+
+                except:
+                    filtro = False
+
+                if filtro == True:      
+                    try:
+                        tweet.save()
+                        print("tweet saved")
+                        print contador
+                        contador += 1
+                    except:
+                    raise      
+        
+    except:
+        raise
+
 
 # Parse command line arguments
 arguments = docopt(__doc__, version='tweemanager 2.0')
@@ -238,6 +362,7 @@ if arguments['genconfig']:
     exit()
 
 configdata = configparserhandler(ReadOrWrite = True,configfilepath=arguments.get('--cfgfile',None))
+print configdata.get('TwitterAPIcredentials','consumer_key')
 
 if arguments['listener']:
     listener(configdata)
@@ -246,15 +371,12 @@ elif arguments['getoldtweets']:
     getoldtweets(configdata)
 elif arguments['getoldertweets']:
     print('getoldertweets')
-    getoldertweets(configdata=configdata,since="2016-02-20",until="2016-03-01",querySearch="lacaixa OR CaixaBank",maxTweets=10)
-elif arguments['updatetweets']:
-    print('updatetweets')
-elif arguments['geotweets']:
-    print('geotweets')
+    getoldertweets(configdata=configdata,maxTweets=10)
 elif arguments['dumpelastic']:
     print('dumpelastic')
-    dumpelastic()
+    dumpelastic(NombreArchivo,indextodump):
 elif arguments['loadelastic']:
     print('loadelastic')
+    loadelastic(dumpedjson)
 else:
     pass
