@@ -5,20 +5,22 @@ from elasticsearch_dsl.connections import connections
 
 class TweetForElastic(DocType):
     """
-    main data is tweet time geo and id that could be getter from geopy
+    Main data is tweet time geo and id that could be getter from geopy
     This data will generate a tweet_for_elastic type.
     """
 
     # Defining the index content:
-
     location = GeoPoint()
     tweettime = Date()
-    # type will be parsed from name tweet_for_elastic
+    # It is useful to save url as a non-tokenized string
+    url = String(analyzer='snowball', fields={'raw': String(index='not_analyzed')})
+    # An analyzer of type snowball that uses the standard tokenizer, with standard filter, lowercase filter, stop filter, and snowball filter.
+
+    # index will be parsed from name tweet_for_elastic
     class Meta:
-        index = 'lacaixa_collector'
+        index = 'twitter_collector'
 
     def save(self, ** kwargs):
-        #self.lines = len(self.body.split())
         return super(TweetForElastic, self).save(** kwargs)
 
 
