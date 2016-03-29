@@ -2,40 +2,37 @@
 
 # NFQ solutions' tweemanager
 
-opensource solution to track and analize tweets easely
+Opensource solution to track and analize tweets easely. This project is at alpha stage and includes other python packages. Check requirements.txt for dependecies control.
 
-this project is at alpha stage and includes other python packages. Check requirements.txt for dependecies control.
-
-to use the package just clone the repo
+To use the package just clone the repo:
     
     $ git clone https://github.com/ekergy/tweemanager.git
 
-create a python's virtualenv
+Create a python's virtualenv:
    
     $ virtualenv -p <path/to/python2.7> .env
 
-actualiza el pip (si es necesario):
+Upgrade pip (if required):
 
     $ pip install --upgrade pip
 
-install requirements
+Install requirements:
 
     $ pip install -r requirements.txt
 
-type
-python tweemanager --help
+Type
+    $ python tweemanager --help
+to show the functionalities
 
-in a production enviroment you should install the package
-python setup.py install
+In a production enviroment you should install the package
+    $ python setup.py install
 
-and use the package as:
+You can find some documentation [here]()
 
-you can find some documentation [here]()
+And use the tweemanager deamon.sh as a template file.
 
-and use the tweemanager deamon.sh as a template file.
+It uses the standard File system as a standard database but you can use mongo or elastic also.
 
-it uses the standard File system as a standard database but you can use mongo or elastic also.
-
-this package basicly uses tweepy package and the getoldtweeter project as base.
+This package basicly uses tweepy package and the getoldtweeter project as base.
 
 
