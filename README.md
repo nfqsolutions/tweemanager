@@ -2,7 +2,7 @@
 
 # NFQ solutions' tweemanager
 
-Opensource solution to track and analize tweets easely. This project is at alpha stage and includes other python packages. Check requirements.txt for dependecies control.
+Opensource solution to track and analize tweets easely. This project is at alpha stage and includes other python packages. Check requirements.txt for dependecies control. You should add also 
 
 To use the package just clone the repo:
     
@@ -27,6 +27,12 @@ Install requirements:
 Type
     $ python tweemanager --help
 to show the functionalities
+
+In order to start using this packages, you need to have a config file. A model can be generated:
+
+    $ python tweemanager gendonfig
+    
+Then, you have to fill the fields in the file with your own data.
 
 In a production enviroment you should install the package
     $ python setup.py install
