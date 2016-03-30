@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# @Author: Hugo M. Marrão Rodrigues
+# @Author: Hugo M. Marrão Rodrigues, Carlos Perales Gonz
 # @Date:   2016-03-02 20:20:57
-# @Last Modified by:   hmarrao
+# @Last Modified by:   cperales
 # @Last Modified time: 2016-03-02 23:53:54
 
 from docopt import docopt
@@ -15,7 +15,7 @@ Usage:
   tweemanager getoldtweets
   tweemanager getoldertweets [<username> <since> <until> <querySearch> <maxTweets>]
   tweemanager genconfig [<cfgfilepath>]
-  tweemanager dumpelastic <indextodump>
+  tweemanager dumpelastic <namefile> <indextodump>
   tweemanager loadelastic <dumpedjson>
   tweemanager (-h | --help)
   tweemanager --version
@@ -56,9 +56,17 @@ def configparserhandler(ReadOrWrite = True,configfilepath = None):
         configdata.set('TwitterAPIcredentials','access_secret',"una access_secret")
         configdata.add_section('TwitterAPITrackQuery')
         configdata.set('TwitterAPITrackQuery','TrackQuery',"palabra")
+        configdata.set('TwitterAPITrackQuery','username',"palabra")
+        configdata.set('TwitterAPITrackQuery','since',"fecha-desde")
+        configdata.set('TwitterAPITrackQuery','until',"fecha-hasta")
         configdata.add_section('Elasticsearch')
         configdata.set('Elasticsearch','ES_URL',"URL_de_ES")
         configdata.set('Elasticsearch','ES_PORT',"Puerto_para_ES")
+        configdata.add_section('Patterns')
+        configdata.set('Patterns','toexclude','[]')
+        configdata.set('Patterns','toinclude','[]')
+        configdata.set('Patterns','languagetoexclude','[]')
+        configdata.set('Patterns','languagetoinclude','[]')
         return configdata
 
 
@@ -388,7 +396,7 @@ elif arguments['getoldertweets']:
     getoldertweets(configdata=configdata,maxTweets=10)
 elif arguments['dumpelastic']:
     print('dumpelastic')
-    dumpelastic(NombreArchivo,indextodump)
+    dumpelastic(arguments['<namefile>'],arguments['<indextodump>'])
 elif arguments['loadelastic']:
     print('loadelastic')
     loadelastic(configdata,arguments['<dumpedjson>'])
