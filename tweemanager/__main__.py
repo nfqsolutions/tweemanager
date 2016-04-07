@@ -13,7 +13,7 @@ NFQ Solutions: this package is at alpha stage.
 Usage:
   tweemanager listener [options]
   tweemanager getoldtweets
-  tweemanager getoldertweets [<username> <since> <until> <querySearch> <maxTweets>]
+  tweemanager getoldertweets
   tweemanager genconfig [<cfgfilepath>]
   tweemanager dumpelastic <namefile> <indextodump>
   tweemanager loadelastic <dumpedjson>
@@ -32,6 +32,10 @@ Options:
   -h --help                      Show this screen
   --version                      Show version
   --cfgfile=<configfilepath>     add config file path to be used
+  --username=<username>     add config file path to be used
+
+Comments:
+
 
 """
 
@@ -121,7 +125,7 @@ def getoldtweets(configdata,max_tweets):
     
     return
 
-def getoldertweets(configdata,maxTweets=None):
+def getoldertweets(configdata,username=None):
     """
     Get old tweets with an unofficial API. Just limited by Twitter servers' capacity
     """
@@ -131,25 +135,80 @@ def getoldertweets(configdata,maxTweets=None):
         from geopy.geocoders import Nominatim
         from tweepywrapper import TweetForElastic,startTweetForElastic
         tweetCriteria = got.manager.TweetCriteria()
+
+        # try:
+        #     username = configdata.get("TwitterAPITrackQuery","username")
+        # except:
+        #     username = None
+        # since = configdata.get("TwitterAPITrackQuery","since")
+        # until = configdata.get("TwitterAPITrackQuery","until")
+        # querySearch = configdata.get("TwitterAPITrackQuery","trackquery")
         
-        if (username):
+
+        # if username != None :
+        #     tweetCriteria.username = username
+        #     print "esto", tweetCriteria.username 
+        # if (since):
+        #     tweetCriteria.since = since
+        #     print tweetCriteria.since
+        # if (until):
+        #     tweetCriteria.until = until
+        #     print tweetCriteria.until
+        # if (querySearch):
+        #     tweetCriteria.querySearch = querySearch
+        #     print tweetCriteria.querySearch
+        # if (maxTweets):
+
+        #     tweetCriteria.maxTweets = maxTweets
+        #     tweetCriteria.maxTweets = 2000
+
+        #     print tweetCriteria.maxTweets
+        # else:
+        #     tweetCriteria.maxTweets = 2000
+
+
+        try:
             tweetCriteria.username = configdata.get("TwitterAPITrackQuery","username")
-        if (since):
+            print tweetCriteria.username
+        except:
+            print "no usuario"
+
+        try:
             tweetCriteria.since = configdata.get("TwitterAPITrackQuery","since")
-        if (until):
+            print tweetCriteria.since
+        except:
+            print "no since"
+            pass
+
+        try:
             tweetCriteria.until = configdata.get("TwitterAPITrackQuery","until")
-        if (querySearch):
+            print tweetCriteria.until 
+        except:
+            print "no until"
+            pass
+
+        try:
             # The query is the same as the listener. Otherwise, change it
             tweetCriteria.querySearch = configdata.get("TwitterAPITrackQuery","trackquery")
-        if (maxTweets):
-            tweetCriteria.maxTweets = maxTweets
-        else:
-            tweetCriteria.maxTweets = 2000
+            print tweetCriteria.querySearch
+        except:
+            print "no query"
+            pass
 
-        #geolocator = Nominatim()
+        try:
+            tweetCriteria.maxTweets = int(configdata.get("TwitterAPITrackQuery","maxTweets"))
+            print tweetCriteria.maxTweets
+        except:
+            print "no maxTweets"
+            tweetCriteria.maxTweets = 2
+
+        geolocator = Nominatim()
+        
         startTweetForElastic(configdata)
-
+        print "pasa por aquí 0"
+        print tweetCriteria
         for t in got.manager.TweetManager.getTweets(tweetCriteria):
+            print "pasa por aquí 1"
             ## If you want to show the tweet, uncomment this
             # print t.permalink
             # print t.username
@@ -164,7 +223,6 @@ def getoldertweets(configdata,maxTweets=None):
             # print t.geoText
 
             tweet = TweetForElastic(meta={'id': t.id})
-            tweet.text = t.text.replace("# ","#").replace("@ ","@")
             tweet.favorite_count = t.favorites
             tweet.retweet_count = t.retweets
             tweet.user = {"name": "None"}
@@ -179,11 +237,22 @@ def getoldertweets(configdata,maxTweets=None):
 
             if (t.geoText):
                 geolocator = Nominatim()
-                loc = geolocator.geocode(t.geoText)
+                loc = geolocator.geocode(t.geoText, timeout=1000000)
                 if loc:
                     print t.id,t.geoText,(loc.latitude,loc.longitude)
                     tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
-            tweet.text = json.dumps(t.text,ensure_ascii=False, encoding='utf8')
+
+            try:
+                texto = json.dumps(t.text,ensure_ascii=False, encoding='utf8')
+                texto = texto.replace(u'# ',u'#')
+                texto = texto.replace(u'/ ',u'/')
+                texto = texto.replace(u'@ ',u'@')
+                tweet.text = texto
+            except Exception as e:
+                print e
+                tweet.text = json.dumps(t.text,ensure_ascii=False, encoding='utf8')
+
+            print tweet.text
 
             ## Filter
             try:
@@ -194,30 +263,29 @@ def getoldertweets(configdata,maxTweets=None):
                 languagetoexclude = configdata.get('Patterns','languagetoexclude')
                 languagetoinclude = configdata.get('Patterns','languagetoinclude')
 
-
+                toexclude = eval(toexclude)
                 for word in toexclude:
+                    word = word.decode('utf-8')
                     if word in text_low:
                         filtro = False
+                        break
 
+                toinclude = eval(toinclude)
                 for word in toinclude:
                     if word in text_low:
                         filtro = True
 
+                print ""
 
-                for language in languagetoexclude:
-                    if json_data["lang"] == language:
-                        filtro = False
 
-                for language in languagetoinclude:
-                    if json_data["lang"] == language:
-                        filtro = True
-
-            except:
+            except Exception as e:
+                print e
                 filtro = False
 
             if filtro == True:      
                 try:
                     tweet.save()
+                    print "Tweet guardado"
                 except:
                     raise                 
 
@@ -251,8 +319,11 @@ def dumpelastic(NombreArchivo,indextodump):
         tweets = res['hits']['hits']
 
         for hit in tweets:
-            hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ").replace("# ","#").replace("@ ","@")
-            outputFile.write('%s\n' % (json.dumps(hit,ensure_ascii=False, encoding='utf8')))
+            try:
+                hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ").replace("# ","#").replace("@ ","@")
+                outputFile.write('%s\n' % (json.dumps(hit,ensure_ascii=False, encoding='utf8')))
+            except:
+                pass
 
     outputFile.close()
 
@@ -317,50 +388,31 @@ def loadelastic(configdata,dumpedjson):
 
             ## Filter
             try:
-
-
+                text_low = tweet.text
+                text_low = text_low.lower()
                 toexclude = configdata.get('Patterns','toexclude')
                 toinclude = configdata.get('Patterns','toinclude')
                 languagetoexclude = configdata.get('Patterns','languagetoexclude')
                 languagetoinclude = configdata.get('Patterns','languagetoinclude')
 
-                ## if we want to include tweets from a date
-                # anno = configdata.get('Patterns','year')
-                # mes = configdata.get('Patterns','month')
-                # dia = configdata.get('Patterns','day')
-                # fecha = datetime.datetime(year=anno,mont=mes,day=dia)
-
-                # Format fields to compare
-                time = tweet.tweettime
-                time_naive = time.replace(tzinfo=None)
-                text_low = tweet["text"]
-                text_low = text_low.lower()
-
+                toexclude = eval(toexclude)
                 for word in toexclude:
-                    print word
-                    print text_low
+                    word = word.decode('utf-8')
                     if word in text_low:
                         filtro = False
+                        break
 
+                toinclude = eval(toinclude)
                 for word in toinclude:
                     if word in text_low:
                         filtro = True
 
-                for language in languagetoexclude:
-                    if json_data["lang"] == language:
-                        filtro = False
+                print ""
 
-                for language in languagetoinclude:
-                    if json_data["lang"] == language:
-                        filtro = True
-
-                # if time < fecha:
-                #     filtro = False
 
             except Exception as e:
                 print e
                 filtro = False
-                raise
 
             if filtro == True:      
                 try:
@@ -392,8 +444,9 @@ elif arguments['getoldtweets']:
     print('getoldtweets')
     getoldtweets(configdata)
 elif arguments['getoldertweets']:
+    print(arguments['--username'])
     print('getoldertweets')
-    getoldertweets(configdata=configdata,maxTweets=10)
+    getoldertweets(configdata=configdata,username=arguments['--username'])
 elif arguments['dumpelastic']:
     print('dumpelastic')
     dumpelastic(arguments['<namefile>'],arguments['<indextodump>'])

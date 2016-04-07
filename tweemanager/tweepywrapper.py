@@ -37,7 +37,7 @@ class MyStreamListener(tweepy.StreamListener):
         try:
             if json_data["place"]:
                 geolocator = Nominatim()
-                loc = geolocator.geocode(json_data["place"]["full_name"])
+                loc = geolocator.geocode(json_data["place"]["full_name"],timeout = 1000000)
                 if loc:
                     tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
         except:
@@ -145,7 +145,7 @@ def letsquery(configdata,max_tweets):
         #
         if json_data["place"]:
             geolocator = Nominatim()
-            loc = geolocator.geocode(json_data["place"]["full_name"])
+            loc = geolocator.geocode(json_data["place"]["full_name"],timeout = 1000000)
             if loc:
                 tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
         #
