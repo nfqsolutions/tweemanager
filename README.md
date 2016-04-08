@@ -37,12 +37,8 @@ Then, you have to fill the fields in the file with your own data.
 In a production enviroment you should install the package
     $ python setup.py install
 
-You can find some documentation about tweepy API [here](docs.tweepy.org)
-
-And use the tweemanager deamon.sh as a template file.
-
-It uses elasticsearch as a standard database but you can use mongo or another data file system.
+It uses elasticsearch as a standard database, but you can use mongo or another data file system.
 
 This package basicly uses tweepy package and the getoldtweeter project as base.
-
-
+You can find some documentation about tweepy [here](http://docs.tweepy.org/en/v3.5.0/)
+You can find some documentation about GetOldTweets [here](https://github.com/Jefferson-Henrique/GetOldTweets-python)
