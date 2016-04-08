@@ -3,7 +3,7 @@
 # @Author: Hugo M. Marrão Rodrigues, Carlos Perales Gonz
 # @Date:   2016-03-02 20:20:57
 # @Last Modified by:   cperales
-# @Last Modified time: 2016-03-02 23:53:54
+# @Last Modified time: 2016-04-08
 
 from docopt import docopt
 
@@ -136,36 +136,6 @@ def getoldertweets(configdata,username=None):
         from tweepywrapper import TweetForElastic,startTweetForElastic
         tweetCriteria = got.manager.TweetCriteria()
 
-        # try:
-        #     username = configdata.get("TwitterAPITrackQuery","username")
-        # except:
-        #     username = None
-        # since = configdata.get("TwitterAPITrackQuery","since")
-        # until = configdata.get("TwitterAPITrackQuery","until")
-        # querySearch = configdata.get("TwitterAPITrackQuery","trackquery")
-        
-
-        # if username != None :
-        #     tweetCriteria.username = username
-        #     print "esto", tweetCriteria.username 
-        # if (since):
-        #     tweetCriteria.since = since
-        #     print tweetCriteria.since
-        # if (until):
-        #     tweetCriteria.until = until
-        #     print tweetCriteria.until
-        # if (querySearch):
-        #     tweetCriteria.querySearch = querySearch
-        #     print tweetCriteria.querySearch
-        # if (maxTweets):
-
-        #     tweetCriteria.maxTweets = maxTweets
-        #     tweetCriteria.maxTweets = 2000
-
-        #     print tweetCriteria.maxTweets
-        # else:
-        #     tweetCriteria.maxTweets = 2000
-
 
         try:
             tweetCriteria.username = configdata.get("TwitterAPITrackQuery","username")
@@ -201,6 +171,8 @@ def getoldertweets(configdata,username=None):
         except:
             print "no maxTweets"
             tweetCriteria.maxTweets = 2
+
+
 
         geolocator = Nominatim()
         
@@ -444,9 +416,8 @@ elif arguments['getoldtweets']:
     print('getoldtweets')
     getoldtweets(configdata)
 elif arguments['getoldertweets']:
-    print(arguments['--username'])
     print('getoldertweets')
-    getoldertweets(configdata=configdata,username=arguments['--username'])
+    getoldertweets(configdata=configdata)
 elif arguments['dumpelastic']:
     print('dumpelastic')
     dumpelastic(arguments['<namefile>'],arguments['<indextodump>'])
