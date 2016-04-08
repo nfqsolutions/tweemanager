@@ -214,6 +214,7 @@ def getoldertweets(configdata,username=None):
                     print t.id,t.geoText,(loc.latitude,loc.longitude)
                     tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
 
+            ## Text
             try:
                 texto = json.dumps(t.text,ensure_ascii=False, encoding='utf8')
                 texto = texto.replace(u'# ',u'#')
@@ -226,13 +227,25 @@ def getoldertweets(configdata,username=None):
 
             print tweet.text
 
-            ## Filter
+            texto = tweet.text
+            try:
+            # Remove URLs
+                try:
+                    texto_sin_url = re.sub(r'htt[^ ]*', '', texto)
+                except:
+                    texto_sin_url = re.sub(r'htt\w+:\/{2}[\d\w-]', '', texto)
+
+                tweet.text = texto_sin_url
+            except:
+                pass
+
+            # Filter
             try:
                 text_low = tweet.text
                 text_low = text_low.lower()
+                idioma = text['lang']
                 toexclude = configdata.get('Patterns','toexclude')
                 toinclude = configdata.get('Patterns','toinclude')
-                languagetoexclude = configdata.get('Patterns','languagetoexclude')
                 languagetoinclude = configdata.get('Patterns','languagetoinclude')
 
                 toexclude = eval(toexclude)
@@ -244,10 +257,19 @@ def getoldertweets(configdata,username=None):
 
                 toinclude = eval(toinclude)
                 for word in toinclude:
+                    word = word.decode('utf-8')
                     if word in text_low:
                         filtro = True
 
-                print ""
+                languagetoinclude = eval(languagetoinclude)
+                for language in languagetoinclude:
+                    language = language.decode('utf-8')
+                    if json_data["lang"] == language:
+                        filtro = True               
+
+            except Exception as e:
+                print e
+                filtro = False
 
 
             except Exception as e:
@@ -257,9 +279,8 @@ def getoldertweets(configdata,username=None):
             if filtro == True:      
                 try:
                     tweet.save()
-                    print "Tweet guardado"
                 except:
-                    raise                 
+                    raise  
 
     except:
         raise
@@ -353,10 +374,59 @@ def loadelastic(configdata,dumpedjson):
             except:
                 pass
 
+
+            ## Text
+            texto = t['_source']['text']
             try:
-                tweet["text"] = t['_source']['text']
+            # Remove URLs
+                try:
+                    texto_sin_url = re.sub(r'htt[^ ]*', '', texto)
+                except:
+                    texto_sin_url = re.sub(r'htt\w+:\/{2}[\d\w-]', '', texto)
+
+                tweet.text = texto_sin_url
             except:
-                raise
+                tweet.text = texto
+
+
+            # Filter
+            try:
+                text_low = tweet.text
+                text_low = text_low.lower()
+                idioma = text['lang']
+                toexclude = configdata.get('Patterns','toexclude')
+                toinclude = configdata.get('Patterns','toinclude')
+                languagetoinclude = configdata.get('Patterns','languagetoinclude')
+
+                toexclude = eval(toexclude)
+                for word in toexclude:
+                    word = word.decode('utf-8')
+                    if word in text_low:
+                        filtro = False
+                        break
+
+                toinclude = eval(toinclude)
+                for word in toinclude:
+                    word = word.decode('utf-8')
+                    if word in text_low:
+                        filtro = True
+
+                languagetoinclude = eval(languagetoinclude)
+                for language in languagetoinclude:
+                    language = language.decode('utf-8')
+                    if json_data["lang"] == language:
+                        filtro = True               
+
+            except Exception as e:
+                print e
+                filtro = False
+
+            if filtro == True:      
+                try:
+                    tweet.save()
+                except:
+                    raise  
+
 
             ## Filter
             try:

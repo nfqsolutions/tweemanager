@@ -29,11 +29,13 @@ class MyStreamListener(tweepy.StreamListener):
         for k,v in json_data.iteritems():
             tweet[k] = v
         
+        # Time
         try:
             tweet.tweettime = datetime.datetime.strptime(json_data['created_at'],'%a %b %d %H:%M:%S +0000 %Y');
         except:
             tweet.tweettime = datetime.datetime.fromtimestamp(int(json_data["timestamp_ms"])/1000)
         
+        # Geolocation
         try:
             if json_data["place"]:
                 geolocator = Nominatim()
@@ -43,50 +45,87 @@ class MyStreamListener(tweepy.StreamListener):
         except:
             pass
 
-        ## If you want to show the tweet, uncomment this
+        # Text
+        texto = t['text']
         try:
-            print(json_data["id"])
-            print tweet["text"]
+        # Remove URLs
+            try:
+                texto_sin_url = re.sub(r'htt[^ ]*', '', texto)
+            except:
+                texto_sin_url = re.sub(r'htt\w+:\/{2}[\d\w-]', '', texto)
+
+            tweet.text = texto_sin_url
         except:
-            pass        
+            tweet.text = texto
+
+        ## If you want to show the tweet, uncomment this
+        # try:
+        #     print(json_data["id"])
+        #     print tweet["text"]
+        # except:
+        #     pass        
 
         ## Filter
         try:
-            text_low = tweet["text"]
+            text_low = tweet.text
             text_low = text_low.lower()
+            idioma = text['lang']
+            toexclude = configdata.get('Patterns','toexclude')
+            toinclude = configdata.get('Patterns','toinclude')
+            languagetoinclude = configdata.get('Patterns','languagetoinclude')
 
-            for word in self.toexclude:
-                # print "pasa por aquí 1"
+            toexclude = eval(toexclude)
+            for word in toexclude:
+                word = word.decode('utf-8')
                 if word in text_low:
-                    # print "pasa por aquí 2 (false)"
                     filtro = False
+                    break
 
-            for word in self.toinclude:
-                # print "pasa por aquí 3"
+            toinclude = eval(toinclude)
+            for word in toinclude:
+                word = word.decode('utf-8')
                 if word in text_low:
-                    # print "pasa por aquí 4 (true)"
                     filtro = True
 
-
-            for language in self.languagetoexclude:
-                # print "pasa por aquí 5"
+            languagetoinclude = eval(languagetoinclude)
+            for language in languagetoinclude:
+                language = language.decode('utf-8')
                 if json_data["lang"] == language:
-                    # print "pasa por aquí 6 (false)"
-                    filtro = False
-
-            for language in self.languagetoinclude:
-                # print "pasa por aquí 7"
-                if json_data["lang"] == language:
-                    # print "pasa por aquí 8 (true)"
-                    filtro = True
+                    filtro = True               
 
         except Exception as e:
             print e
             filtro = False
 
+
+        # # Filter (not sure it works)
+        # try:
+        #     text_low = tweet.text
+        #     text_low = text_low.lower()
+
+        #     for word in self.toexclude:
+        #         if word in text_low:
+        #             filtro = False
+
+        #     for word in self.toinclude:
+        #         if word in text_low:
+        #             filtro = True
+
+
+        #     for language in self.languagetoexclude:
+        #         if json_data["lang"] == language:
+        #             filtro = False
+
+        #     for language in self.languagetoinclude:
+        #         if json_data["lang"] == language:
+        #             filtro = True
+
+        # except Exception as e:
+        #     print e
+        #     filtro = False
+
         if filtro == True:      
             try:
-                # print "pasa por aquí 9"
                 tweet.save()
             except:
                 raise        
@@ -148,5 +187,83 @@ def letsquery(configdata,max_tweets):
             loc = geolocator.geocode(json_data["place"]["full_name"],timeout = 1000000)
             if loc:
                 tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
-        #
-        tweet.save()
+
+        ## Text
+        texto = t['text']
+        try:
+        # Remove URLs
+            try:
+                texto_sin_url = re.sub(r'htt[^ ]*', '', texto)
+            except:
+                texto_sin_url = re.sub(r'htt\w+:\/{2}[\d\w-]', '', texto)
+
+            tweet.text = texto_sin_url
+        except:
+            tweet.text = texto
+
+        # Filter
+        try:
+            text_low = tweet.text
+            text_low = text_low.lower()
+            idioma = text['lang']
+            toexclude = configdata.get('Patterns','toexclude')
+            toinclude = configdata.get('Patterns','toinclude')
+            languagetoinclude = configdata.get('Patterns','languagetoinclude')
+
+            toexclude = eval(toexclude)
+            for word in toexclude:
+                word = word.decode('utf-8')
+                if word in text_low:
+                    filtro = False
+                    break
+
+            toinclude = eval(toinclude)
+            for word in toinclude:
+                word = word.decode('utf-8')
+                if word in text_low:
+                    filtro = True
+
+            languagetoinclude = eval(languagetoinclude)
+            for language in languagetoinclude:
+                language = language.decode('utf-8')
+                if json_data["lang"] == language:
+                    filtro = True               
+
+        except Exception as e:
+            print e
+            filtro = False
+
+
+        # # Filter (not sure it works)
+        # try
+        #     text_low = tweet.text
+        #     text_low = text_low.lower()
+        #     idioma = text['lang']
+        #     toexclude = configdata.get('Patterns','toexclude')
+        #     toinclude = configdata.get('Patterns','toinclude')
+        #     languagetoinclude = configdata.get('Patterns','languagetoinclude')
+
+        #     for word in self.toexclude:
+        #         word = word.decode('utf-8')
+        #         if word in text_low:
+        #             filtro = False
+
+        #     for word in self.toinclude:
+        #         word = word.decode('utf-8')
+        #         if word in text_low:
+        #             filtro = True
+
+        #     for language in self.languagetoinclude:
+        #         language = language.decode('utf-8')
+        #         if json_data["lang"] == language:
+        #             filtro = True
+
+        # except Exception as e:
+        #     print e
+        #     filtro = False
+
+        if filtro == True:      
+            try:
+                tweet.save()
+            except:
+                raise  
