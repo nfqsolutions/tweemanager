@@ -17,6 +17,7 @@ Usage:
   tweemanager genconfig [<cfgfilepath>]
   tweemanager dumpelastic <namefile> <indextodump>
   tweemanager loadelastic <dumpedjson>
+  tweemanager dumptocsv <dumpedjson> <csvfile>
   tweemanager (-h | --help)
   tweemanager --version
 
@@ -27,6 +28,7 @@ Commands:
   genconfig      Generate the tweemanager.cfg
   dumpelastic    Download tweets from Elasticsearch into a json
   loadelastic    Upload tweets to Elasticsearch from a json
+  dumptocsv      Load tweets from a json to a CSV
 
 Options:
   -h --help                      Show this screen
@@ -69,7 +71,6 @@ def configparserhandler(ReadOrWrite = True,configfilepath = None):
         configdata.add_section('Patterns')
         configdata.set('Patterns','toexclude','[]')
         configdata.set('Patterns','toinclude','[]')
-        configdata.set('Patterns','languagetoexclude','[]')
         configdata.set('Patterns','languagetoinclude','[]')
         return configdata
 
@@ -469,6 +470,84 @@ def loadelastic(configdata,dumpedjson):
         raise
 
 
+def dumptoCSV(dumpedjson,csvfile):
+  """
+  Dump JSON fields to a CSV file. Comment/Uncomment to pass all the data or just the text message
+  """
+    import codecs
+    import json
+
+    infile = codecs.open(dumpedjson, "r",encoding='utf8')
+
+    outputFile = codecs.open(csvfile, "w+",encoding='utf8')
+    outputFile.write('texto\n')
+
+    # outputFile.write('contributors\ttruncated\ttext\tis_quote_status\tin_reply_to_status_id\tid\tfavorite_count\tsource\tretweeted\tcoordinates\ttimestamp_ms\tin_reply_to_screen_name\tin_reply_to_user_id\tretweet_count\tid_str\tfavorited\tgeo\tpossibly_sensitive\tlang\tcreated_at\tfilter_level\tin_reply_to_status_id_str\tplace\tUsuario verificado\tNum amigos\tNombre de usuario\n') #] (t.contributors, t.truncated, t.text, t.is_quote_status, t.in_reply_to_status_id, t.id, t.favourite_count, t.source, t.retweeted, t.coordinates, t.timestamp_ms, t.in_reply_to_screen_name, t.in_reply_to_user_id, t.retweet_count, t.id_str, t.favorited, t.geo, t.in_reply_to_user_id_str, t.possibly_sensitive\tlang, t.created_at, t.filter_level, t.in_reply_to_status_id_str, t.place))
+
+    i = 1
+    for t in infile:
+
+        line_as_dict = json.loads(t.rstrip())
+        entero = line_as_dict
+        line_as_dict = line_as_dict["_source"]
+        texto  = line_as_dict['text'].strip()
+        texto = texto.rstrip('\n')
+        print texto
+        outputFile.write('%s\n' % (texto)
+
+
+
+        # geoloc = line_as_dict.get('geo')
+
+        # if not geoloc:
+        #   geoloc = "NA"
+
+
+        # entities = line_as_dict.get('entities','NA')
+        # # url = entities.get('urls','[NA]')
+        # usuario_nul = {'name':'NA', 'friends_count':0}
+        # user = line_as_dict.get('user',usuario_nul)
+
+        # print ""
+        # try:
+        #     iden = line_as_dict['id']
+        # except:
+        #     iden = entero["_id"]
+
+        # try:
+        #     fecha = line_as_dict['tweettime']
+        # except:
+        #     fecha = line_as_dict['created_at']
+
+        # print(line_as_dict.get('contributors','NA'), 
+        # line_as_dict.get('truncated','NA'), texto, line_as_dict.get('is_quote_status','NA'), line_as_dict.get('in_reply_to_status_id','NA'), iden,
+        # line_as_dict.get('favorite_count',0), line_as_dict.get('source','NA'), line_as_dict.get('retweeted','False'), line_as_dict.get('coordinates','NA'), line_as_dict.get('timestamp_ms','NA'),
+        # line_as_dict.get('in_reply_to_screen_name','NA'), line_as_dict.get('in_reply_to_user_id','NA'), line_as_dict.get('retweet_count',0), line_as_dict.get('id_str','NA'), line_as_dict.get('favorited','NA'),
+        # geoloc, line_as_dict.get('possibly_sensitive','False'), line_as_dict.get('lang','NA'), fecha,
+        # line_as_dict.get('filter_level','NA'), line_as_dict.get('in_reply_to_status_id_str','NA'), line_as_dict.get('place','NA'), user.get('verified','False'), user.get('friends_count',0),
+        # user.get('name','NA'))
+
+        # outputFile.write('%s\t %s\t %s\t %s\t %s\t %s\t %f\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\n' % (line_as_dict.get('contributors','NA'), 
+        # line_as_dict.get('truncated','NA'), texto, line_as_dict.get('is_quote_status','NA'), line_as_dict.get('in_reply_to_status_id','NA'), iden,
+        # line_as_dict.get('favorite_count',0), line_as_dict.get('source','NA'), line_as_dict.get('retweeted','False'), line_as_dict.get('coordinates','NA'), line_as_dict.get('timestamp_ms','NA'),
+        # line_as_dict.get('in_reply_to_screen_name','NA'), line_as_dict.get('in_reply_to_user_id','NA'), line_as_dict.get('retweet_count',0), line_as_dict.get('id_str','NA'), line_as_dict.get('favorited','NA'),
+        # geoloc, line_as_dict.get('possibly_sensitive','False'), line_as_dict.get('lang','NA'), fecha,
+        # line_as_dict.get('filter_level','NA'), line_as_dict.get('in_reply_to_status_id_str','NA'), line_as_dict.get('place','NA'), user.get('verified','False'), user.get('friends_count',0),
+        # user.get('name','NA')  ))
+
+        #except:
+        #g  print line_as_dict
+        # outputFile.write('%s\t%s\t%s\t%d\t%s\t%s\t%f\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (line_as_dict['contributors'], line_as_dict['truncated'], line_as_dict['text'], line_as_dict['is_quote_status'], line_as_dict['in_reply_to_status_id'], line_as_dict['id'], line_as_dict['favorite_count'], line_as_dict['source'], line_as_dict['retweeted'], line_as_dict['coordinates'], line_as_dict['timestamp_ms'], line_as_dict['in_reply_to_screen_name'], line_as_dict['in_reply_to_user_id'], line_as_dict['retweet_count'], line_as_dict['id_str'], line_as_dict['favorited'], line_as_dict['in_reply_to_user_id_str'], line_as_dict['possibly_sensitive'], line_as_dict['lang'], line_as_dict['created_at'], line_as_dict['filter_level'], line_as_dict['in_reply_to_status_id_str'], line_as_dict['place']))
+
+        # (t.me, t.date.strftime("%Y-%m-%d %H:%M"), t.retweets, t.favorites, t.text, t.geo, t.mentions, t.hashtags, t.id, t.permalink)
+    
+        i += 1
+        print i
+
+  outputFile.close()
+
+
+
 # Parse command line arguments
 arguments = docopt(__doc__, version='tweemanager 2.0')
 
@@ -494,5 +573,7 @@ elif arguments['dumpelastic']:
 elif arguments['loadelastic']:
     print('loadelastic')
     loadelastic(configdata,arguments['<dumpedjson>'])
+elif arguments['dumptocsv']:
+    dumptocsv(arguments['dumpedjson'],arguments['csvfile'])
 else:
     pass
