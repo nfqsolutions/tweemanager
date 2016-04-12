@@ -117,16 +117,17 @@ def listener(configdata):
     letsgo(configdata)
     return
 
-def getoldtweets(configdata,max_tweets):
+def getoldtweets(configdata):
     """
     Get old tweets with the official API. Limited to 10 days
     """
     from tweepywrapper import letsquery
+    max_tweets = int(configdata.get("TwitterAPITrackQuery","maxTweets"))
     letsquery(configdata,max_tweets)
     
     return
 
-def getoldertweets(configdata,username=None):
+def getoldertweets(configdata):
     """
     Get old tweets with an unofficial API. Just limited by Twitter servers' capacity
     """
@@ -171,17 +172,15 @@ def getoldertweets(configdata,username=None):
             print tweetCriteria.maxTweets
         except:
             print "no maxTweets"
-            tweetCriteria.maxTweets = 2
+            tweetCriteria.maxTweets = 1
 
 
 
         geolocator = Nominatim()
-        
+        searched_tweets = got.manager.TweetManager.getTweets(tweetCriteria)
         startTweetForElastic(configdata)
-        print "pasa por aquí 0"
-        print tweetCriteria
-        for t in got.manager.TweetManager.getTweets(tweetCriteria):
-            print "pasa por aquí 1"
+        contador = 0
+        for t in searched_tweets:
             ## If you want to show the tweet, uncomment this
             # print t.permalink
             # print t.username
@@ -209,18 +208,21 @@ def getoldertweets(configdata,username=None):
                     print(t.date)
 
             if (t.geoText):
-                geolocator = Nominatim()
-                loc = geolocator.geocode(t.geoText, timeout=1000000)
-                if loc:
-                    print t.id,t.geoText,(loc.latitude,loc.longitude)
-                    tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
+                try:
+                    geolocator = Nominatim()
+                    loc = geolocator.geocode(t.geoText, timeout=1000000)
+                    if loc:
+                        print t.id,t.geoText,(loc.latitude,loc.longitude)
+                        tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
+                except:
+                    pass
 
             ## Text
             try:
                 texto = json.dumps(t.text,ensure_ascii=False, encoding='utf8')
-                texto = texto.replace(u'# ',u'#')
-                texto = texto.replace(u'/ ',u'/')
-                texto = texto.replace(u'@ ',u'@')
+                texto = re.sub(r'# ', '#', texto)
+                texto = re.sub(r'/ ', '/', texto)
+                texto = re.sub(r'@ ', '@', texto)
                 tweet.text = texto
             except Exception as e:
                 print e
@@ -241,44 +243,43 @@ def getoldertweets(configdata,username=None):
                 pass
 
             # Filter
-            try:
-                text_low = tweet.text
-                text_low = text_low.lower()
-                idioma = text['lang']
-                toexclude = configdata.get('Patterns','toexclude')
-                toinclude = configdata.get('Patterns','toinclude')
-                languagetoinclude = configdata.get('Patterns','languagetoinclude')
+            filtro = True
+            # try:
+            #     text_low = tweet.text
+            #     text_low = text_low.lower()
+            #     idioma = text['lang']
+            #     toexclude = configdata.get('Patterns','toexclude')
+            #     toinclude = configdata.get('Patterns','toinclude')
+            #     languagetoinclude = configdata.get('Patterns','languagetoinclude')
 
-                toexclude = eval(toexclude)
-                for word in toexclude:
-                    word = word.decode('utf-8')
-                    if word in text_low:
-                        filtro = False
-                        break
+            #     toexclude = eval(toexclude)
+            #     for word in toexclude:
+            #         word = word.decode('utf-8')
+            #         if word in text_low:
+            #             filtro = False
+            #             break
 
-                toinclude = eval(toinclude)
-                for word in toinclude:
-                    word = word.decode('utf-8')
-                    if word in text_low:
-                        filtro = True
+            #     toinclude = eval(toinclude)
+            #     for word in toinclude:
+            #         word = word.decode('utf-8')
+            #         if word in text_low:
+            #             filtro = True
 
-                languagetoinclude = eval(languagetoinclude)
-                for language in languagetoinclude:
-                    language = language.decode('utf-8')
-                    if json_data["lang"] == language:
-                        filtro = True               
+            #     languagetoinclude = eval(languagetoinclude)
+            #     for language in languagetoinclude:
+            #         language = language.decode('utf-8')
+            #         if json_data["lang"] == language:
+            #             filtro = True               
 
-            except Exception as e:
-                print e
-                filtro = False
+            # except Exception as e:
+            #     print e
+            #     filtro = False
 
-
-            except Exception as e:
-                print e
-                filtro = False
 
             if filtro == True:      
                 try:
+                    contador += 1
+                    print contador
                     tweet.save()
                 except:
                     raise  
@@ -470,81 +471,81 @@ def loadelastic(configdata,dumpedjson):
         raise
 
 
-def dumptoCSV(dumpedjson,csvfile):
-  """
-  Dump JSON fields to a CSV file. Comment/Uncomment to pass all the data or just the text message
-  """
-    import codecs
-    import json
+# def dumptoCSV(dumpedjson,csvfile):
+#     """
+#     Dump JSON fields to a CSV file. Comment/Uncomment to pass all the data or just the text message
+#     """
+#     import codecs
+#     import json
 
-    infile = codecs.open(dumpedjson, "r",encoding='utf8')
+#     infile = codecs.open(dumpedjson, "r",encoding='utf8')
 
-    outputFile = codecs.open(csvfile, "w+",encoding='utf8')
-    outputFile.write('texto\n')
+#     outputFile = codecs.open(csvfile, "w+",encoding='utf8')
+#     outputFile.write('texto\n')
 
-    # outputFile.write('contributors\ttruncated\ttext\tis_quote_status\tin_reply_to_status_id\tid\tfavorite_count\tsource\tretweeted\tcoordinates\ttimestamp_ms\tin_reply_to_screen_name\tin_reply_to_user_id\tretweet_count\tid_str\tfavorited\tgeo\tpossibly_sensitive\tlang\tcreated_at\tfilter_level\tin_reply_to_status_id_str\tplace\tUsuario verificado\tNum amigos\tNombre de usuario\n') #] (t.contributors, t.truncated, t.text, t.is_quote_status, t.in_reply_to_status_id, t.id, t.favourite_count, t.source, t.retweeted, t.coordinates, t.timestamp_ms, t.in_reply_to_screen_name, t.in_reply_to_user_id, t.retweet_count, t.id_str, t.favorited, t.geo, t.in_reply_to_user_id_str, t.possibly_sensitive\tlang, t.created_at, t.filter_level, t.in_reply_to_status_id_str, t.place))
+#     # outputFile.write('contributors\ttruncated\ttext\tis_quote_status\tin_reply_to_status_id\tid\tfavorite_count\tsource\tretweeted\tcoordinates\ttimestamp_ms\tin_reply_to_screen_name\tin_reply_to_user_id\tretweet_count\tid_str\tfavorited\tgeo\tpossibly_sensitive\tlang\tcreated_at\tfilter_level\tin_reply_to_status_id_str\tplace\tUsuario verificado\tNum amigos\tNombre de usuario\n') #] (t.contributors, t.truncated, t.text, t.is_quote_status, t.in_reply_to_status_id, t.id, t.favourite_count, t.source, t.retweeted, t.coordinates, t.timestamp_ms, t.in_reply_to_screen_name, t.in_reply_to_user_id, t.retweet_count, t.id_str, t.favorited, t.geo, t.in_reply_to_user_id_str, t.possibly_sensitive\tlang, t.created_at, t.filter_level, t.in_reply_to_status_id_str, t.place))
 
-    i = 1
-    for t in infile:
+#     i = 1
+#     for t in infile:
 
-        line_as_dict = json.loads(t.rstrip())
-        entero = line_as_dict
-        line_as_dict = line_as_dict["_source"]
-        texto  = line_as_dict['text'].strip()
-        texto = texto.rstrip('\n')
-        print texto
-        outputFile.write('%s\n' % (texto)
-
-
-
-        # geoloc = line_as_dict.get('geo')
-
-        # if not geoloc:
-        #   geoloc = "NA"
+#         line_as_dict = json.loads(t.rstrip())
+#         entero = line_as_dict
+#         line_as_dict = line_as_dict["_source"]
+#         texto  = line_as_dict['text'].strip()
+#         texto = texto.rstrip('\n')
+#         print texto
+#         outputFile.write('%s\n' % (texto)
 
 
-        # entities = line_as_dict.get('entities','NA')
-        # # url = entities.get('urls','[NA]')
-        # usuario_nul = {'name':'NA', 'friends_count':0}
-        # user = line_as_dict.get('user',usuario_nul)
 
-        # print ""
-        # try:
-        #     iden = line_as_dict['id']
-        # except:
-        #     iden = entero["_id"]
+#         # geoloc = line_as_dict.get('geo')
 
-        # try:
-        #     fecha = line_as_dict['tweettime']
-        # except:
-        #     fecha = line_as_dict['created_at']
+#         # if not geoloc:
+#         #   geoloc = "NA"
 
-        # print(line_as_dict.get('contributors','NA'), 
-        # line_as_dict.get('truncated','NA'), texto, line_as_dict.get('is_quote_status','NA'), line_as_dict.get('in_reply_to_status_id','NA'), iden,
-        # line_as_dict.get('favorite_count',0), line_as_dict.get('source','NA'), line_as_dict.get('retweeted','False'), line_as_dict.get('coordinates','NA'), line_as_dict.get('timestamp_ms','NA'),
-        # line_as_dict.get('in_reply_to_screen_name','NA'), line_as_dict.get('in_reply_to_user_id','NA'), line_as_dict.get('retweet_count',0), line_as_dict.get('id_str','NA'), line_as_dict.get('favorited','NA'),
-        # geoloc, line_as_dict.get('possibly_sensitive','False'), line_as_dict.get('lang','NA'), fecha,
-        # line_as_dict.get('filter_level','NA'), line_as_dict.get('in_reply_to_status_id_str','NA'), line_as_dict.get('place','NA'), user.get('verified','False'), user.get('friends_count',0),
-        # user.get('name','NA'))
 
-        # outputFile.write('%s\t %s\t %s\t %s\t %s\t %s\t %f\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\n' % (line_as_dict.get('contributors','NA'), 
-        # line_as_dict.get('truncated','NA'), texto, line_as_dict.get('is_quote_status','NA'), line_as_dict.get('in_reply_to_status_id','NA'), iden,
-        # line_as_dict.get('favorite_count',0), line_as_dict.get('source','NA'), line_as_dict.get('retweeted','False'), line_as_dict.get('coordinates','NA'), line_as_dict.get('timestamp_ms','NA'),
-        # line_as_dict.get('in_reply_to_screen_name','NA'), line_as_dict.get('in_reply_to_user_id','NA'), line_as_dict.get('retweet_count',0), line_as_dict.get('id_str','NA'), line_as_dict.get('favorited','NA'),
-        # geoloc, line_as_dict.get('possibly_sensitive','False'), line_as_dict.get('lang','NA'), fecha,
-        # line_as_dict.get('filter_level','NA'), line_as_dict.get('in_reply_to_status_id_str','NA'), line_as_dict.get('place','NA'), user.get('verified','False'), user.get('friends_count',0),
-        # user.get('name','NA')  ))
+#         # entities = line_as_dict.get('entities','NA')
+#         # # url = entities.get('urls','[NA]')
+#         # usuario_nul = {'name':'NA', 'friends_count':0}
+#         # user = line_as_dict.get('user',usuario_nul)
 
-        #except:
-        #g  print line_as_dict
-        # outputFile.write('%s\t%s\t%s\t%d\t%s\t%s\t%f\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (line_as_dict['contributors'], line_as_dict['truncated'], line_as_dict['text'], line_as_dict['is_quote_status'], line_as_dict['in_reply_to_status_id'], line_as_dict['id'], line_as_dict['favorite_count'], line_as_dict['source'], line_as_dict['retweeted'], line_as_dict['coordinates'], line_as_dict['timestamp_ms'], line_as_dict['in_reply_to_screen_name'], line_as_dict['in_reply_to_user_id'], line_as_dict['retweet_count'], line_as_dict['id_str'], line_as_dict['favorited'], line_as_dict['in_reply_to_user_id_str'], line_as_dict['possibly_sensitive'], line_as_dict['lang'], line_as_dict['created_at'], line_as_dict['filter_level'], line_as_dict['in_reply_to_status_id_str'], line_as_dict['place']))
+#         # print ""
+#         # try:
+#         #     iden = line_as_dict['id']
+#         # except:
+#         #     iden = entero["_id"]
 
-        # (t.me, t.date.strftime("%Y-%m-%d %H:%M"), t.retweets, t.favorites, t.text, t.geo, t.mentions, t.hashtags, t.id, t.permalink)
-    
-        i += 1
-        print i
+#         # try:
+#         #     fecha = line_as_dict['tweettime']
+#         # except:
+#         #     fecha = line_as_dict['created_at']
 
-  outputFile.close()
+#         # print(line_as_dict.get('contributors','NA'), 
+#         # line_as_dict.get('truncated','NA'), texto, line_as_dict.get('is_quote_status','NA'), line_as_dict.get('in_reply_to_status_id','NA'), iden,
+#         # line_as_dict.get('favorite_count',0), line_as_dict.get('source','NA'), line_as_dict.get('retweeted','False'), line_as_dict.get('coordinates','NA'), line_as_dict.get('timestamp_ms','NA'),
+#         # line_as_dict.get('in_reply_to_screen_name','NA'), line_as_dict.get('in_reply_to_user_id','NA'), line_as_dict.get('retweet_count',0), line_as_dict.get('id_str','NA'), line_as_dict.get('favorited','NA'),
+#         # geoloc, line_as_dict.get('possibly_sensitive','False'), line_as_dict.get('lang','NA'), fecha,
+#         # line_as_dict.get('filter_level','NA'), line_as_dict.get('in_reply_to_status_id_str','NA'), line_as_dict.get('place','NA'), user.get('verified','False'), user.get('friends_count',0),
+#         # user.get('name','NA'))
+
+#         # outputFile.write('%s\t %s\t %s\t %s\t %s\t %s\t %f\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\t %s\n' % (line_as_dict.get('contributors','NA'), 
+#         # line_as_dict.get('truncated','NA'), texto, line_as_dict.get('is_quote_status','NA'), line_as_dict.get('in_reply_to_status_id','NA'), iden,
+#         # line_as_dict.get('favorite_count',0), line_as_dict.get('source','NA'), line_as_dict.get('retweeted','False'), line_as_dict.get('coordinates','NA'), line_as_dict.get('timestamp_ms','NA'),
+#         # line_as_dict.get('in_reply_to_screen_name','NA'), line_as_dict.get('in_reply_to_user_id','NA'), line_as_dict.get('retweet_count',0), line_as_dict.get('id_str','NA'), line_as_dict.get('favorited','NA'),
+#         # geoloc, line_as_dict.get('possibly_sensitive','False'), line_as_dict.get('lang','NA'), fecha,
+#         # line_as_dict.get('filter_level','NA'), line_as_dict.get('in_reply_to_status_id_str','NA'), line_as_dict.get('place','NA'), user.get('verified','False'), user.get('friends_count',0),
+#         # user.get('name','NA')  ))
+
+#         #except:
+#         #g  print line_as_dict
+#         # outputFile.write('%s\t%s\t%s\t%d\t%s\t%s\t%f\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n' % (line_as_dict['contributors'], line_as_dict['truncated'], line_as_dict['text'], line_as_dict['is_quote_status'], line_as_dict['in_reply_to_status_id'], line_as_dict['id'], line_as_dict['favorite_count'], line_as_dict['source'], line_as_dict['retweeted'], line_as_dict['coordinates'], line_as_dict['timestamp_ms'], line_as_dict['in_reply_to_screen_name'], line_as_dict['in_reply_to_user_id'], line_as_dict['retweet_count'], line_as_dict['id_str'], line_as_dict['favorited'], line_as_dict['in_reply_to_user_id_str'], line_as_dict['possibly_sensitive'], line_as_dict['lang'], line_as_dict['created_at'], line_as_dict['filter_level'], line_as_dict['in_reply_to_status_id_str'], line_as_dict['place']))
+
+#         # (t.me, t.date.strftime("%Y-%m-%d %H:%M"), t.retweets, t.favorites, t.text, t.geo, t.mentions, t.hashtags, t.id, t.permalink)
+
+#         i += 1
+#         print i
+
+#     outputFile.close()
 
 
 
@@ -563,7 +564,7 @@ if arguments['listener']:
     listener(configdata)
 elif arguments['getoldtweets']:
     print('getoldtweets')
-    getoldtweets(configdata)
+    getoldtweets(configdata=configdata)
 elif arguments['getoldertweets']:
     print('getoldertweets')
     getoldertweets(configdata=configdata)

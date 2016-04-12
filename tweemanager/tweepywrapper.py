@@ -165,11 +165,31 @@ def letsquery(configdata,max_tweets):
         , configdata.get("TwitterAPIcredentials","access_secret"))
 
     api = tweepy.API(auth)
-    query = configdata.get("TwitterAPITrackQuery","trackquery")
+    try:
+        query = configdata.get("TwitterAPITrackQuery","trackquery")
+    except:
+        query = None
     #
+
+    try:
+        since = configdata.get("TwitterAPITrackQuery","since")
+        since = 'since:' + since
+        query = query + ' ' + since
+    except:
+        pass
+
+    try:
+        until = configdata.get("TwitterAPITrackQuery","until")
+        until = 'until:' + until
+        query = query + ' ' + until
+    except:
+        pass
+
     startTweetForElastic(configdata)
     #
-    for status in tweepy.Cursor(api.search, q=query).items(max_tweets):
+    contador = 0
+    searched_tweets = tweepy.Cursor(api.search, q=query).items(max_tweets)
+    for status in searched_tweets:
         #
         json_data = status._json
         #
@@ -182,56 +202,57 @@ def letsquery(configdata,max_tweets):
         #
         tweet.location =  None
         #
-        if json_data["place"]:
-            geolocator = Nominatim()
-            loc = geolocator.geocode(json_data["place"]["full_name"],timeout = 1000000)
-            if loc:
-                tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
+        # if json_data["place"]:
+        #     geolocator = Nominatim()
+        #     loc = geolocator.geocode(json_data["place"]["full_name"],timeout = 1000000)
+        #     if loc:
+        #         tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
 
-        ## Text
-        texto = t['text']
-        try:
-        # Remove URLs
-            try:
-                texto_sin_url = re.sub(r'htt[^ ]*', '', texto)
-            except:
-                texto_sin_url = re.sub(r'htt\w+:\/{2}[\d\w-]', '', texto)
+        # ## Text
+        # texto = json_data['text']
+        # try:
+        # # Remove URLs
+        #     try:
+        #         texto_sin_url = re.sub(r'htt[^ ]*', '', texto)
+        #     except:
+        #         texto_sin_url = re.sub(r'htt\w+:\/{2}[\d\w-]', '', texto)
 
-            tweet.text = texto_sin_url
-        except:
-            tweet.text = texto
+        #     tweet.text = texto_sin_url
+        # except:
+        #     tweet.text = texto
 
-        # Filter
-        try:
-            text_low = tweet.text
-            text_low = text_low.lower()
-            idioma = text['lang']
-            toexclude = configdata.get('Patterns','toexclude')
-            toinclude = configdata.get('Patterns','toinclude')
-            languagetoinclude = configdata.get('Patterns','languagetoinclude')
+        # # Filter
+        filtro=True
+        # try:
+        #     text_low = tweet.text
+        #     text_low = text_low.lower()
+        #     idioma = text['lang']
+        #     toexclude = configdata.get('Patterns','toexclude')
+        #     toinclude = configdata.get('Patterns','toinclude')
+        #     languagetoinclude = configdata.get('Patterns','languagetoinclude')
 
-            toexclude = eval(toexclude)
-            for word in toexclude:
-                word = word.decode('utf-8')
-                if word in text_low:
-                    filtro = False
-                    break
+        #     toexclude = eval(toexclude)
+        #     for word in toexclude:
+        #         word = word.decode('utf-8')
+        #         if word in text_low:
+        #             filtro = False
+        #             break
 
-            toinclude = eval(toinclude)
-            for word in toinclude:
-                word = word.decode('utf-8')
-                if word in text_low:
-                    filtro = True
+        #     toinclude = eval(toinclude)
+        #     for word in toinclude:
+        #         word = word.decode('utf-8')
+        #         if word in text_low:
+        #             filtro = True
 
-            languagetoinclude = eval(languagetoinclude)
-            for language in languagetoinclude:
-                language = language.decode('utf-8')
-                if json_data["lang"] == language:
-                    filtro = True               
+        #     languagetoinclude = eval(languagetoinclude)
+        #     for language in languagetoinclude:
+        #         language = language.decode('utf-8')
+        #         if json_data["lang"] == language:
+        #             filtro = True               
 
-        except Exception as e:
-            print e
-            filtro = False
+        # except Exception as e:
+        #     print e
+        #     filtro = False
 
 
         # # Filter (not sure it works)
@@ -264,6 +285,9 @@ def letsquery(configdata,max_tweets):
 
         if filtro == True:      
             try:
+                print tweet.text
+                contador += 1
+                print contador
                 tweet.save()
             except:
                 raise  
