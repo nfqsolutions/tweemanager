@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-
-from ConfigParser import ConfigParser
-
+try:
+    from ConfigParser import ConfigParser
+except:
+    from configparser import ConfigParser
 class ConfigParserManager(ConfigParser):
 	""" ConfigParserManager
 	A simple extension from ConfigParser.

@@ -17,8 +17,10 @@ class outputhandler(object):
 		"""
 		"""
 		if outputtype is None:
-			#self.output = sys.stdout
-			self.output = codecs.getwriter('utf8')(sys.stdout)
+			if (sys.version_info) > (3,5):
+				self.output = sys.stdout
+			else:
+				self.output = codecs.getwriter('utf8')(sys.stdout)
 			self.tipo = "stdout"
 		if outputtype == "mongodb":
 			self.tipo = "mongodb"
@@ -40,8 +42,12 @@ class outputhandler(object):
 		elif self.tipo == "mongodb":
 			# if not a file it is assumed that is a mongodocument
 			mongodoc = self.output(id=result['id'])
-			for key,value in result.iteritems():
-				mongodoc[key] = value
+			if (sys.version_info) > (3,5):
+				for key,value in result.items():
+                                        mongodoc[key] = value
+                        else:
+				for key,value in result.iteritems():
+					mongodoc[key] = value
 			# and add a new line
 			mongodoc.save()
 		elif self.tipo == "stdout":

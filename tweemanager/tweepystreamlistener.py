@@ -24,7 +24,7 @@ class nfqTwitterStreamListener(tweepy.StreamListener):
 
         This status will put candidate in a MQ.
         """
-        print "data from twitter"
+        print("data from twitter")
         data = status._json
         # Avoid manual parsing datetime and use the one on the Status object.
         data[u'created_at'] = status.created_at

@@ -15,7 +15,7 @@ class TweetDocument(mongoengine.DynamicDocument):
 def importDocuments(jsonline):
 	"""
 	"""
-	print jsonline
+	# print jsonline
 	# if not a file it is assumed that is a mongodocument
 	jsontodict = json_util.loads(jsonline)
 	mongodoc = TweetDocument(id=jsontodict["id"])

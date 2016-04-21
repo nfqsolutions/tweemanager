@@ -150,7 +150,6 @@ if arguments.get('loadtweets'):
     # except:
     #     sys.stdout.flush()
     #     pass
-    print k
     sys.exit(0)
 
 #
