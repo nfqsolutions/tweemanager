@@ -33,7 +33,7 @@ class outputhandler(object):
     def putresult(self,result):
         """
         """
-        print(type(self.output))
+        # 
         if self.tipo == "file":
             self.output.write(json.dumps(result, default=json_util.default, ensure_ascii=False, encoding='utf8'))
             # and add a new line

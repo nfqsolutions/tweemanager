@@ -19,7 +19,11 @@ def importDocuments(jsonline):
     # if not a file it is assumed that is a mongodocument
     jsontodict = json_util.loads(jsonline)
     mongodoc = TweetDocument(id=jsontodict["id"])
-    for key,value in jsontodict.iteritems():
-        mongodoc[key] = value
+    if (sys.version_info) > (3,5):
+        for key,value in jsontodict.items():
+            mongodoc[key] = value
+    else:
+        for key,value in jsontodict.items():
+            mongodoc[key] = value
     # and add a new line
     mongodoc.save()
