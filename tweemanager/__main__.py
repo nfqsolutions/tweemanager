@@ -36,7 +36,7 @@ Options:
   -h --help                             Show this screen.
   --version                             Show version.
   -c <cfgfile> --cfgfile <cfgfile>      Set a config file to be used.
-  -o <fout> --output <fout>         Set the output file. If not set it will use stdout.                      
+  -o <fout> --output <fout>             Set the output file. If not set it will use stdout.                      
   -y --yes                              Lets you generate the configfile automagicly.
   -w <nworkers> --workers <nworkers>    Workers to use (only makes sense with 
                                         tweeprocessor command).
