@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-import urllib,urllib2,json,re,datetime
+import urllib,urllib2,re,datetime
+import simplejson as json
 from .. import models
-from ..pyquery import PyQuery
+from pyquery import PyQuery
+import chardet
 
 class TweetManager:
 
@@ -27,12 +29,18 @@ class TweetManager:
 
 			for tweetHTML in tweets:
 				tweetPQ = PyQuery(tweetHTML)
+				#print str(tweetPQ)
 				tweet = models.Tweet()
 
-				usernameTweet = tweetPQ("span.username.js-action-profile-name b").text();
-				txt = tweetPQ("p.js-tweet-text").text()
-				#re.sub(r"\s+", " ",
-				#	re.sub(r"[^\x00-\x7F]", "", tweetPQ("p.js-tweet-text").text()).replace('# ', '#').replace('@ ', '@'));
+				usernameTweet = tweetPQ("span.username.js-action-profile-name b").text()
+				txt = tweetPQ("p.js-tweet-text").text().replace('# ', '#')\
+				                                       .replace('@ ', '@')\
+				                                       .replace('http:// ', 'http://')\
+				                                       .replace('https:// ', 'https://')
+				                                       # .decode(encoding="utf-8")
+
+				re.sub(r"\s+", " ",
+					re.sub(r"[^\x00-\x7F]", "", tweetPQ("p.js-tweet-text").text()));
 				retweets = int(tweetPQ("span.ProfileTweet-action--retweet span.ProfileTweet-actionCount").attr("data-tweet-stat-count").replace(",", ""));
 				favorites = int(tweetPQ("span.ProfileTweet-action--favorite span.ProfileTweet-actionCount").attr("data-tweet-stat-count").replace(",", ""));
 				dateSec = int(tweetPQ("small.time span.js-short-timestamp").attr("data-time"));
@@ -44,16 +52,16 @@ class TweetManager:
 				if len(geoSpan) > 0:
 					geoText = geoSpan.attr('title')
 
-				tweet.id = id
-				tweet.permalink = 'https://twitter.com' + permalink
-				tweet.username = usernameTweet
-				tweet.text = txt
-				tweet.date = datetime.datetime.fromtimestamp(dateSec)
-				tweet.retweets = retweets
-				tweet.favorites = favorites
-				tweet.mentions = " ".join(re.compile('(@\\w*)').findall(tweet.text))
-				tweet.hashtags = " ".join(re.compile('(#\\w*)').findall(tweet.text))
-				tweet.geoText = geoText
+				tweet[u'id'] = id
+				tweet[u'permalink'] = 'https://twitter.com' + permalink
+				tweet[u'username'] = usernameTweet
+				tweet[u'text'] = txt
+				tweet[u'date'] = datetime.datetime.fromtimestamp(dateSec)
+				tweet[u'retweets'] = retweets
+				tweet[u'favorites'] = favorites
+				tweet[u'mentions'] = " ".join(re.compile('(@\\w*)').findall(tweet[u'text']))
+				tweet[u'hashtags'] = " ".join(re.compile('(#\\w*)').findall(tweet[u'text']))
+				tweet[u'geoText'] = geoText
 
 				results.append(tweet)
 
@@ -86,8 +94,12 @@ class TweetManager:
 
 		req = urllib2.Request(url, headers = headers)
 
-		jsonResponse = urllib2.urlopen(req).read()
+		response = urllib2.urlopen(req)
 
+		jsonResponse = response.read()
+
+		encoding = chardet.detect(jsonResponse)
+		
 		dataJson = json.loads(jsonResponse)
-
+		
 		return dataJson

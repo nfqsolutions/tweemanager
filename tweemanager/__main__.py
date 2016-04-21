@@ -5,453 +5,155 @@
 # @Last Modified by:   cperales
 # @Last Modified time: 2016-03-02 23:53:54
 
+import sys
+
 from docopt import docopt
 
+from configparsermanager import ConfigParserManager
+from tweepystreamlistener import letslisten,letssearch,nfqTwitterAuth
+import utilities
+
 __doc__ = """tweemanager.
-NFQ Solutions: this package is at alpha stage.
+NFQ Solutions: this package is at beta stage.
 
 Usage:
-  tweemanager listener [options]
-  tweemanager getoldtweets
-  tweemanager getoldertweets
-  tweemanager genconfig [<cfgfilepath>]
-  tweemanager dumpelastic <namefile> <indextodump>
-  tweemanager loadelastic <dumpedjson>
-  tweemanager (-h | --help)
-  tweemanager --version
+  tweemanager (listener|searchtweets|getoldtweets|genconfig) [options]
+  tweemanager pairmongoelastic
+  tweemanager tweeprocessor [options]
+  tweemanager loadtweets [<jsonfile>]
+  tweemanager dumptweets [<jsonfile>]
 
 Commands:
-  listener       Raise the tweepy listener
-  getoldtweets   Access old tweeters (less than 10 days)
-  getoldertweets Access old tweeters (unofficial API)
-  genconfig      Generate the tweemanager.cfg
-  dumpelastic    Download tweets from Elasticsearch into a json
-  loadelastic    Upload tweets to Elasticsearch from a json
+  listener       Raise the tweepy listener.
+  searchtweets   Access tweets using search API (less than 10 days).
+  getoldtweets   Access old tweeters (unofficial API).
+  tweeprocessor  Start a server that process tweets.
+  loadtweets     load tweets from file.
+  dumptweets     dump all tweets.
+  genconfig      Generate the tweem.cfg
 
 Options:
-  -h --help                      Show this screen
-  --version                      Show version
-  --cfgfile=<configfilepath>     add config file path to be used
-  --username=<username>     add config file path to be used
+  -h --help                             Show this screen.
+  --version                             Show version.
+  -c <cfgfile> --cfgfile <cfgfile>      Set a config file to be used.
+  -o <fout> --output <fout>         Set the output file. If not set it will use stdout.                      
+  -y --yes                              Lets you generate the configfile automagicly.
+  -w <nworkers> --workers <nworkers>    Workers to use (only makes sense with 
+                                        tweeprocessor command).
 
 Comments:
-
-
+  Check INSTALL.md and USAGE.md to get you started.
+  
 """
 
-import ConfigParser
-
-def configparserhandler(ReadOrWrite = True,configfilepath = None):
-    """
-    ReadOrWrite = True will read or use default config data
-    ReadOrWrite = False will write the tweemanager.cfg if it doesn't exists
-    """
-    configdata = ConfigParser.ConfigParser()
-
-    def configdefaultdata():
-        """
-        if no data is given use this as default
-        """
-        configdata = ConfigParser.ConfigParser()
-        configdata.add_section('TwitterAPIcredentials')
-        configdata.set('TwitterAPIcredentials','consumer_key',"una_consumer_key")
-        configdata.set('TwitterAPIcredentials','consumer_secret',"una consumer_secret")
-        configdata.set('TwitterAPIcredentials','access_key',"una access_key")
-        configdata.set('TwitterAPIcredentials','access_secret',"una access_secret")
-        configdata.add_section('TwitterAPITrackQuery')
-        configdata.set('TwitterAPITrackQuery','TrackQuery',"palabra")
-        configdata.set('TwitterAPITrackQuery','username',"palabra")
-        configdata.set('TwitterAPITrackQuery','since',"fecha-desde")
-        configdata.set('TwitterAPITrackQuery','until',"fecha-hasta")
-        configdata.add_section('Elasticsearch')
-        configdata.set('Elasticsearch','ES_URL',"URL_de_ES")
-        configdata.set('Elasticsearch','ES_PORT',"Puerto_para_ES")
-        configdata.add_section('Patterns')
-        configdata.set('Patterns','toexclude','[]')
-        configdata.set('Patterns','toinclude','[]')
-        configdata.set('Patterns','languagetoexclude','[]')
-        configdata.set('Patterns','languagetoinclude','[]')
-        return configdata
-
-
-    if ReadOrWrite:
-        # Read tweem.cfg or given config file
-        try:
-            if configfilepath:
-                if os.path.isfile(configfilepath):
-                    configdata.read(configfilepath)
-            else:
-                configdata.read("tweem.cfg")
-                print "reading tweem.cfg"
-                print configdata.sections()
-        except:
-            raise
-        finally:
-            return configdata
-    else:
-        # write config file tweem.cfg with default information
-        try:
-            if configfilepath is None:
-                configfilepath = "tweem.cfg"
-            import os.path
-            if not os.path.isfile(configfilepath):
-                configdata = configdefaultdata()
-                with open(configfilepath,"w") as fichero:
-                    configdata.write(fichero)
-                print("Done::"+configfilepath+" is ready to me modified")
-            else:
-                print("Warning::"+configfilepath+".cfg already exists")
-                print("Warning::delete it repeat command")
-        except:
-            raise
-        finally:
-            return configdata
-
-
-def listener(configdata):
-    """
-    Set up a listener which save tweets from a query
-    """
-    from tweepywrapper import letsgo
-    letsgo(configdata)
-    return
-
-def getoldtweets(configdata,max_tweets):
-    """
-    Get old tweets with the official API. Limited to 10 days
-    """
-    from tweepywrapper import letsquery
-    letsquery(configdata,max_tweets)
-    
-    return
-
-def getoldertweets(configdata,username=None):
-    """
-    Get old tweets with an unofficial API. Just limited by Twitter servers' capacity
-    """
-    try:
-        import got
-        import json
-        from geopy.geocoders import Nominatim
-        from tweepywrapper import TweetForElastic,startTweetForElastic
-        tweetCriteria = got.manager.TweetCriteria()
-
-        # try:
-        #     username = configdata.get("TwitterAPITrackQuery","username")
-        # except:
-        #     username = None
-        # since = configdata.get("TwitterAPITrackQuery","since")
-        # until = configdata.get("TwitterAPITrackQuery","until")
-        # querySearch = configdata.get("TwitterAPITrackQuery","trackquery")
-        
-
-        # if username != None :
-        #     tweetCriteria.username = username
-        #     print "esto", tweetCriteria.username 
-        # if (since):
-        #     tweetCriteria.since = since
-        #     print tweetCriteria.since
-        # if (until):
-        #     tweetCriteria.until = until
-        #     print tweetCriteria.until
-        # if (querySearch):
-        #     tweetCriteria.querySearch = querySearch
-        #     print tweetCriteria.querySearch
-        # if (maxTweets):
-
-        #     tweetCriteria.maxTweets = maxTweets
-        #     tweetCriteria.maxTweets = 2000
-
-        #     print tweetCriteria.maxTweets
-        # else:
-        #     tweetCriteria.maxTweets = 2000
-
-
-        try:
-            tweetCriteria.username = configdata.get("TwitterAPITrackQuery","username")
-            print tweetCriteria.username
-        except:
-            print "no usuario"
-
-        try:
-            tweetCriteria.since = configdata.get("TwitterAPITrackQuery","since")
-            print tweetCriteria.since
-        except:
-            print "no since"
-            pass
-
-        try:
-            tweetCriteria.until = configdata.get("TwitterAPITrackQuery","until")
-            print tweetCriteria.until 
-        except:
-            print "no until"
-            pass
-
-        try:
-            # The query is the same as the listener. Otherwise, change it
-            tweetCriteria.querySearch = configdata.get("TwitterAPITrackQuery","trackquery")
-            print tweetCriteria.querySearch
-        except:
-            print "no query"
-            pass
-
-        try:
-            tweetCriteria.maxTweets = int(configdata.get("TwitterAPITrackQuery","maxTweets"))
-            print tweetCriteria.maxTweets
-        except:
-            print "no maxTweets"
-            tweetCriteria.maxTweets = 2
-
-        geolocator = Nominatim()
-        
-        startTweetForElastic(configdata)
-        print "pasa por aquí 0"
-        print tweetCriteria
-        for t in got.manager.TweetManager.getTweets(tweetCriteria):
-            print "pasa por aquí 1"
-            ## If you want to show the tweet, uncomment this
-            # print t.permalink
-            # print t.username
-            # print t.text
-            # print t.text.replace("# ","#").replace("@ ","@")
-            # print type(t.date)
-            # print t.date
-            # print t.retweets 
-            # print t.favorites
-            # print t.mentions 
-            # print t.hashtags
-            # print t.geoText
-
-            tweet = TweetForElastic(meta={'id': t.id})
-            tweet.favorite_count = t.favorites
-            tweet.retweet_count = t.retweets
-            tweet.user = {"name": "None"}
-            tweet.user.name = t.username
-
-            if not hasattr(tweet,"tweettime"):
-                tweet.tweettime = t.date
-            else:
-                if not tweet.tweettime:
-                    tweet.tweettime = t.date
-                    print(t.date)
-
-            if (t.geoText):
-                geolocator = Nominatim()
-                loc = geolocator.geocode(t.geoText, timeout=1000000)
-                if loc:
-                    print t.id,t.geoText,(loc.latitude,loc.longitude)
-                    tweet.location =  {"lat" : loc.latitude,"lon" : loc.longitude}
-
-            try:
-                texto = json.dumps(t.text,ensure_ascii=False, encoding='utf8')
-                texto = texto.replace(u'# ',u'#')
-                texto = texto.replace(u'/ ',u'/')
-                texto = texto.replace(u'@ ',u'@')
-                tweet.text = texto
-            except Exception as e:
-                print e
-                tweet.text = json.dumps(t.text,ensure_ascii=False, encoding='utf8')
-
-            print tweet.text
-
-            ## Filter
-            try:
-                text_low = tweet.text
-                text_low = text_low.lower()
-                toexclude = configdata.get('Patterns','toexclude')
-                toinclude = configdata.get('Patterns','toinclude')
-                languagetoexclude = configdata.get('Patterns','languagetoexclude')
-                languagetoinclude = configdata.get('Patterns','languagetoinclude')
-
-                toexclude = eval(toexclude)
-                for word in toexclude:
-                    word = word.decode('utf-8')
-                    if word in text_low:
-                        filtro = False
-                        break
-
-                toinclude = eval(toinclude)
-                for word in toinclude:
-                    if word in text_low:
-                        filtro = True
-
-                print ""
-
-
-            except Exception as e:
-                print e
-                filtro = False
-
-            if filtro == True:      
-                try:
-                    tweet.save()
-                    print "Tweet guardado"
-                except:
-                    raise                 
-
-    except:
-        raise
-
-def dumpelastic(NombreArchivo,indextodump):
-    """
-    Dump tweets from an index into a json in a bulk of 500 tweets
-    """
-    import json
-    from elasticsearch import Elasticsearch
-    import io
-
-    es = Elasticsearch([{'host':configdata.get("Elasticsearch","ES_URL")}])
-    outputFile = io.open(NombreArchivo, "w+", encoding='utf8')
-
-    res = es.search(index=indextodump, size=500, doc_type="tweet_for_elastic", body={"query": {"match_all": {}}}, scroll='10m')
-    
-    tweets = res['hits']['hits']
-
-    for hit in tweets:
-        hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ").replace("# ","#").replace("@ ","@")
-        outputFile.write('%s\n' % (json.dumps(hit,ensure_ascii=False, encoding='utf8')))
-
-       
-    while (len(tweets)>0):
-        # Keep with the search until no more tweets are found
-        sid = res['_scroll_id']
-        res = es.scroll(scroll_id = sid, scroll = '10m')
-        tweets = res['hits']['hits']
-
-        for hit in tweets:
-            try:
-                hit["_source"]['text'] = hit["_source"]['text'].replace("\n"," ").replace("# ","#").replace("@ ","@")
-                outputFile.write('%s\n' % (json.dumps(hit,ensure_ascii=False, encoding='utf8')))
-            except:
-                pass
-
-    outputFile.close()
-
-    return
-
-def loadelastic(configdata,dumpedjson):
-    """
-    This function try to load data to the Elasticsearch server by importing tweets from a json
-    """
-    try:
-        import got
-        import json
-        import datetime
-        from geopy.geocoders import Nominatim
-        from tweepywrapper import TweetForElastic,startTweetForElastic
-
-
-        # Streaming
-        startTweetForElastic(configdata)
-
-        tweets = open(dumpedjson, "r")
-
-        contador = 0
-
-        for t in tweets:
-            t = json.loads(t)
-
-            tweet = TweetForElastic(meta={'id': t['_source']['id']})
-            
-            for key, value in t["_source"].iteritems():
-                try:
-                    tweet[key] = eval(value)
-                except:
-                    tweet[key] = value
-
-            try:
-                tweet.tweettime = t['_source']['tweettime']
-                print t['_source']['tweettime']
-            except:
-                tweet.tweettime = datetime.datetime.strptime(t['_source']['created_at'],'%a %b %d %H:%M:%S +0000 %Y');
-                print t['_source']['created_at']
-
-            try:
-                tweet.location = t['_source']['location']
-                # print tweet.location
-            except Exception as e:
-                loc = None
-
-            try:
-                urls = t['_source']['entities']['urls']
-                # This script just save the first url
-                url = urls[0]
-                ex_url = url['expanded_url']
-                tweet.url = ex_url
-            except:
-                pass
-
-            try:
-                tweet["text"] = t['_source']['text']
-            except:
-                raise
-
-            ## Filter
-            try:
-                text_low = tweet.text
-                text_low = text_low.lower()
-                toexclude = configdata.get('Patterns','toexclude')
-                toinclude = configdata.get('Patterns','toinclude')
-                languagetoexclude = configdata.get('Patterns','languagetoexclude')
-                languagetoinclude = configdata.get('Patterns','languagetoinclude')
-
-                toexclude = eval(toexclude)
-                for word in toexclude:
-                    word = word.decode('utf-8')
-                    if word in text_low:
-                        filtro = False
-                        break
-
-                toinclude = eval(toinclude)
-                for word in toinclude:
-                    if word in text_low:
-                        filtro = True
-
-                print ""
-
-
-            except Exception as e:
-                print e
-                filtro = False
-
-            if filtro == True:      
-                try:
-                    tweet.save()
-                    print("tweet saved")
-                    print contador
-                    contador += 1
-                except:
-                    raise      
-        
-    except:
-        raise
-
-
 # Parse command line arguments
-arguments = docopt(__doc__, version='tweemanager 2.0')
+arguments = docopt(__doc__, version='tweemanager beta')
 
-if arguments['genconfig']:
-    print(arguments)
-    configdata = configparserhandler(ReadOrWrite = False,configfilepath=arguments.get('<cfgfilepath>',None))
-    exit()
+# First things first: 
+# if no configuration file is given one will use the default one:
+# tweem.cfg that is expected to be located at execution path.
+if not arguments.get('--cfgfile'):
+    arguments['--cfgfile'] = "tweem.cfg"
 
-configdata = configparserhandler(ReadOrWrite = True,configfilepath=arguments.get('--cfgfile',None))
-print configdata.get('TwitterAPIcredentials','consumer_key')
+# Preparing Output file. if non is given stdout will be the one to be used.
+utilities.resultshandler = utilities.outputhandler(arguments['--output'])
 
-if arguments['listener']:
-    listener(configdata)
-elif arguments['getoldtweets']:
-    print('getoldtweets')
-    getoldtweets(configdata)
-elif arguments['getoldertweets']:
-    print(arguments['--username'])
-    print('getoldertweets')
-    getoldertweets(configdata=configdata,username=arguments['--username'])
-elif arguments['dumpelastic']:
-    print('dumpelastic')
-    dumpelastic(arguments['<namefile>'],arguments['<indextodump>'])
-elif arguments['loadelastic']:
-    print('loadelastic')
-    loadelastic(configdata,arguments['<dumpedjson>'])
-else:
-    pass
+# if genconfig command is executed it will generate a dummy configfile
+if arguments.get('genconfig'):
+    # launch a warning and a press any key to continue:
+    if not arguments.get('--yes'):
+        if raw_input("This operation delete contents from"
+          +arguments['--cfgfile']
+          +"Really want to continue?[y/n] ").lower()[0] == "n":
+            print("Configuration file not generated. Exiting ...")
+            sys.exit(0)
+    with open(arguments['--cfgfile'],'w') as configfile:
+        cfginfo = ConfigParserManager(configfile)
+        cfginfo.templateinit()
+        cfginfo.write(configfile)
+    print("Configuration template file generated: "+arguments['--cfgfile'])
+    print("Check USAGE.md to get you started!")
+    sys.exit(0)
+
+
+# read configuration file
+cfginfo = ConfigParserManager(arguments['--cfgfile'])
+cfginfo.api = nfqTwitterAuth(cfginfo).get_api()
+
+#outputhandler = outputhandler(arguments['--output'])
+
+utilities.resultshandler = utilities.outputhandler(arguments['--output'])
+
+# if mongodb is set add the connection to the the engine.
+if (arguments['--output'] == "mongodb"):
+    import mongoengine
+    mongoengine.connect(
+        host = cfginfo.getMongoDBSpecs('host')
+    )
+
+if arguments.get('listener'):
+    letslisten(cfginfo.api,eval(cfginfo.getListenerSpecs("trackarray")))
+    sys.exit(0)
+
+
+if arguments.get('searchtweets'):
+    # TODO: maxtweets should be a input
+    # if (arguments['--output'] == "mongodb"):
+    #   import mongoengine
+    #   mongoengine.connect(
+    #     host = cfginfo.getMongoDBSpecs('host')
+    #     )
+    try:
+        maxtweets = int(cfginfo.getSearchSpecs("maxtweets"))
+    except:
+        maxtweets = 10
+    letssearch(cfginfo.api,cfginfo.getSearchSpecs("searchquery"),maxtweets)
+    sys.exit(0)
+    
+#
+if arguments.get('getoldtweets'):
+    # need a serve for ever:
+    from gotsearch import gotsearch
+    #get query search:
+    try:
+        maxtweets = int(cfginfo.getSearchSpecs("maxtweets"))
+    except:
+        maxtweets = 10
+    gotsearch(querySearch=cfginfo.getSearchSpecs("searchquery"),maxTweets=maxtweets)
+    sys.exit(0)
+
+#
+if arguments.get('loadtweets'):
+    import mongoengine
+    mongoengine.connect(
+        host = cfginfo.getMongoDBSpecs('host')
+    )
+    #
+    # Assume that each document is in one line:
+    # 
+    print("loadtweets")
+    from tweetdocument import importDocuments
+    k = 0
+    for line in sys.stdin:
+        jsonline = line
+        importDocuments(line)
+        k += 1
+    # while 1:
+    #     try:
+    #         print sys.stdin.readline()
+    #         k += 1
+    #     except EOFError:
+    #         break
+
+    # try:
+        
+    # except:
+    #     sys.stdout.flush()
+    #     pass
+    print k
+    sys.exit(0)
+
+#
+if arguments.get('dumptweets'):
+    print("dumptweets")
+    sys.exit(0)

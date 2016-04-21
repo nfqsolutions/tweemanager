@@ -19,14 +19,15 @@ class TweetForElastic(DocType):
 
     # index will be parsed from name tweet_for_elastic
     class Meta:
-        index = 'twitter_caixa_collector'
+        index = 'bmn_collector'
 
     def save(self, ** kwargs):
         return super(TweetForElastic, self).save(** kwargs)
 
 
 def startTweetForElastic(configdata):
-    """
+    """ 
+    Start ES connection and initializate index connection.
     """
     # Define a default Elasticsearch client
     connections.create_connection(hosts=[configdata.get("Elasticsearch","ES_URL")+":"+configdata.get("Elasticsearch","ES_PORT")])
