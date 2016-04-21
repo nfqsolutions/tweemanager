@@ -45,7 +45,7 @@ class outputhandler(object):
             if (sys.version_info) > (3,5):
                 for key,value in result.items():
                                         mongodoc[key] = value
-                        else:
+            else:
                 for key,value in result.iteritems():
                     mongodoc[key] = value
             # and add a new line
