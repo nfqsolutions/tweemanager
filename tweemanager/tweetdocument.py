@@ -8,6 +8,7 @@ class TweetDocument(mongoengine.DynamicDocument):
     """
     DynamicDocument for the mongodb insert
     """
+    meta = {'collection':'Tweets'}
     id = mongoengine.IntField(primary_key=True)
     created_at = mongoengine.DateTimeField()
 
