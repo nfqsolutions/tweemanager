@@ -27,7 +27,12 @@ class nfqTwitterStreamListener(tweepy.StreamListener):
         data = status._json
         # Avoid manual parsing datetime and use the one on the Status object.
         data[u'created_at'] = status.created_at
-        utilities.resultshandler.putresult(data)
+        # before seding this to post processor check of exclude and include patterns:
+        if listenerPattternsChecker(data):
+            utilities.resultshandler.putresult(data)
+        else:
+            print("tweet doesn't match patterns!")
+
 
 
 class nfqTwitterAuth(object): 
@@ -50,7 +55,9 @@ class nfqTwitterAuth(object):
 
 
 def letslisten(api,track):
-    """Set 
+    """
+    This is limited to Twitter track system.
+    In general listening requires some processing when data is recevied.
     """
     NFQlistener = nfqTwitterStreamListener()
     thecurrentstream = tweepy.Stream(auth = api.auth, listener=NFQlistener)
@@ -59,6 +66,8 @@ def letslisten(api,track):
 
 def letssearch(api,query,maxtweets=10):
     """
+    In general search doesn't need 
+    patterns to be checked since the query field isn't like the track one on the listener.
     """
     for status in tweepy.Cursor(api.search, q=query).items(maxtweets):
         # Verver
@@ -66,3 +75,8 @@ def letssearch(api,query,maxtweets=10):
         data = status._json
         data[u'created_at'] = status.created_at
         utilities.resultshandler.putresult(data)
+
+def listenerPattternsChecker(result):
+    """
+    """
+    return True

@@ -40,23 +40,39 @@ class outputhandler(object):
         # 
         
         # add location:
+
         try:
             if result.get('geo',None):
                 if result['geo']['type'] == 'Point':
                     result['location'] = {'lat':result['geo']['type'][0],'lon':result['geo']['type'][1]}
             elif result.get("place",None):
-                if result['place']['bounding_box']['type'] == 'Polygon':
+                if result.get('place',{}).get('bounding_box',{}).get('type',None) == 'Polygon':
                     # calculate polygon centroid.
                     transposed = zip(*result['place']['bounding_box']['coordinates'][0])
                     # sums = map(sum, transposed)
                     averages = map(avg, transposed)
                     result['location'] = {'lat':averages[1],'lon':averages[0]}
+                else:
+                    if result.get('place',{}).get('full_name',None):
+                        print("has full name")
+                        print(result['place']['full_name'])
+                        from geopy.geocoders import Nominatim
+                        geolocator = Nominatim()
+                        loc = geolocator.geocode(result['place']['full_name'])
+                        if loc:
+                            result['location'] =  {"lat" : loc.latitude,"lon" : loc.longitude}
         except:
             pass
         # add clean text for unique count and training:
         try:
             text_clean = result['text']
             result['text_clean'] = " ".join(filter(lambda x:(x[0]!=u'#' and x[0]!=u'@' and x[0:4]!=u'http'), text_clean.split()))
+        except:
+            pass
+        # Adding other kind of info: the tweet permalink
+        try:
+            if not result.get('permalink',None):
+                result['permalink'] = u'https://twitter.com/'+result['user']['screen_name']+u'/status/'+unicode(result['id'])
         except:
             pass
         if self.tipo == "file":
