@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from datetime import datetime
-from elasticsearch_dsl import DocType, String, Date, Integer, Mapping, GeoPoint
+from elasticsearch_dsl import DocType, String, Date, GeoPoint
 from elasticsearch_dsl.connections import connections
 
 
@@ -14,8 +13,10 @@ class TweetForElastic(DocType):
     location = GeoPoint()
     tweettime = Date()
     # It is useful to save url as a non-tokenized string
-    url = String(analyzer='snowball', fields={'raw': String(index='not_analyzed')})
-    # An analyzer of type snowball that uses the standard tokenizer, with standard filter, lowercase filter, stop filter, and snowball filter.
+    url = String(analyzer='snowball',
+                 fields={'raw': String(index='not_analyzed')})
+    # An analyzer of type snowball that uses the standard tokenizer,
+    # with standard filter, lowercase filter, stop filter, and snowball filter.
 
     # index will be parsed from name tweet_for_elastic
     class Meta:
@@ -26,11 +27,13 @@ class TweetForElastic(DocType):
 
 
 def startTweetForElastic(configdata):
-    """ 
+    """
     Start ES connection and initializate index connection.
     """
     # Define a default Elasticsearch client
-    connections.create_connection(hosts=[configdata.get("Elasticsearch","ES_URL")+":"+configdata.get("Elasticsearch","ES_PORT")])
+    connections.create_connection(hosts=[configdata.get(
+        "Elasticsearch", "ES_URL") + ":" +
+        configdata.get("Elasticsearch", "ES_PORT")])
 
     # create the mappings in elasticsearch
     TweetForElastic.init()
