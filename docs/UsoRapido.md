@@ -10,7 +10,7 @@
 	pip install -r requirementsUsoRapido.txt
 	```
 
-	> Nota: Opcionalmente instala un venv (o virtualenv) con tu instalación de python. Puedes usar Python 2.7 o Python 3.5 (si tienes algun problema o encuentras uno reporta en el repositorio *s’il vous plait*)
+	> Nota: Opcionalmente instala un venv (o virtualenv) con tu instalación de python. Puedes usar Python 2.7 o Python 3.5 (si tienes algun problema o encuentras uno pon una issue [*s’il vous plait*](https://github.com/ekergy/tweemanager/issues))
 
 
 3. Busca unos cuantos tweets (con la API oficiosa **getoldtweets**):
