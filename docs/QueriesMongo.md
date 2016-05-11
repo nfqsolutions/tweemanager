@@ -26,6 +26,7 @@
 5. Contar el número de idiomas distintos ordenados por hashtag:
 
 	5.1 Programático:
+
 		```javascript
 		Nlanguages = db.Tweets.distinct("lang");
 		for (i=0; i< Nlanguages.length; i++) {
@@ -33,7 +34,10 @@
 		}
 		```
 
-	5.2 Aggregación:
+	5.2 Aggregación:		
+	
 		```javascript
 		db.Tweets.aggregate({$group: {_id: "$lang", total: {$sum: 1} }})
 		```
+
+6. Contar palabras con stopwords:
