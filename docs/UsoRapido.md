@@ -1,6 +1,8 @@
 1. Clona este repositorio:
 
+	```bash
 	git clone https://github.com/ekergy/tweemanager.git
+	```
 
 2. instala las dependencias minimas necesarias:
 
