@@ -19,6 +19,6 @@
 	python tweemanager getoldtweets -c tweemUsoRapido.cfg
 	```
 
-	> nota: Para este caso ni hay que registrar una app en twitter.
+	> Nota: Para este caso ni hay que registrar una app en twitter.
 
 

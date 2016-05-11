@@ -104,8 +104,6 @@ class outputhandler(object):
                         'lat': averages[1], 'lon': averages[0]}
                 else:
                     if result.get('place', {}).get('full_name', None):
-                        print("has full name")
-                        print(result['place']['full_name'])
                         from geopy.geocoders import Nominatim
                         geolocator = Nominatim()
                         loc = geolocator.geocode(result['place']['full_name'])
