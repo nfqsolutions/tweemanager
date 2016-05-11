@@ -6,8 +6,8 @@ import codecs
 import re
 import string
 import unicodedata
-from tweetdocument import TweetDocument
 from bson import json_util as json
+
 
 
 resultshandler = None
@@ -71,6 +71,7 @@ class outputhandler(object):
                 self.output = codecs.getwriter('utf8')(sys.stdout)
             self.tipo = "stdout"
         if outputtype == "mongodb":
+            from tweetdocument import TweetDocument
             self.tipo = "mongodb"
             self.output = TweetDocument
         elif isinstance(outputtype, str):

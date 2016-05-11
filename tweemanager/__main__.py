@@ -86,10 +86,6 @@ if arguments.get('genconfig'):
 # read configuration file:
 configparsermanager.CFGINFO = configparsermanager.ConfigParserManager(arguments['--cfgfile'])
 
-from tweepystreamlistener import nfqTwitterAuth
-
-configparsermanager.CFGINFO.api = nfqTwitterAuth(configparsermanager.CFGINFO).get_api()
-
 # Preparing Output file. if non is given stdout will be the one to be used.
 # Selection is done on outputhandler init method.
 import utilities
@@ -106,12 +102,16 @@ if (arguments['--output'] == "mongodb"):
 
 # listener command
 if arguments.get('listener'):
+    from tweepystreamlistener import nfqTwitterAuth
+    configparsermanager.CFGINFO.api = nfqTwitterAuth(configparsermanager.CFGINFO).get_api()
     from tweepystreamlistener import letslisten
     letslisten(configparsermanager.CFGINFO.api, eval(configparsermanager.CFGINFO.getListenerSpecs("trackarray")))
     sys.exit(0)
 
 # searchtweets command
 if arguments.get('searchtweets'):
+    from tweepystreamlistener import nfqTwitterAuth
+    configparsermanager.CFGINFO.api = nfqTwitterAuth(configparsermanager.CFGINFO).get_api()
     from tweepystreamlistener import letssearch
     try:
         maxtweets = int(configparsermanager.CFGINFO.getSearchSpecs("maxtweets"))
