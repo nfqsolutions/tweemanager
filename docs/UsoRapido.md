@@ -25,3 +25,20 @@
 
 	Ya tenemos unos cuantos tweets. Podriamos procesar la información que hemos obtenido con alguno visualizador/procesador de datos.
 
+4. Inserta los datos en mongodb:
+
+	Añade mongo a tu fichero de configuración:
+	```
+	[MongoDBSpecs]
+	host=mongodb://127.0.0.1/tweets
+	repocollname=tweetslacaixa
+	```
+
+	y ejecuta el comando de importación para importar los datos obtenidos anteriormente:
+	```bash
+	python tweemanager importToMongo TestUsoRapido.json
+	```
+
+	> Nota: podemos realizar el paso anterior directamente para mongo usando la opción *-o mongodb*: ```python tweemanager importToMongo TestUsoRapido.json -o mongodb```
+
+
