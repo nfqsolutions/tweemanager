@@ -54,8 +54,7 @@ def gotsearch(username=None,
                     {u'text': mention.replace('#', '')})
 
         # remove entities if no data is set:
-        if (len(result[u'entities'][u'hashtags']) == 0) and
-           (len(result[u'entities'][u'user_mentions']) == 0):
+        if (len(result[u'entities'][u'hashtags']) == 0) and (len(result[u'entities'][u'user_mentions']) == 0):
             result.pop(u'entities')
 
         utilities.resultshandler.putresult(result)

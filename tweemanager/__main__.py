@@ -4,14 +4,11 @@
 # @Date:   2016-03-02 20:20:57
 # @Last Modified by:   cperales
 # @Last Modified time: 2016-03-02 23:53:54
-
+# system imports
 import sys
-
+# packages and modules imports
 from docopt import docopt
-
-from configparsermanager import ConfigParserManager
-from tweepystreamlistener import letslisten, letssearch, nfqTwitterAuth
-import utilities
+import configparsermanager
 
 __doc__ = """tweemanager.
 NFQ Solutions: this package is at beta stage.
@@ -66,9 +63,7 @@ arguments = docopt(__doc__, version='tweemanager beta')
 if not arguments.get('--cfgfile'):
     arguments['--cfgfile'] = "tweem.cfg"
 
-# Preparing Output file. if non is given stdout will be the one to be used.
-# Selection is done on outputhandler init method.
-utilities.resultshandler = utilities.outputhandler(arguments['--output'])
+import configparsermanager
 
 # if genconfig command is the selected one, it will generate a dummy configfile
 # using the name handled by arguments['--cfgfile'].
@@ -81,37 +76,48 @@ if arguments.get('genconfig'):
             print("Configuration file not generated. Exiting ...")
             sys.exit(0)
     with open(arguments['--cfgfile'], 'w') as configfile:
-        cfginfo = ConfigParserManager(configfile)
-        cfginfo.templateinit()
-        cfginfo.write(configfile)
+        configparsermanager.CFGINFO = configparsermanager.ConfigParserManager(configfile)
+        configparsermanager.CFGINFO.templateinit()
+        configparsermanager.CFGINFO.write(configfile)
     print("Configuration template file generated: " + arguments['--cfgfile'])
     print("Check USAGE.md to get you started!")
     sys.exit(0)
 
-
 # read configuration file:
-cfginfo = ConfigParserManager(arguments['--cfgfile'])
-cfginfo.api = nfqTwitterAuth(cfginfo).get_api()
+configparsermanager.CFGINFO = configparsermanager.ConfigParserManager(arguments['--cfgfile'])
+
+from tweepystreamlistener import nfqTwitterAuth
+
+configparsermanager.CFGINFO.api = nfqTwitterAuth(configparsermanager.CFGINFO).get_api()
+
+# Preparing Output file. if non is given stdout will be the one to be used.
+# Selection is done on outputhandler init method.
+import utilities
+utilities.resultshandler = utilities.outputhandler(arguments['--output'])
+
 
 # if mongodb is set start the connection for mongoengine.
 if (arguments['--output'] == "mongodb"):
     import mongoengine
     mongoengine.connect(
-        host=cfginfo.getMongoDBSpecs('host')
+        host=configparsermanager.CFGINFO.getMongoDBSpecs('host')
     )
+    # tweetdocument.TweetsRepoCollName = CFGINFO.getMongoDBSpecs('repocollname')
 
 # listener command
 if arguments.get('listener'):
-    letslisten(cfginfo.api, eval(cfginfo.getListenerSpecs("trackarray")))
+    from tweepystreamlistener import letslisten
+    letslisten(configparsermanager.CFGINFO.api, eval(configparsermanager.CFGINFO.getListenerSpecs("trackarray")))
     sys.exit(0)
 
 # searchtweets command
 if arguments.get('searchtweets'):
+    from tweepystreamlistener import letssearch
     try:
-        maxtweets = int(cfginfo.getSearchSpecs("maxtweets"))
+        maxtweets = int(configparsermanager.CFGINFO.getSearchSpecs("maxtweets"))
     except:
         maxtweets = 10
-    letssearch(cfginfo.api, cfginfo.getSearchSpecs("searchquery"), maxtweets)
+    letssearch(configparsermanager.CFGINFO.api, configparsermanager.CFGINFO.getSearchSpecs("searchquery"), maxtweets)
     sys.exit(0)
 
 # getoldtweets command
@@ -120,10 +126,10 @@ if arguments.get('getoldtweets'):
     from gotsearch import gotsearch
     # get query search:
     try:
-        maxtweets = int(cfginfo.getSearchSpecs("maxtweets"))
+        maxtweets = int(configparsermanager.CFGINFO.getSearchSpecs("maxtweets"))
     except:
         maxtweets = 10
-    gotsearch(querySearch=cfginfo.getSearchSpecs(
+    gotsearch(querySearch=configparsermanager.CFGINFO.getSearchSpecs(
         "searchquery"), maxTweets=maxtweets)
     sys.exit(0)
 
@@ -135,8 +141,9 @@ if arguments.get('importToMongo'):
     # a connection is set either way.
     import mongoengine
     mongoengine.connect(
-        host=cfginfo.getMongoDBSpecs('host')
+        host=configparsermanager.CFGINFO.getMongoDBSpecs('host')
     )
+    # tweetdocument.TweetsRepoCollName = CFGINFO.getMongoDBSpecs('repocollname')
     # Assume that each document is in one line:
     # if no file is given it will load from stdin
     utilities.resultshandler = utilities.outputhandler('mongodb')
@@ -149,19 +156,19 @@ if arguments.get('importToMongo'):
         print("Using stdin to process json data.")
         print("Note: for really large jsons, use pipes. ej: \'< or |\' .")
     spinner = spinning_cursor()
-    from tweetdocument import importToMongo
+    # from utilities import importToMongo
     while 1:
         try:
             line = inputprocess.readline()
             if not line:
                 break
-            importToMongo(line)
+            utilities.importToMongo(line)
             try:
-                sys.stdout.write(spinner.next())
+                sys.stdout.write(next(spinner))
                 sys.stdout.flush()
                 sys.stdout.write('\b')
             except:
-                pass
+                raise
         except ValueError:
             print("Error in json:" + line)
         except:

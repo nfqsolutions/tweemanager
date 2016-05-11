@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from tweetdocument import TweetDocument
-from bson import json_util as json
+import datetime
 import codecs
 import re
 import string
 import unicodedata
+from tweetdocument import TweetDocument
+from bson import json_util as json
 
 
 resultshandler = None
 
 punctuacion = set(string.punctuation + '¿¡')
-repunctuacion = re.compile('[%s]' % re.escape(string.punctuation))
+repunctuacion = re.compile('[%s]' % re.escape(string.punctuation + '¿¡'))
 sourceprocessor = re.compile(r'<a.*?>(.*?)</a>', re.S | re.M)
 
 
@@ -20,7 +21,42 @@ def avg(items):
     return float(sum(items)) / len(items)
 
 
+def cleantweet(rawtweet):
+    """
+    """
+    finetweet = ""
+    try:
+        # Proceso original pero se estaba perdiendo alguna información:
+        # Quita los RT's:
+        text_clean = rawtweet.replace('RT ', '')
+        # todo en letras pequeñas:
+        text_clean = text_clean.lower()
+        # reemplaza urls por URL:
+        text_clean = re.sub(
+            '((www\.[^\s]+)|(https?://[^\s]+))', 'URL', text_clean)
+        # Quita mentions y pone AT_MENTION
+        text_clean = re.sub('@[^\s]+', 'AT_MENTION', text_clean)
+        # Reemplaza #palabra por palabra:
+        text_clean = re.sub(r'#([^\s]+)', r'\1', text_clean)
+        # Limpia puntuacion:
+        text_clean = repunctuacion.sub('', text_clean)
+        # quita acentos:
+        text_clean = ''.join((c for c in unicodedata.normalize(
+            'NFD', text_clean) if unicodedata.category(c) != 'Mn'))
+        # Limpia palabras repetidas y consecutivas:
+        text_clean = re.sub(r'\b(\w+)( \1\b)+', r'\1', text_clean)
+        # Reemplaza espacios extra
+        text_clean = re.sub('[\s]+', ' ', text_clean)
+        # y añade un trimzito
+        finetweet = text_clean.strip('\'"')
+    except:
+        raise
+    finally:
+        return finetweet
+
+
 class outputhandler(object):
+
     """
     This Handler perform the processing needed from obtained tweet.
     """
@@ -79,31 +115,9 @@ class outputhandler(object):
             pass
         # add clean text for unique count and training:
         try:
-            # Proceso original pero se estaba perdiendo alguna información:
-            # Quita los RT's:
-            text_clean = result['text'].replace('RT ', '')
-            # todo en letras pequeñas:
-            text_clean = text_clean.lower()
-            # reemplaza urls por URL:
-            text_clean = re.sub(
-                '((www\.[^\s]+)|(https?://[^\s]+))', 'URL', text_clean)
-            # Quita mentions y pone AT_MENTION
-            text_clean = re.sub('@[^\s]+', 'AT_MENTION', text_clean)
-            # Reemplaza #palabra por palabra:
-            text_clean = re.sub(r'#([^\s]+)', r'\1', text_clean)
-            # Limpia puntuacion:
-            text_clean = repunctuacion.sub('', text_clean)
-            # quita acentos:
-            text_clean = ''.join((c for c in unicodedata.normalize(
-                'NFD', text_clean) if unicodedata.category(c) != 'Mn'))
-            # Limpia palabras repetidas y consecutivas:
-            text_clean = re.sub(r'\b(\w+)( \1\b)+', r'\1', text_clean)
-            # Reemplaza espacios extra
-            text_clean = re.sub('[\s]+', ' ', text_clean)
-            # y añade un trimzito
-            result['text_clean'] = text_clean.strip('\'"')
+            result['text_clean'] = cleantweet(result['text'])
         except:
-            raise
+            pass
         # Adding other kind of info: the tweet permalink
         try:
             if not result.get('permalink', None):
@@ -149,3 +163,33 @@ class outputhandler(object):
                 ensure_ascii=False))
             # and add a new line
             self.output.write("\n")
+
+
+def importToMongo(jsonline, directimport=False):
+    """
+    """
+    # if not a file it is assumed that is a mongodocument
+    try:
+        jsontodict = json.loads(jsonline)
+        # Check if created_at exists and try to parse it properly:
+        if not isinstance(jsontodict['created_at'], datetime.datetime):
+            # must parse date
+            jsontodict['created_at'] = datetime.datetime.strptime(
+                jsontodict['created_at'], '%a %b %d %H:%M:%S +0000 %Y')
+        else:
+            # no need to parse date
+            pass
+        if directimport:
+            mongodoc = TweetDocument(id=int(jsontodict["id_str"]))
+            if (sys.version_info) > (3, 5):
+                for key, value in jsontodict.items():
+                    mongodoc[key] = value
+            else:
+                for key, value in jsontodict.iteritems():
+                    mongodoc[key] = value
+            # and add a new line
+            mongodoc.save()
+        else:
+            resultshandler.putresult(jsontodict)
+    except:
+        raise

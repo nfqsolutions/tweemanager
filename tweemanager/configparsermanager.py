@@ -1,9 +1,16 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 try:
     from ConfigParser import ConfigParser
 except:
     from configparser import ConfigParser
+
+# Do this more pythonic:
+CFGINFO = None
+
+
 class ConfigParserManager(ConfigParser):
+
     """ ConfigParserManager
     A simple extension from ConfigParser.
     """
@@ -13,7 +20,7 @@ class ConfigParserManager(ConfigParser):
     SearchSpecs = "SearchSpecs"
     MongoDBSpecs = "MongoDBSpecs"
 
-    def __init__(self,cpath):
+    def __init__(self, cpath):
         """
         """
         ConfigParser.__init__(self)
@@ -23,47 +30,46 @@ class ConfigParserManager(ConfigParser):
     def templateinit(self):
         """
         """
-        
         self.add_section(self.TwitterAPIcredentials)
-        self.set(self.TwitterAPIcredentials,"consumer_key",)
-        self.set(self.TwitterAPIcredentials,"consumer_secret",)
-        self.set(self.TwitterAPIcredentials,"access_key",)
-        self.set(self.TwitterAPIcredentials,"access_secret",)
+        self.set(self.TwitterAPIcredentials, "consumer_key",)
+        self.set(self.TwitterAPIcredentials, "consumer_secret",)
+        self.set(self.TwitterAPIcredentials, "access_key",)
+        self.set(self.TwitterAPIcredentials, "access_secret",)
         self.add_section(self.ListenerSpecs)
-        self.set(self.ListenerSpecs,"usersarray",)
-        self.set(self.ListenerSpecs,"trackarray",)
-        self.set(self.ListenerSpecs,"patternstoexclude",)
-        self.set(self.ListenerSpecs,"patternstoinclude",)
+        self.set(self.ListenerSpecs, "usersarray",)
+        self.set(self.ListenerSpecs, "trackarray",)
+        self.set(self.ListenerSpecs, "patternstoexclude",)
+        self.set(self.ListenerSpecs, "patternstoinclude",)
         self.add_section(self.SearchSpecs)
-        self.set(self.SearchSpecs,"searchquery",)
-        self.set(self.SearchSpecs,"maxtweets",)
+        self.set(self.SearchSpecs, "searchquery",)
+        self.set(self.SearchSpecs, "maxtweets",)
         self.add_section(self.mongodb)
-        self.set(self.MongoDBSpecs,"name",)
-        self.set(self.MongoDBSpecs,"username",)
-        self.set(self.MongoDBSpecs,"password",)
-        self.set(self.MongoDBSpecs,"host",)
+        self.set(self.MongoDBSpecs, "repocollname",)
+        self.set(self.MongoDBSpecs, "name",)
+        self.set(self.MongoDBSpecs, "username",)
+        self.set(self.MongoDBSpecs, "password",)
+        self.set(self.MongoDBSpecs, "host",)
 
-    def getTwitterAPIcredentials(self,key):
+    def getTwitterAPIcredentials(self, key):
         """
         """
-        return self.get(self.TwitterAPIcredentials,key)
+        return self.get(self.TwitterAPIcredentials, key)
 
-    def getListenerSpecs(self,key):
+    def getListenerSpecs(self, key):
         """
         """
-        return self.get(self.ListenerSpecs,key)
+        return self.get(self.ListenerSpecs, key)
 
-    def getSearchSpecs(self,key):
+    def getSearchSpecs(self, key):
         """
         """
-        return self.get(self.SearchSpecs,key)
+        return self.get(self.SearchSpecs, key)
 
-    def getMongoDBSpecs(self,key):
+    def getMongoDBSpecs(self, key):
         """
         """
-        
         try:
-            result = self.get(self.MongoDBSpecs,key)
+            result = self.get(self.MongoDBSpecs, key)
         except:
             result = None
         return result
