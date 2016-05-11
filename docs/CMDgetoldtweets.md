@@ -21,7 +21,5 @@ until = 2016-05-01
 
 El comando funciona como la búsqueda avanzada que un puede realizar en la [página de twitter](https://twitter.com/search-advanced).
 
-La información generada es similar a la da API oficial con algunas limitaciones ya que ni todos los campos estan disponibles.
-
-
+La información generada es similar a la da API oficial con algunas limitaciones ya que ni todos los campos están disponibles.
 

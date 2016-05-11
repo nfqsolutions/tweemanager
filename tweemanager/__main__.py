@@ -129,7 +129,7 @@ if arguments.get('getoldtweets'):
         since=cfgpm.CFGINFO.getGOTSpecs("since"),
         until=cfgpm.CFGINFO.getGOTSpecs("until"),
         querySearch=cfgpm.CFGINFO.getGOTSpecs("querysearch"),
-        maxTweets=cfgpm.CFGINFO.getGOTSpecs("maxtweets"))
+        maxTweets=int(cfgpm.CFGINFO.getGOTSpecs("maxtweets")))
     sys.exit(0)
 
 # importToMongo command

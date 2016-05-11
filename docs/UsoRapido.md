@@ -21,8 +21,7 @@
 
 	> Nota: Para este caso ni hay que registrar una app en twitter.
 
-	consulta la página [CMDgetoldtweets.md](./CMDgetoldtweets.md) para conocer el funcionamiento del comando.
+	consulta la página [CMDgetoldtweets.md](./CMDgetoldtweets.md) para más info del comando.
 
-
-
+	Ya tenemos unos cuantos tweets. Podriamos procesar la información que hemos obtenido con alguno visualizador/procesador de datos.
 

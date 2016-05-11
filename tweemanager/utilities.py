@@ -41,6 +41,10 @@ def cleantweet(rawtweet):
         # Limpia puntuacion:
         text_clean = repunctuacion.sub('', text_clean)
         # quita acentos:
+        try: # Python 2
+            text_clean = unicode(text_clean)
+        except: # Python 3
+            pass
         text_clean = ''.join((c for c in unicodedata.normalize(
             'NFD', text_clean) if unicodedata.category(c) != 'Mn'))
         # Limpia palabras repetidas y consecutivas:
