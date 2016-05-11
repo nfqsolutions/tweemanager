@@ -19,6 +19,7 @@ class ConfigParserManager(ConfigParser):
     ListenerSpecs = "ListenerSpecs"
     SearchSpecs = "SearchSpecs"
     MongoDBSpecs = "MongoDBSpecs"
+    GOTSpecs = "GOTSpecs"
 
     def __init__(self, cpath):
         """
@@ -43,6 +44,12 @@ class ConfigParserManager(ConfigParser):
         self.add_section(self.SearchSpecs)
         self.set(self.SearchSpecs, "searchquery",)
         self.set(self.SearchSpecs, "maxtweets",)
+        self.add_section(self.GOTSpecs)
+        self.set(self.GOTSpecs, "username",)
+        self.set(self.GOTSpecs, "since",)
+        self.set(self.GOTSpecs, "until",)
+        self.set(self.GOTSpecs, "querysearch",)
+        self.set(self.GOTSpecs, "maxtweets",)
         self.add_section(self.mongodb)
         self.set(self.MongoDBSpecs, "repocollname",)
         self.set(self.MongoDBSpecs, "name",)
@@ -64,6 +71,14 @@ class ConfigParserManager(ConfigParser):
         """
         """
         return self.get(self.SearchSpecs, key)
+
+    def getGOTSpecs(self, key):
+        """
+        """
+        try:
+            return self.get(self.GOTSpecs, key)
+        except:
+            return None
 
     def getMongoDBSpecs(self, key):
         """
