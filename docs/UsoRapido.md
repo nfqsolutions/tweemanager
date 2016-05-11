@@ -21,7 +21,8 @@
 
 	> Nota: Para este caso ni hay que registrar una app en twitter.
 
-4. Alguna busqueda más con **getoldtweets**:
+	consulta la página [CMDgetoldtweets.md](./CMDgetoldtweets.md) para conocer el funcionamiento del comando.
+
 
 
 
