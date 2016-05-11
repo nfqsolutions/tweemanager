@@ -21,6 +21,16 @@ def importToMongo(jsonline, directimport=False):
     # if not a file it is assumed that is a mongodocument
     try:
         jsontodict = json_util.loads(jsonline)
+        # If the json comes from elasticsearch
+        jsontodict = jsontodict['_source']
+        
+        # Homogenize the information
+        try:
+            print(jsontodict['created_at'])
+        except:
+            jsontodict['created_at'] = jsontodict['tweettime']
+            print(jsontodict['created_at'])
+
         # Check if created_at exists and try to parse it properly:
         if not isinstance(jsontodict['created_at'], datetime.datetime):
             # must parse date
