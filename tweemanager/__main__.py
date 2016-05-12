@@ -69,15 +69,19 @@ import configparsermanager as cfgpm
 if arguments.get('genconfig'):
     # launch a warning and a press any key to continue:
     if not arguments.get('--yes'):
-        if input("This operation delete contents from" +
+        try: # Python 2to3 compat
+            input = raw_input
+        except NameError:
+            pass
+        if input("This operation delete contents from \'" +
                  arguments['--cfgfile'] +
-                 "Really want to continue?[y/n] ").lower()[0] == "n":
+                 "\', if it exists. \nReally want to continue?[y/n] ").lower()[0] == "n":
             print("Configuration file not generated. Exiting ...")
             sys.exit(0)
-    with open(arguments['--cfgfile'], 'w') as configfile:
-        cfgpm.CFGINFO = cfgpm.ConfigParserManager(configfile)
+    with open(arguments['--cfgfile'], 'w') as cfgfile:
+        cfgpm.CFGINFO = cfgpm.ConfigParserManager(cfgfile)
         cfgpm.CFGINFO.templateinit()
-        cfgpm.CFGINFO.write(configfile)
+        cfgpm.CFGINFO.write(cfgfile)
     print("Configuration template file generated: " + arguments['--cfgfile'])
     print("Check USAGE.md to get you started!")
     sys.exit(0)

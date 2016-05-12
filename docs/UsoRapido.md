@@ -31,7 +31,7 @@
 	```
 	[MongoDBSpecs]
 	host=mongodb://127.0.0.1/tweets
-	repocollname=tweetslacaixa
+	repocollname=RepoDeTweets
 	```
 
 	y ejecuta el comando de importación para importar los datos obtenidos anteriormente:
