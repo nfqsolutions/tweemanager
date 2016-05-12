@@ -9,10 +9,8 @@ import unicodedata
 from bson import json_util as json
 
 
-
 resultshandler = None
 
-punctuacion = set(string.punctuation + '¿¡')
 repunctuacion = re.compile('[%s]' % re.escape(string.punctuation + '¿¡'))
 sourceprocessor = re.compile(r'<a.*?>(.*?)</a>', re.S | re.M)
 
@@ -183,6 +181,7 @@ def importToMongo(jsonline, directimport=False):
             # no need to parse date
             pass
         if directimport:
+            from tweetdocument import TweetDocument
             mongodoc = TweetDocument(id=int(jsontodict["id_str"]))
             if (sys.version_info) > (3, 5):
                 for key, value in jsontodict.items():

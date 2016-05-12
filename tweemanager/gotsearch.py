@@ -31,6 +31,7 @@ def gotsearch(username=None,
         result = dict()
 
         result[u'id'] = rawtweet[u'id']
+        result[u'id_str'] = rawtweet[u'id']
         result[u'created_at'] = rawtweet[u'date']
         result[u'text'] = rawtweet[u'text']
         result[u'user'] = {u'screen_name': rawtweet[u'username']}
