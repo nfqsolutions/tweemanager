@@ -1,19 +1,20 @@
-Ekergy OpenSourceSoftware  by NFQ solutions
-
 ![Alt text](/docs/images/nfq_solutions.png?raw=true)
+# Ekergy *OpenSource* Software by NFQ solutions S.L.
 
+## python package tweemanager
 
-# NFQ's Reputational Risk Solution
+Solución de recolectar, almacenar y procesar información desde twitter.
 
-Solución para hacer un seguimiento de la analisis reputacional de una instituición financiera.
+Como usar el código:
+[Uso Rápido](/docs/UsoRapido.md)
 
-## Paquetes Disponibles:
+[Uso Completo]()
 
-### Escuchador Twitter:
+Puedes encontrar mas información en la carpeta [docs](/docs/)
 
-La Api de twitter permite escuchar los tweets de usuarios o de la red en general usando palabras("track") como filtro.
-Al construir un escuchador hay que tener en cuenta la información del la [api para streaming](https://dev.twitter.com/streaming/overview/request-parameters#track)
+Licencia:
+https://creativecommons.org/licenses/by-nc/4.0/
 
-### Funcionamiento del Paquete tweemanager:
-
-
+TODO:
+[] Talvez deberiamos cambiar el nombre a TweeRepoManager o algo por el esquilo.
+[] Talvez deberiamos cambiar el nombre a TweeRepoManager o algo por el esquilo.
