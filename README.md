@@ -1,3 +1,8 @@
+Ekergy OpenSourceSoftware  by NFQ solutions
+
+![Alt text](/docs/images/nfq_solutions.png?raw=true)
+
+
 # NFQ's Reputational Risk Solution
 
 Solución para hacer un seguimiento de la analisis reputacional de una instituición financiera.
