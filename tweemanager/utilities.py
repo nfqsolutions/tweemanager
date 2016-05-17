@@ -6,13 +6,11 @@ import codecs
 import re
 import string
 import unicodedata
-from tweetdocument import TweetDocument
 from bson import json_util as json
 
 
 resultshandler = None
 
-punctuacion = set(string.punctuation + '¿¡')
 repunctuacion = re.compile('[%s]' % re.escape(string.punctuation + '¿¡'))
 sourceprocessor = re.compile(r'<a.*?>(.*?)</a>', re.S | re.M)
 
@@ -41,6 +39,10 @@ def cleantweet(rawtweet):
         # Limpia puntuacion:
         text_clean = repunctuacion.sub('', text_clean)
         # quita acentos:
+        try: # Python 2
+            text_clean = unicode(text_clean)
+        except: # Python 3
+            pass
         text_clean = ''.join((c for c in unicodedata.normalize(
             'NFD', text_clean) if unicodedata.category(c) != 'Mn'))
         # Limpia palabras repetidas y consecutivas:
@@ -71,6 +73,7 @@ class outputhandler(object):
                 self.output = codecs.getwriter('utf8')(sys.stdout)
             self.tipo = "stdout"
         if outputtype == "mongodb":
+            from tweetdocument import TweetDocument
             self.tipo = "mongodb"
             self.output = TweetDocument
         elif isinstance(outputtype, str):
@@ -103,8 +106,6 @@ class outputhandler(object):
                         'lat': averages[1], 'lon': averages[0]}
                 else:
                     if result.get('place', {}).get('full_name', None):
-                        print("has full name")
-                        print(result['place']['full_name'])
                         from geopy.geocoders import Nominatim
                         geolocator = Nominatim()
                         loc = geolocator.geocode(result['place']['full_name'])
@@ -180,6 +181,7 @@ def importToMongo(jsonline, directimport=False):
             # no need to parse date
             pass
         if directimport:
+            from tweetdocument import TweetDocument
             mongodoc = TweetDocument(id=int(jsontodict["id_str"]))
             if (sys.version_info) > (3, 5):
                 for key, value in jsontodict.items():

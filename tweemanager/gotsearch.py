@@ -31,6 +31,7 @@ def gotsearch(username=None,
         result = dict()
 
         result[u'id'] = rawtweet[u'id']
+        result[u'id_str'] = rawtweet[u'id']
         result[u'created_at'] = rawtweet[u'date']
         result[u'text'] = rawtweet[u'text']
         result[u'user'] = {u'screen_name': rawtweet[u'username']}
@@ -43,15 +44,15 @@ def gotsearch(username=None,
         result[u'entities'] = {"user_mentions": [],
                                "hashtags": []}
         # Process hashtags
-        for hashtag in rawtweet[u'hashtags'].split(','):
+        for hashtag in rawtweet[u'hashtags'].split(' '):
             if hashtag != "":
                 result[u'entities'][u'hashtags'].append(
                     {u'text': hashtag.replace('#', '')})
         # Process mentions
-        for mention in rawtweet[u'mentions'].split(','):
+        for mention in rawtweet[u'mentions'].split(' '):
             if mention != "":
                 result[u'entities'][u'user_mentions'].append(
-                    {u'text': mention.replace('#', '')})
+                    {u'text': mention.replace('@', '')})
 
         # remove entities if no data is set:
         if (len(result[u'entities'][u'hashtags']) == 0) and (len(result[u'entities'][u'user_mentions']) == 0):

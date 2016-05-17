@@ -7,21 +7,28 @@ class TweetCriteria:
         self.maxTweets = 0
 
     def setUsername(self, username):
-        self.username = username
+        if username:
+            self.username = username
         return self
 
     def setSince(self, since):
-        self.since = since
+        if since:
+            self.since = since
         return self
 
     def setUntil(self, until):
-        self.until = until
+        if until:
+            self.until = until
         return self
 
     def setQuerySearch(self, querySearch):
-        self.querySearch = querySearch
+        if querySearch:
+            self.querySearch = querySearch
         return self
 
     def setMaxTweets(self, maxTweets):
-        self.maxTweets = maxTweets
+        if maxTweets:
+            self.maxTweets = maxTweets
+        else:
+            self.maxTweets = 25
         return self
