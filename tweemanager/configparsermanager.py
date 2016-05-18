@@ -21,7 +21,7 @@ class ConfigParserManager(ConfigParser):
     MongoDBSpecs = "MongoDBSpecs"
     GOTSpecs = "GOTSpecs"
 
-    def __init__(self, cpath):
+    def __init__(self, cpath, jsonstr=None):
         """
         """
         ConfigParser.__init__(self)
@@ -59,6 +59,18 @@ class ConfigParserManager(ConfigParser):
         self.set(self.MongoDBSpecs, "username", "")
         self.set(self.MongoDBSpecs, "password", "")
         self.set(self.MongoDBSpecs, "host", "")
+
+    def _templatejson(self):
+        """
+        """
+        jsonstr = ""
+        return jsonstr
+
+    def jsontocfgfile(self, jsonstr):
+        """
+        Will map a json string as a cfgfile:
+
+        """
 
     def getTwitterAPIcredentials(self, key):
         """

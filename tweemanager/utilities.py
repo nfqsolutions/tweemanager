@@ -67,7 +67,7 @@ class outputhandler(object):
         """
         """
         if outputtype is None:
-            if (sys.version_info) > (3, 5):
+            if (sys.version_info) > (3, 4):
                 self.output = sys.stdout
             else:
                 self.output = codecs.getwriter('utf8')(sys.stdout)
@@ -147,7 +147,7 @@ class outputhandler(object):
             # if not a file it is assumed that is a mongodocument
             mongodoc = self.output(id=int(result['id_str']))
             result.pop('id')
-            if (sys.version_info) > (3, 5):
+            if (sys.version_info) > (3, 4):
                 for key, value in result.items():
                     mongodoc[key] = value
             else:
@@ -183,7 +183,7 @@ def importToMongo(jsonline, directimport=False):
         if directimport:
             from tweetdocument import TweetDocument
             mongodoc = TweetDocument(id=int(jsontodict["id_str"]))
-            if (sys.version_info) > (3, 5):
+            if (sys.version_info) > (3, 4):
                 for key, value in jsontodict.items():
                     mongodoc[key] = value
             else:

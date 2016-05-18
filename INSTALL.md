@@ -1,7 +1,10 @@
 
-1 Paso 0
+Paso 0
 	virtualen .env or pyvenv .env
 	source .env/bin/activate
-2 Paso 1
+Paso 1
 	pip install --upgrade pip
 	pip install -r requirements.txt
+Paso 2
+	# Prueba el paquete
+	[Uso Rápido](/docs/UsoRapido.md)

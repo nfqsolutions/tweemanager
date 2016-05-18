@@ -69,7 +69,7 @@ import configparsermanager as cfgpm
 if arguments.get('genconfig'):
     # launch a warning and a press any key to continue:
     if not arguments.get('--yes'):
-        try: # Python 2to3 compat
+        try: # Python2 Python3 compat
             input = raw_input
         except NameError:
             pass
