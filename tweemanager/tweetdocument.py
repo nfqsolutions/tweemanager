@@ -2,8 +2,6 @@
 import mongoengine
 
 
-
-
 def create_collection_name(cls):
     """
     Note: mongoengine doesn't allow to change meta directly.
@@ -15,6 +13,8 @@ def create_collection_name(cls):
     print(CFGINFO.getMongoDBSpecs('repocollname'))
     try:
         TweetsRepoCollName = CFGINFO.getMongoDBSpecs('repocollname')
+        if not TweetsRepoCollName:
+            raise
     except:
         TweetsRepoCollName = "TweetsRepo"
     finally:
