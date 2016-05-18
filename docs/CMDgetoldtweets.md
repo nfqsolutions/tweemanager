@@ -28,14 +28,14 @@ Para el username si se usan dos busca que el usuario1 haya mencionado al usuario
 Las búsquedas no son case sensitive. Ejemplo:
 ```
 [GOTSpecs]
-username = barackobama hillaryclinton
+username = barackobama
 querysearch = "Donald Trump"
 maxtweets = 100
 ```
 obtiene resultados distintos de
 ```
 [GOTSpecs]
-username = barackobama hillaryclinton
+username = barackobama
 querysearch = "Donald Trump"
 maxtweets = 100
 ```
