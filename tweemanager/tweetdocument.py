@@ -9,8 +9,8 @@ def create_collection_name(cls):
     can be set using the config file.
     """
     # global configurations:
+    from configparsermanager import CFGINFO
     try:
-        from configparsermanager import CFGINFO
         TweetsRepoCollName = CFGINFO.getMongoDBSpecs('repocollname')
         if not TweetsRepoCollName:
             raise
