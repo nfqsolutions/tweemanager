@@ -9,10 +9,17 @@
 
 Código preparado para Python 2.7 Python 3.4 y Python 3.5
 
+Para instalar el código:
 
+Paso 0: (optional)
+	virtualen .env or pyvenv .env
+	source .env/bin/activate
+Paso 1:
+	pip install --upgrade pip # (optional)
+	pip install -r requirements.txt
 
 > Si encuentras algun problema reclama [aqui](https://github.com/ekergy/tweemanager/issues).
-  En windows es posible que haya que instalar alguna dependencia precompilada (ej. lxml)
+  En windows es posible que haya que instalar alguna dependencia precompilada (ej. lxml).
   Puedes descargar las dependencias [aqui](http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml)
 
 [Uso Rápido](/docs/UsoRapido.md)
