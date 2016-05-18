@@ -40,4 +40,4 @@ password =
 host = 
 ```
 
-Solamente tienes que usar/rellenar los campos necesite cada comando.
+Solamente tienes que usar/rellenar los campos que necesite cada comando.
