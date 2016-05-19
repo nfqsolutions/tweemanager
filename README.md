@@ -23,8 +23,7 @@ Paso 1:
 virtualenv .env # opcional
 # or
 pyvenv .env # opcional
-source .env/bin/activate # opcional
-pip install --upgrade pip # opcional
+source .env/bin/activate && pip install --upgrade pip && # optional
 pip install -r requirements.txt
 ```
 
