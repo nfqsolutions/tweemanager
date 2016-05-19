@@ -21,7 +21,9 @@ cd tweemanager
 Paso 1:
 
 ```bash
-virtualen .env or pyvenv .env # opcional
+virtualenv .env # opcional
+# or
+pyvenv .env # opcional
 source .env/bin/activate # opcional
 pip install --upgrade pip # opcional
 pip install -r requirements.txt
