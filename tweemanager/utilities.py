@@ -6,6 +6,7 @@ import codecs
 import re
 import string
 import unicodedata
+import logging
 from bson import json_util as json
 
 

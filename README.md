@@ -15,6 +15,7 @@ Paso 0:
 
 ```bash
 git clone https://github.com/ekergy/tweemanager.git
+cd tweemanager
 ```
 
 Paso 1:
@@ -26,9 +27,9 @@ pip install --upgrade pip # opcional
 pip install -r requirements.txt
 ```
 
-> Si encuentras algun problema reclama [aqui](https://github.com/ekergy/tweemanager/issues).
+> Si encuentras algún problema reclama [aquí](https://github.com/ekergy/tweemanager/issues).
   En windows es posible que haya que instalar alguna dependencia precompilada (ej. lxml).
-  Puedes descargar las dependencias [aqui](http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml)
+  Puedes descargar las dependencias [aquí](http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml)
 
 Paso 2:
 
@@ -38,7 +39,7 @@ python tweemanager -h
 ```
 y deberás ver la ayuda del paquete.
 
-Para un uso rápido [clica aqui](/docs/UsoRapido.md)
+Para un uso rápido [clica aquí](/docs/UsoRapido.md)
 
 Puedes encontrar mas información en la carpeta [docs](/docs/)
 

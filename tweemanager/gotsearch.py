@@ -4,6 +4,8 @@ import getoldtweets
 
 import utilities
 
+import logging
+
 
 def gotsearch(username=None,
               since=None,
@@ -58,4 +60,5 @@ def gotsearch(username=None,
         if (len(result[u'entities'][u'hashtags']) == 0) and (len(result[u'entities'][u'user_mentions']) == 0):
             result.pop(u'entities')
 
+        logging.info("Got Tweet with id %s" % result[u'id'])
         utilities.resultshandler.putresult(result)

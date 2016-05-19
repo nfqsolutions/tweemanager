@@ -3,6 +3,7 @@ import tweepy
 from tweepy.utils import import_simplejson
 
 import utilities
+import logging
 
 json = import_simplejson()
 
@@ -30,6 +31,7 @@ class nfqTwitterStreamListener(tweepy.StreamListener):
         # and include patterns:
         if listenerPattternsChecker(data):
             utilities.resultshandler.putresult(data)
+            logging.info("Tracked Tweet with id %s" % data[u'id'])
         else:
             print("tweet doesn't match patterns!")
 
