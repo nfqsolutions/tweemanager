@@ -14,16 +14,16 @@ Para instalar el código:
 Paso 0:
 
 ```bash
-git clone https://github.com/ekergy/tweemanager.git
-cd tweemanager
+git clone https://github.com/ekergy/tweemanager.git && cd tweemanager
 ```
 
 Paso 1:
 
 ```bash
-virtualen .env or pyvenv .env # opcional
-source .env/bin/activate # opcional
-pip install --upgrade pip # opcional
+virtualenv .env # opcional
+# or
+pyvenv .env # opcional
+source .env/bin/activate && pip install --upgrade pip # optional
 pip install -r requirements.txt
 ```
 

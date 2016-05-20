@@ -31,7 +31,7 @@ class nfqTwitterStreamListener(tweepy.StreamListener):
         # and include patterns:
         if listenerPattternsChecker(data):
             utilities.resultshandler.putresult(data)
-            logging.info("Tracked Tweet with id %s" % data[u'id'])
+            logging.info("Tracked Tweet with id {}".format(data[u'id']))
         else:
             print("tweet doesn't match patterns!")
 
