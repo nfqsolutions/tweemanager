@@ -6,6 +6,7 @@
 # @Last Modified time: 2016-03-02 23:53:54
 # system imports
 import sys
+import traceback
 # packages and modules imports
 from docopt import docopt
 import logging
@@ -214,6 +215,10 @@ if cmdargs.get('importToMongo'):
                 raise
         except ValueError:
             print("Error in json:" + line)
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            formatted_traceback = traceback.format_exception(exc_type, exc_value, exc_traceback)
+            for traceback_line in formatted_traceback:
+                print(traceback_line)
         except:
             raise
             break
