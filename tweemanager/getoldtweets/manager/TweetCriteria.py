@@ -32,3 +32,6 @@ class TweetCriteria:
         else:
             self.maxTweets = 25
         return self
+
+    def __repr__(self):
+        return 'username: {}, since: {}, until: {}, querySearch: {}, maxTweets: {}'.format(self.username, self.since, self.until, self.querySearch, self.maxTweets)

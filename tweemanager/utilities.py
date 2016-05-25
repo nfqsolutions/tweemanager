@@ -88,6 +88,7 @@ class outputhandler(object):
         #
 
         # add location:
+        logging.info("start final process on tweetid: {}".format(result['id']))
         try:
             if result.get('geo', None):
                 if result['geo']['type'] == 'Point':
@@ -114,12 +115,12 @@ class outputhandler(object):
                             result['location'] = {
                                 "lat": loc.latitude, "lon": loc.longitude}
         except:
-            pass
+            logging.debug("couldn't manage to find location for tweetid: {} ".format(result['id']))
         # add clean text for unique count and training:
         try:
             result['text_clean'] = cleantweet(result['text'])
         except:
-            pass
+            logging.debug("couldn't manage to clean text for tweetid: {} ".format(result['id']))
         # Adding other kind of info: the tweet permalink
         try:
             if not result.get('permalink', None):
@@ -133,7 +134,7 @@ class outputhandler(object):
             result['source'] = sourceprocessor.match(
                 result['source']).groups()[0]
         except:
-            pass
+            logging.debug("couldn't process source for tweetid: {} ".format(result['id']))
         if self.tipo == "file":
             # self.output.write(json.dumps(
             #    result, default=json_util.default,
@@ -143,6 +144,7 @@ class outputhandler(object):
                 ensure_ascii=False))
             # and add a new line
             self.output.write("\n")
+            logging.info("saving tweetid: {} to json".format(result['id']))
         # elif isinstance(self.output,type(TweetDocument)):
         elif self.tipo == "mongodb":
             # if not a file it is assumed that is a mongodocument
@@ -156,6 +158,7 @@ class outputhandler(object):
                     mongodoc[key] = value
             # and add a new line
             mongodoc.save()
+            logging.info("saving tweetid: {} to mongo".format(result['id']))
         elif self.tipo == "stdout":
             # self.output.write(json.dumps(
             #    result, default=json_util.default,
@@ -165,6 +168,7 @@ class outputhandler(object):
                 ensure_ascii=False))
             # and add a new line
             self.output.write("\n")
+            logging.info("saving tweetid: {} to json".format(result['id']))
 
 
 def importToMongo(jsonline, directimport=False):
@@ -173,6 +177,7 @@ def importToMongo(jsonline, directimport=False):
     # if not a file it is assumed that is a mongodocument
     try:
         jsontodict = json.loads(jsonline)
+        logging.debug("Starting importing tweetid {} to mongo".format(jsontodict['id']))
         # Check if created_at exists and try to parse it properly:
         if not isinstance(jsontodict['created_at'], datetime.datetime):
             # must parse date
@@ -194,5 +199,6 @@ def importToMongo(jsonline, directimport=False):
             mongodoc.save()
         else:
             resultshandler.putresult(jsontodict)
+        logging.debug("Saved tweetid {} to mongo".format(jsontodict['id']))
     except:
         raise

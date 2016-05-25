@@ -5,6 +5,7 @@
 # @Last Modified by:   cperales
 # @Last Modified time: 2016-03-02 23:53:54
 # system imports
+import os
 import sys
 import traceback
 # packages and modules imports
@@ -81,12 +82,13 @@ definedloglevel = loglevels.get(cmdargs.get('--loglevel'))
 if definedloglevel:
     logging.basicConfig(
         level=loglevels[cmdargs['--loglevel']],
-        format="%(message)s"
+        format='%(asctime)s - %(levelname)s - %(funcName)s - %(message)s'
     )
 else:
     logging.basicConfig(
         level=logging.INFO,
-        format="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        #format="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"
+        format='%(asctime)s - %(levelname)s - %(funcName)s - %(message)s'
     )
 
 
@@ -140,7 +142,8 @@ if (cmdargs['--output'] == "mongodb"):
 
 # listener command
 if cmdargs.get('listener'):
-    logging.info("Starting listener with the following trackarray s%" % cfgpm.CFGINFO.getListenerSpecs("trackarray"))
+    logging.info("listener command start with pid: {}".format(os.getpid()))
+    logging.debug("... listener uses oficial API")
     from tweepystreamlistener import nfqTwitterAuth
     cfgpm.CFGINFO.api = nfqTwitterAuth(cfgpm.CFGINFO).get_api()
     from tweepystreamlistener import letslisten
@@ -149,32 +152,50 @@ if cmdargs.get('listener'):
 
 # searchtweets command
 if cmdargs.get('searchtweets'):
-    logging.info("Performing a searchtweets using oficial API")
-    from tweepystreamlistener import nfqTwitterAuth
-    cfgpm.CFGINFO.api = nfqTwitterAuth(cfgpm.CFGINFO).get_api()
-    from tweepystreamlistener import letssearch
+    logging.info("searchtweets command start with pid: {}".format(os.getpid()))
+    logging.debug("... searchtweets uses oficial API")
     try:
-        maxtweets = int(cfgpm.CFGINFO.getSearchSpecs("maxtweets"))
+        from tweepystreamlistener import nfqTwitterAuth
+        cfgpm.CFGINFO.api = nfqTwitterAuth(cfgpm.CFGINFO).get_api()
+        from tweepystreamlistener import letssearch
+        try:
+            maxtweets = int(cfgpm.CFGINFO.getSearchSpecs("maxtweets"))
+        except:
+            maxtweets = 10
+        letssearch(cfgpm.CFGINFO.api, cfgpm.CFGINFO.getSearchSpecs("searchquery"), maxtweets)
+        logging.info("searchtweets command done.")
+        if cmdargs['--output']:
+            logging.info("check {} file for results".format(cmdargs['--output']))
     except:
-        maxtweets = 10
-    letssearch(cfgpm.CFGINFO.api, cfgpm.CFGINFO.getSearchSpecs("searchquery"), maxtweets)
-    logging.info("...done")
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        formatted_traceback = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        for traceback_line in formatted_traceback:
+            logging.info(traceback_line)
+        logging.info("searchtweets with errors.")
     sys.exit(0)
 
 # getoldtweets command
 if cmdargs.get('getoldtweets'):
     # need a serve for ever:
-    print("verver")
-    logging.info("Performing a getoldtweets search")
-    from gotsearch import gotsearch
-    # get query search:
-    gotsearch(
-        username=cfgpm.CFGINFO.getGOTSpecs("username"),
-        since=cfgpm.CFGINFO.getGOTSpecs("since"),
-        until=cfgpm.CFGINFO.getGOTSpecs("until"),
-        querySearch=cfgpm.CFGINFO.getGOTSpecs("querysearch"),
-        maxTweets=int(cfgpm.CFGINFO.getGOTSpecs("maxtweets")))
-    logging.info("...done")
+    logging.info("getoldtweets command start with pid: {}".format(os.getpid()))
+    try:
+        from gotsearch import gotsearch
+        # get query search:
+        gotsearch(
+            username=cfgpm.CFGINFO.getGOTSpecs("username"),
+            since=cfgpm.CFGINFO.getGOTSpecs("since"),
+            until=cfgpm.CFGINFO.getGOTSpecs("until"),
+            querySearch=cfgpm.CFGINFO.getGOTSpecs("querysearch"),
+            maxTweets=int(cfgpm.CFGINFO.getGOTSpecs("maxtweets")))
+        logging.info("getoldtweets command done.")
+        if cmdargs['--output']:
+            logging.info("check {} file for results".format(cmdargs['--output']))
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        formatted_traceback = traceback.format_exception(exc_type, exc_value, exc_traceback)
+        for traceback_line in formatted_traceback:
+            logging.info(traceback_line)
+        logging.info("getoldtweets with errors.")
     sys.exit(0)
 
 # importToMongo command

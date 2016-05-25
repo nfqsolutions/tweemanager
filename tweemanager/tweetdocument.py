@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import mongoengine
 
+TweetsRepoStdName = "TweetsRepo"
+
 
 def create_collection_name(cls):
     """
@@ -15,7 +17,7 @@ def create_collection_name(cls):
         if not TweetsRepoCollName:
             raise
     except:
-        TweetsRepoCollName = "TweetsRepo"
+        TweetsRepoCollName = TweetsRepoStdName
     finally:
         return TweetsRepoCollName
 

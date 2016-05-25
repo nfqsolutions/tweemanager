@@ -28,10 +28,12 @@ def gotsearch(username=None,
     if maxTweets:
         tweetCriteria.maxTweets = maxTweets
 
+    logging.info("getoldtweets using criteria {}".format(tweetCriteria))
+    k = 0
     for rawtweet in getoldtweets.manager.TweetManager.getTweets(tweetCriteria):
         # Mapping result from result
         result = dict()
-
+        
         result[u'id'] = rawtweet[u'id']
         result[u'id_str'] = rawtweet[u'id']
         result[u'created_at'] = rawtweet[u'date']
@@ -60,5 +62,7 @@ def gotsearch(username=None,
         if (len(result[u'entities'][u'hashtags']) == 0) and (len(result[u'entities'][u'user_mentions']) == 0):
             result.pop(u'entities')
 
-        logging.info("Got Tweet with id %s" % result[u'id'])
+        logging.debug("Retrieved a tweet with id: {}".format(result[u'id']))
         utilities.resultshandler.putresult(result)
+        k += 1
+    logging.info("getoldtweets retrieved {} tweets".format(k))

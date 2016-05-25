@@ -29,11 +29,11 @@ class nfqTwitterStreamListener(tweepy.StreamListener):
         data[u'created_at'] = status.created_at
         # before seding this to post processor check of exclude
         # and include patterns:
-        if listenerPattternsChecker(data):
+        if listenerPatternsChecker(data):
             utilities.resultshandler.putresult(data)
             logging.info("Tracked Tweet with id {}".format(data[u'id']))
         else:
-            print("tweet doesn't match patterns!")
+            logging.info("Tracked Tweet with id {} fail to pass on patterns Check".format(data[u'id']))
 
 
 class nfqTwitterAuth(object):
@@ -80,7 +80,7 @@ def letssearch(api, query, maxtweets=10):
         utilities.resultshandler.putresult(data)
 
 
-def listenerPattternsChecker(result):
+def listenerPatternsChecker(result):
     """
     """
     return True
