@@ -171,7 +171,7 @@ class outputhandler(object):
             logging.info("saving tweetid: {} to json".format(result['id']))
 
 
-def importToMongo(jsonline, directimport=False):
+def importToMongo(jsonline, directimport=True):
     """
     """
     # if not a file it is assumed that is a mongodocument
