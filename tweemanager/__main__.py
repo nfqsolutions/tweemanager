@@ -227,7 +227,7 @@ if cmdargs.get('importToMongo'):
             line = inputprocess.readline()
             if not line:
                 break
-            utilities.importToMongo(line)
+            utilities.importToMongo(line) # You can write importToMongo(line,directimport=True)
             try:
                 sys.stdout.write(next(spinner))
                 sys.stdout.flush()

@@ -149,7 +149,7 @@ class outputhandler(object):
         elif self.tipo == "mongodb":
             # if not a file it is assumed that is a mongodocument
             mongodoc = self.output(id=int(result['id_str']))
-            result.pop('id')
+            tweetid = result.pop('id')
             if (sys.version_info) > (3, 4):
                 for key, value in result.items():
                     mongodoc[key] = value
@@ -158,7 +158,7 @@ class outputhandler(object):
                     mongodoc[key] = value
             # and add a new line
             mongodoc.save()
-            logging.info("saving tweetid: {} to mongo".format(result['id']))
+            logging.info("saving tweetid: {} to mongo".format(tweetid))
         elif self.tipo == "stdout":
             # self.output.write(json.dumps(
             #    result, default=json_util.default,
@@ -171,7 +171,7 @@ class outputhandler(object):
             logging.info("saving tweetid: {} to json".format(result['id']))
 
 
-def importToMongo(jsonline, directimport=True):
+def importToMongo(jsonline, directimport=False):
     """
     """
     # if not a file it is assumed that is a mongodocument
@@ -199,6 +199,6 @@ def importToMongo(jsonline, directimport=True):
             mongodoc.save()
         else:
             resultshandler.putresult(jsontodict)
-        logging.debug("Saved tweetid {} to mongo".format(jsontodict['id']))
+        logging.debug("Saved tweetid {} to mongo".format(jsontodict['id_str']))
     except:
         raise
