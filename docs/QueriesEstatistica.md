@@ -98,3 +98,21 @@
 	```
 
 	En el punto anterior vimos como realizar esta operación.
+
+6. Número de tweets positivos y negativos por semana:
+
+	```javascript
+	db.Tweets.aggregate([
+	{ '$project' : { "source": 1, "valoration": 1, '_id': 0, 'week': { '$week': "$created_at" } } },
+	{ '$group' : { '_id': "$week", 
+	                 "total_positivos": {"$sum": {"$cond":[{"$eq":["$valoration.algoritmo_1.clasificado","positivo"]},1,0]}},
+	                 "total_negativos": {"$sum": {"$cond":[{"$eq":["$valoration.algoritmo_1.clasificado","negativo"]},1,0]}},
+	                 "total": {"$sum": 1},
+	               }
+	    },
+	{ '$project' : { "semana": "$_id", "positivos": "$total_positivos", "negativos":"$total_negativos", "total":"$total","por_valorar":{'$subtract':["$total",{'$add':["$total_positivos", "$total_negativos"]}]} } },
+	{ '$sort': {"semana": 1}}
+	])
+	```
+
+	Permite realizar un reporting semanal de nuestra base de datos
