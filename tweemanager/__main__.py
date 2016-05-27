@@ -79,12 +79,13 @@ cmdargs = docopt(__doc__, version='tweemanager beta')
 
 # Setting logging verbosity:
 definedloglevel = loglevels.get(cmdargs.get('--loglevel'))
-if definedloglevel:
+if definedloglevel != None:
     logging.basicConfig(
-        level=loglevels[cmdargs['--loglevel']],
+        level=definedloglevel,
         format='%(asctime)s - %(levelname)s - %(funcName)s - %(message)s'
     )
 else:
+    print("default")
     logging.basicConfig(
         level=logging.INFO,
         #format="[%(filename)s:%(lineno)s - %(funcName)20s() ] %(message)s"

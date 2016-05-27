@@ -7,6 +7,7 @@ import re
 import string
 import unicodedata
 import logging
+import configparsermanager as configdata
 from bson import json_util as json
 
 
@@ -135,6 +136,12 @@ class outputhandler(object):
                 result['source']).groups()[0]
         except:
             logging.debug("couldn't process source for tweetid: {} ".format(result['id']))
+
+        if not listenerPatternsChecker(result):
+            logging.debug("couldn't process listenerPatternsChecker for tweetid: {} ".format(result['id']))
+            return
+
+
         if self.tipo == "file":
             # self.output.write(json.dumps(
             #    result, default=json_util.default,
@@ -202,3 +209,50 @@ def importToMongo(jsonline, directimport=False):
         logging.debug("Saved tweetid {} to mongo".format(jsontodict['id_str']))
     except:
         raise
+
+def listenerPatternsChecker(result):
+    """
+    Analize whether the tweet should be included in our database, depending on
+    certains patterns
+    """
+    filtro = True
+    logging.debug("Starting listenerPatternsChecker")
+    logging.debug("Starting listenerPatternsChecker for tweet {}".format(json.dumps(result)))
+    # TODO: posibles problemas con los carácteres especiales
+    try:
+        logging.debug("Patterns from cfg file{}".format(configdata.CFGINFO.getTextPatterns("patternstoexclude")))
+        PatternsToExclude = eval(configdata.CFGINFO.getTextPatterns("patternstoexclude"))
+        PatternsToInclude = eval(configdata.CFGINFO.getTextPatterns("patternstoinclude"))
+        LanguagesToInclude = eval(configdata.CFGINFO.getTextPatterns("langtoinclude"))
+        logging.debug("Patterns being check:{}".format(PatternsToExclude))
+    except:
+        raise
+        return filtro
+    logging.debug("Patterns being check:{}".format(PatternsToExclude))
+
+    # TODO: No sería necesario el campo text_clean
+    text = result['text']
+    text.lower()
+    
+    for pattern in PatternsToExclude:
+        # logging.debug("Pattern to Exclude", pattern)
+        if cleantweet(pattern) in text:
+            logging.debug("este partner lo cambio a false {}".format(text))
+            logging.debug("este partner lo cambio a false {}".format(pattern))
+            logging.debug("este partner lo cambio a false {}".format(cleantweet(pattern)))
+            filtro = False
+            text = re.sub(pattern, '', text)
+
+    for pattern in PatternsToInclude:
+        if cleantweet(pattern) in text:
+            filtro = True
+
+    try:
+        idioma = result['lang']
+        for lang in LanguagesToInclude:
+            if lang is idioma:
+                filtro = True
+    except:
+        logging.debug("Tweet doesn't have lang")
+
+    return filtro

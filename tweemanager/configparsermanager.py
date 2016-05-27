@@ -20,6 +20,7 @@ class ConfigParserManager(ConfigParser):
     SearchSpecs = "SearchSpecs"
     MongoDBSpecs = "MongoDBSpecs"
     GOTSpecs = "GOTSpecs"
+    TextPatterns = "TextPatterns"
 
     def __init__(self, cpath, jsonstr=None):
         """
@@ -59,6 +60,10 @@ class ConfigParserManager(ConfigParser):
         self.set(self.MongoDBSpecs, "username", "")
         self.set(self.MongoDBSpecs, "password", "")
         self.set(self.MongoDBSpecs, "host", "")
+        self.add_section(self.TextPatterns)
+        self.set(self.TextPatterns, "patternstoexclude", "")
+        self.set(self.TextPatterns, "patternstoinclude", "")
+        self.set(self.TextPatterns, "langtoinclude", "")
 
     def _templatejson(self):
         """
@@ -116,6 +121,18 @@ class ConfigParserManager(ConfigParser):
         """
         try:
             result = self.get(self.MongoDBSpecs, key)
+            if result == '':
+                raise
+        except:
+            result = None
+        return result
+
+
+    def getTextPatterns(self, key):
+        """
+        """
+        try:
+            result = self.get(self.TextPatterns, key)
             if result == '':
                 raise
         except:
