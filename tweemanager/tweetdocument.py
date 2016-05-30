@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import mongoengine
 
+
 TweetsRepoStdName = "TweetsRepo"
 
 
@@ -11,7 +12,7 @@ def create_collection_name(cls):
     can be set using the config file.
     """
     # global configurations:
-    from configparsermanager import CFGINFO
+    from .configparsermanager import CFGINFO
     try:
         TweetsRepoCollName = CFGINFO.getMongoDBSpecs('repocollname')
         if not TweetsRepoCollName:
