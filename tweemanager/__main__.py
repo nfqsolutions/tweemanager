@@ -17,7 +17,7 @@ NFQ Solutions: this package is at beta stage.
 
 Usage:
   tweemanager (listener|searchtweets|getoldtweets|genconfig) [options]
-  tweemanager pairmongoelastic
+  tweemanager mongo2elastic
   tweemanager tweeprocessor [options]
   tweemanager importToMongo [<jsonfile>]
   tweemanager dumpFromMongo [<jsonfile>]
@@ -27,6 +27,8 @@ Commands:
   searchtweets      Access tweets using search API (less than 10 days).
   getoldtweets      Access old tweeters (unofficial API).
   tweeprocessor     Start a server that process tweets.
+
+  mongo2elastic     Map mongo data to a elastic index.
 
   genconfig         Generate the tweem.cfg
 
@@ -244,6 +246,13 @@ if cmdargs.get('importToMongo'):
         except:
             raise
             break
+    sys.exit(0)
+
+if cmdargs.get('mongo2elastic'):
+    logging.info("mongo2elastic command start with pid: {}".format(os.getpid()))
+    from mongo2elastic import mongo2elastic
+    mongo2elastic()
+    logging.info("mongo2elastic done")
     sys.exit(0)
 
 #

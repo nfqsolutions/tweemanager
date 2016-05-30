@@ -18,9 +18,10 @@ class ConfigParserManager(ConfigParser):
     TwitterAPIcredentials = "TwitterAPIcredentials"
     ListenerSpecs = "ListenerSpecs"
     SearchSpecs = "SearchSpecs"
-    MongoDBSpecs = "MongoDBSpecs"
     GOTSpecs = "GOTSpecs"
     TextPatterns = "TextPatterns"
+    MongoDBSpecs = "MongoDBSpecs"
+    ElasticSpecs = "ElasticSpecs"
 
     def __init__(self, cpath, jsonstr=None):
         """
@@ -43,8 +44,6 @@ class ConfigParserManager(ConfigParser):
         self.add_section(self.ListenerSpecs)
         self.set(self.ListenerSpecs, "usersarray", "")
         self.set(self.ListenerSpecs, "trackarray", "")
-        self.set(self.ListenerSpecs, "patternstoexclude", "")
-        self.set(self.ListenerSpecs, "patternstoinclude", "")
         self.add_section(self.SearchSpecs)
         self.set(self.SearchSpecs, "searchquery", "")
         self.set(self.SearchSpecs, "maxtweets", "")
@@ -54,16 +53,21 @@ class ConfigParserManager(ConfigParser):
         self.set(self.GOTSpecs, "until", "")
         self.set(self.GOTSpecs, "querysearch", "")
         self.set(self.GOTSpecs, "maxtweets", "")
+        self.add_section(self.TextPatterns)
+        self.set(self.TextPatterns, "patternstoexclude", "")
+        self.set(self.TextPatterns, "patternstoinclude", "")
+        self.set(self.TextPatterns, "langtoinclude", "")
         self.add_section(self.MongoDBSpecs)
         self.set(self.MongoDBSpecs, "repocollname", "")
         self.set(self.MongoDBSpecs, "name", "")
         self.set(self.MongoDBSpecs, "username", "")
         self.set(self.MongoDBSpecs, "password", "")
         self.set(self.MongoDBSpecs, "host", "")
-        self.add_section(self.TextPatterns)
-        self.set(self.TextPatterns, "patternstoexclude", "")
-        self.set(self.TextPatterns, "patternstoinclude", "")
-        self.set(self.TextPatterns, "langtoinclude", "")
+        self.add_section(self.ElasticSpecs)
+        self.set(self.ElasticSpecs, "host", "")
+        self.set(self.ElasticSpecs, "index", "")
+        self.set(self.ElasticSpecs, "username", "")
+        self.set(self.ElasticSpecs, "password", "")
 
     def _templatejson(self):
         """
@@ -116,6 +120,17 @@ class ConfigParserManager(ConfigParser):
         finally:
             return result
 
+    def getTextPatterns(self, key):
+        """
+        """
+        try:
+            result = self.get(self.TextPatterns, key)
+            if result == '':
+                raise
+        except:
+            result = None
+        return result
+
     def getMongoDBSpecs(self, key):
         """
         """
@@ -127,12 +142,11 @@ class ConfigParserManager(ConfigParser):
             result = None
         return result
 
-
-    def getTextPatterns(self, key):
+    def getElasticSpecs(self, key):
         """
         """
         try:
-            result = self.get(self.TextPatterns, key)
+            result = self.get(self.ElasticSpecs, key)
             if result == '':
                 raise
         except:
