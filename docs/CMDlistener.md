@@ -28,3 +28,19 @@ Para guardar los datos en mongodb:
 python tweemanager listener -c tweemUsoRapido.cfg -o mongodb
 ```
 o guárdalos en un fichero y usa el comando importToMongo.
+
+La api de streaming de twitter tiene alguna limitación. Por ejemplo no se puede buscar **"un beso"** como palabra.
+El stream devolverá cosas como:
+"No hay nada que un buen beso no pueda curar."
+que puede o no ser apropriado para nuestro escuchador.
+
+Para poder filtrar datos de este tipo podemos usar la sección de TextPatterns del fichero de configuración.
+
+Cuando definido estos campos permiten introducir patrones de busqueda extra sobre el text del tweet, garantizando que solamente estamos guardanto tweets con secuencias de palabras correctas.
+
+En el ejemplo anterior para garantizar que solamente tweets con **"un beso"** son registrados tenemos que añadir la siguiente configuración:
+
+```
+[TextPatterns]
+patternstoexclude = ["un beso"]
+```

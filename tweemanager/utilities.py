@@ -221,12 +221,14 @@ def listenerPatternsChecker(result):
     # TODO: posibles problemas con los carácteres especiales
     try:
         logging.debug("Patterns from cfg file{}".format(configdata.CFGINFO.getTextPatterns("patternstoexclude")))
+        print(configdata.CFGINFO.getTextPatterns("patternstoexclude"))
         PatternsToExclude = eval(configdata.CFGINFO.getTextPatterns("patternstoexclude"))
         PatternsToInclude = eval(configdata.CFGINFO.getTextPatterns("patternstoinclude"))
         LanguagesToInclude = eval(configdata.CFGINFO.getTextPatterns("langtoinclude"))
         logging.debug("Patterns being check:{}".format(PatternsToExclude))
     except:
         raise
+        logging.debug("No Patterns to check")
         return filtro
     logging.debug("Patterns being check:{}".format(PatternsToExclude))
 
