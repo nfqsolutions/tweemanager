@@ -4,7 +4,7 @@
 Comando **getoldtweets**:
 
 ```bash
-python tweemanager getoldtweets
+tweemanager getoldtweets
 ```
 
 datos de entrada (fichero de configuración):
@@ -12,11 +12,11 @@ datos de entrada (fichero de configuración):
 
 ```
 [GOTSpecs]
-username = barackobama
-querysearch = barackobama
+username = "barackobama"
+querysearch = "barackobama"
 maxtweets = 100
-since = 2016-01-01
-until = 2016-05-01
+since = "2016-01-01"
+until = "2016-05-01"
 ```
 
 El comando funciona como la búsqueda avanzada que un puede realizar en la [página de twitter](https://twitter.com/search-advanced).
@@ -28,21 +28,21 @@ Para el username si se usan dos busca que el usuario1 haya mencionado al usuario
 Las búsquedas no son case sensitive. Ejemplo:
 ```
 [GOTSpecs]
-username = barackobama
+username = "barackobama"
 querysearch = "Donald Trump"
 maxtweets = 100
 ```
 obtiene resultados distintos de
 ```
 [GOTSpecs]
-username = barackobama
+username = "barackobama"
 querysearch = "Donald Trump"
 maxtweets = 100
 ```
 y también resultados distintos de:
 ```
 [GOTSpecs]
-username = barackobama OR hillaryclinton
+username = "barackobama OR hillaryclinton"
 querysearch = "Donald Trump"
 maxtweets = 10
 ```

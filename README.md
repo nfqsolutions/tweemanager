@@ -24,7 +24,7 @@ virtualenv .env # opcional
 # or
 pyvenv .env # opcional
 source .env/bin/activate && pip install --upgrade pip # optional
-pip install -r requirements.txt
+python setup.py install
 ```
 
 > Si encuentras algún problema reclama [aquí](https://github.com/ekergy/tweemanager/issues).
@@ -35,7 +35,7 @@ Paso 2:
 
 Prueba el paquete
 ```bash
-python tweemanager -h
+tweemanager -h
 ```
 y deberás ver la ayuda del paquete.
 

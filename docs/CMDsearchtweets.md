@@ -13,12 +13,12 @@ access_secret = un_access_secret
 añade la *query* de búsqueda y el numero máximo de tweets a tu fichero de configuración:
 ```
 [SearchSpecs]
-searchquery = barackobama
+searchquery = "barackobama"
 maxtweets = 100
 ```
 y lanza el comando:
 ```
-python tweemanager searchtweets -c tweemUsoRapido.cfg
+tweemanager searchtweets -c tweemUsoRapido.cfg
 ```
 usa la opción -o o el redireccionador ">" para guardar la busqueda en un fichero.
 
@@ -26,6 +26,6 @@ para construir tu query tiene en cuenta la [documentación oficial de Twitter](h
 
 para guardar los datos en mongodb:
 ```
-python tweemanager searchtweets -c tweemUsoRapido.cfg -o mongodb
+tweemanager searchtweets -c tweemUsoRapido.cfg -o mongodb
 ```
 o guárdalos en un fichero y usa el comando importToMongo.

@@ -4,7 +4,7 @@
 Comando **genconfig**:
 
 ```bash
-python tweemanager genconfig
+tweemanager genconfig
 ```
 
 Este comando genera un fichero template de configuración:
@@ -50,3 +50,4 @@ password =
 ```
 
 Solamente tienes que usar/rellenar los campos que necesite cada comando.
+Los tipos de datos son json o sea strings con \"\" int y floats normal y listas con \[\].
