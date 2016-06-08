@@ -159,9 +159,8 @@ class GenericTweetProcessor(object):
                 # checking patterns:
             if self.LANGTOINCLUDE:
                 logging.debug("LANGTOINCLUDE")
-                result = False
                 for pattern in self.LANGTOINCLUDE:
-                    if textclean(pattern) in self.tweetdata['lang']:
+                    if textclean(pattern) in self.tweetdata.get('lang',''):
                         logging.debug("langtoinclude {} found in tweet id: {}".format(pattern, self.tweetdata['id']))
                         result = True
         return result

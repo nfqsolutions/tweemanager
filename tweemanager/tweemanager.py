@@ -225,7 +225,6 @@ def tweemanager():
             for tweet in getoldtweetsGenerator(tweetCriteria):
                 posttweet = TweetProcessor(tweet)
                 posttweet.sendtooutput()
-                print(json.dumps(posttweet.tweetdata))
             logging.info('getoldtweets command Done')
         except:
             logging.critical('Error in getoldtweets command')
