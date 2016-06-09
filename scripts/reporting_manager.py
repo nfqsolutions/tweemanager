@@ -4,24 +4,24 @@ import datetime
 
 
 # 1º ListOfdays:
-def genListOfdays(StartDate, EndDate):
+def genListOfdays(StartDate, EndDate=datetime.datetime.now()):
     """
     """
-    onedaydelta = datetime.timedelta(1)
+    onedaydelta = datetime.timedelta(days=1)
     StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
-    EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day + 1)
+    EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day)
     delta = EndDate - StartDate
     for i in xrange(delta.days):
         yield {'Start': StartDate, 'End': StartDate + onedaydelta}
-        StartDate = StartDate + onedaydelta
+        StartDate += onedaydelta
 
 
 # 2º ListOfWeeks:
 def genListOfWeeks(StartDate, EndDate):
     """
     """
-    onedaydelta = datetime.timedelta(1)
-    oneweekdelta = datetime.timedelta(7)
+    onedaydelta = datetime.timedelta(days=1)
+    oneweekdelta = datetime.timedelta(days=7)
     StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
     while StartDate.weekday() != 0:
         StartDate = StartDate - onedaydelta
@@ -30,7 +30,7 @@ def genListOfWeeks(StartDate, EndDate):
     deltaweeks = deltadays.days / 7
     for i in xrange(deltaweeks + 1):
         yield {'Start': StartDate, 'End': StartDate + oneweekdelta}
-        StartDate = StartDate + oneweekdelta
+        StartDate += oneweekdelta
 
 # 3º ListOfMonth:
 def genListOfMonth(StartDate, EndDateInp):
@@ -44,42 +44,111 @@ def genListOfMonth(StartDate, EndDateInp):
         StartDate = EndDate
 
 
-# Agg Function:
-def aggResults(StartDate, EndDate):
+# Agg Functions:
+def aggCount(StartDate, EndDate):
     """
+    It returns the number of tweets between a time interval
     """
     pipeline = [
         {"$match": {"created_at": {"$gte": StartDate}, "created_at": {"$lt": EndDate}}},
         {"$group": {"_id": "", "count": {"$sum": 1}}},
     ]
+
     for result in coll.aggregate(pipeline):
         result = result
     return result
-#
-client = pymongo.MongoClient()
-db = client.tweets
-coll = db.Tweets
-#
 
-# 1º get first date
-for tweet in coll.find().sort('created_at', 1).limit(1):
-    StartDate = tweet['created_at']
-print(StartDate)
-# 2º get last date
-for tweet in coll.find().sort('created_at', -1).limit(1):
-    EndDate = tweet['created_at']
-print(EndDate)
-# 3º get all data:
+def aggPositivos(StartDate, EndDate):
+    """
+    It returns the number of positive tweets classified by an algoritm in a time interval
+    """
+    pipeline = [
+        {"$match": {"created_at": {"$gte": StartDate}, "created_at": {"$lt": EndDate}}},
+        {"$group": {"_id": "", "npos": {"$sum": {"$cond":[{"$eq":["$valoration.algoritm.clasificado","positivo"]},1,0]}}
+        }},
+    ]
+    for result in coll.aggregate(pipeline):
+        result = result
+    return result
 
-# Perform aggregations on the time table:
-# 1º ListOfdays:
-for values in genListOfdays(StartDate, EndDate):
-    print(values,aggResults(values['Start'], values['End']))
+def aggNegativos(StartDate, EndDate):
+    """
+    It returns the number of negative tweets classified by an algoritm in a time interval
+    """
+    pipeline = [
+        {"$match": {"created_at": {"$gte": StartDate}, "created_at": {"$lt": EndDate}}},
+        {"$group": {"_id": "", "nneg": {"$sum": {"$cond":[{"$eq":["$valoration.algoritm.clasificado","negativo"]},1,0]}}
+        }},
+    ]
+    for result in coll.aggregate(pipeline):
+        result = result
+    return result
 
-# 2º ListOfWeeks:
-for values in genListOfWeeks(StartDate, EndDate):
-    print(values,aggResults(values['Start'], values['End']))
+def aggRepo(StartDate, EndDate):
+    """
+    It returns another features of our classifier
+    """
+    pipeline = [
+        {"$match": {"created_at": {"$gte": StartDate}, "created_at": {"$lt": EndDate}}},
+        {"$group": {"_id": "", "count": {"$sum": "$valoration.algoritm.other"}
+        }},
+        ]
+    for result in coll.aggregate(pipeline):
+        result = result
+    return result
 
-# 3º ListOfMonth:
-for values in genListOfMonth(StartDate, EndDate):
-    print(values,aggResults(values['Start'], values['End']))
+if __name__ == '__main__':
+    #
+    your_connection = 'mongodb://127.0.0.1'
+    client = pymongo.MongoClient(your_connection, 27017)
+    db = client.tweets
+    coll = db.TweetsRepo
+    #
+
+    # 1º get first date
+    for tweet in coll.find().sort('created_at', 1).limit(1):
+        StartDate = tweet['created_at']
+    print(StartDate)
+    # 2º get last date
+    for tweet in coll.find().sort('created_at', -1).limit(1):
+        EndDate = tweet['created_at']
+    print(EndDate)
+    # 3º get all data:
+
+    # Perform aggregations on the time table:
+    # 1º ListOfdays:
+    for values in genListOfdays(StartDate, EndDate):
+        print("Tweets")
+
+        print(values,aggCount(values['Start'], values['End']))
+        print("Positivos")
+        print(values,aggPositivos(values['Start'], values['End']))
+        print("Negativos")
+        print(values,aggNegativos(values['Start'], values['End']))
+        print("Métrica")
+        print(values,aggRepo(values['Start'], values['End']))
+        print("")
+
+    # 2º ListOfWeeks:
+    for values in genListOfWeeks(StartDate, EndDate):
+        print("Tweets")
+        print(values,aggCount(values['Start'], values['End']))
+        print("Positivos")
+        print(values,aggPositivos(values['Start'], values['End']))
+        print("Negativos")
+        print(values,aggNegativos(values['Start'], values['End']))
+        print("Métrica")
+        print(values,aggRepo(values['Start'], values['End']))
+        print("")
+
+    # 3º ListOfMonth:
+    for values in genListOfMonth(StartDate, EndDate):
+        print("Tweets")
+        print(values,aggCount(values['Start'], values['End']))
+        print("Positivos")
+        print(values,aggPositivos(values['Start'], values['End']))
+        print("Negativos")
+        print(values,aggNegativos(values['Start'], values['End']))
+        print("Métrica")
+        print(values,aggRepo(values['Start'], values['End']))
+        print("")
