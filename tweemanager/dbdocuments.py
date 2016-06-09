@@ -2,7 +2,7 @@
 import mongoengine
 from .settings import cfgmanager
 
-TweetsRepoStdName = "TweetsRepo"
+TweetsRepoStdName = "Tweets_copy"
 
 
 def create_collection_name(cls):
@@ -12,7 +12,10 @@ def create_collection_name(cls):
     can be set using the config file.
     """
     # global configurations:
-    print(cfgmanager.MongoDBSpecs['repocollname'])
+    try:
+        print(cfgmanager.MongoDBSpecs['repocollname'])
+    except:
+        print("No se está ejecutando desde cfgmanager") # TODO: eliminar esto
     try:
         TweetsRepoCollName = cfgmanager.MongoDBSpecs['repocollname']
         if not TweetsRepoCollName:
