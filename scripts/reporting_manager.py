@@ -7,14 +7,6 @@ import json
 def genListOfdays(StartDate, EndDate=datetime.datetime.now()):
     """
     """
-    # onedaydelta = datetime.timedelta(days=1)
-    # StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
-    # EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day)
-    # while StartDate < EndDate:
-    #     yield {'Start': StartDate, 'End': StartDate + onedaydelta}
-    #     StartDate += onedaydelta
-
-    # Old Code
     onedaydelta = datetime.timedelta(days=1)
     StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
     EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day)
@@ -27,17 +19,6 @@ def genListOfdays(StartDate, EndDate=datetime.datetime.now()):
 def genListOfWeeks(StartDate, EndDate):
     """
     """
-    # onedaydelta = datetime.timedelta(days=1)
-    # oneweekdelta = datetime.timedelta(days=7)
-    # StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
-    # while StartDate.weekday() != 0:
-    #     StartDate = StartDate - onedaydelta
-    # EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day) + onedaydelta
-    # while StartDate < EndDate:
-    #     yield {'Start': StartDate, 'End': StartDate + oneweekdelta}
-    #     StartDate += oneweekdelta
-
-    # Old Code
     onedaydelta = datetime.timedelta(days=1)
     oneweekdelta = datetime.timedelta(days=7)
     StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
@@ -152,7 +133,7 @@ if __name__ == '__main__':
 
     # Write the reporting in a JSON file
     report_to_JSON(StartDate, EndDate)
-    
+
     # Perform aggregations on the time table:
     # 1º ListOfdays:
     print("Por días")
