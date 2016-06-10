@@ -3,7 +3,7 @@ import mongoengine
 from .settings import cfgmanager
 
 TweetsRepoStdName = "TweetsRepo"
-# Verver
+
 
 def create_collection_name(cls):
     """
@@ -12,6 +12,7 @@ def create_collection_name(cls):
     can be set using the config file.
     """
     # global configurations:
+    
     try:
         print(cfgmanager.MongoDBSpecs['repocollname'])
     except:
