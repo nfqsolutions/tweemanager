@@ -34,6 +34,9 @@ while fecha_actual > a_year_ago - deltat:
         querySearch=query_to_search,
         maxTweets=100)
 
+    # Initialize a count indicator
+    # However, it measures how many tweets it takes from Twitter, not how many are inserted
+    contador = 0
     for tweet in getoldtweetsGenerator(tweetCriteria):
         TweetProcessor = MongoTweetProcessor
         TweetProcessor.PATTERNSTOINCLUDE = query
@@ -41,5 +44,7 @@ while fecha_actual > a_year_ago - deltat:
 
         posttweet = TweetProcessor(tweet)
         posttweet.sendtooutput()
+        contador += 1
 
     fecha_actual = fecha_actual - deltat
+    print(fecha_actual,contador)
