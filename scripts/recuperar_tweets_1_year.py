@@ -24,9 +24,13 @@ for element in query:
 patternstoexclude = [u'caixa cataluña', u'caixa galicia']
 
 while fecha_actual > a_year_ago - deltat:
+    ini = fecha_actual - deltat # Fecha de inicio de la búsqueda
+    ini = ini.strftime("%Y-%m-%d") # Tiene que estar en string
+    fin = fecha_actual.strftime("%Y-%m-%d") # Fecha de fin de la búsqueda
+
     tweetCriteria = setTweetCriteria(
-        since=fecha_actual - deltat,
-        until=fecha_actual,
+        since=ini,
+        until=fin,
         querySearch=query_to_search,
         maxTweets=100)
 
@@ -37,6 +41,5 @@ while fecha_actual > a_year_ago - deltat:
 
         posttweet = TweetProcessor(tweet)
         posttweet.sendtooutput()
-        logging.info('getoldtweets command Done')
 
     fecha_actual = fecha_actual - deltat
