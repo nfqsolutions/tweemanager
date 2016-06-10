@@ -38,9 +38,8 @@ class TweetManager:
                 break
 
             for tweetHTML in tweets:
-                # print(tweetHTML)
                 tweetPQ = PyQuery(tweetHTML)
-                #print(str(tweetPQ))
+                # print(str(tweetPQ))
                 tweet = models.Tweet()
 
                 usernameTweet = tweetPQ("span.username.js-action-profile-name b").text()
@@ -70,6 +69,9 @@ class TweetManager:
                 if len(geoSpan) > 0:
                     geoText = geoSpan.attr('title')
 
+                # lang if available:
+                lang = tweetPQ("p.js-tweet-text").attr('lang')
+
                 tweet[u'id'] = id
                 tweet[u'permalink'] = 'https://twitter.com' + permalink
                 tweet[u'username'] = usernameTweet
@@ -80,6 +82,7 @@ class TweetManager:
                 tweet[u'mentions'] = " ".join(re.compile('(@\\w*)').findall(tweet[u'text']))
                 tweet[u'hashtags'] = " ".join(re.compile('(#\\w*)').findall(tweet[u'text']))
                 tweet[u'geoText'] = geoText
+                tweet[u'lang'] = lang
 
                 results.append(tweet)
 

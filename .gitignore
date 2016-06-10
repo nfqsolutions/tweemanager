@@ -12,6 +12,7 @@ env/
 .env35/
 .env34/
 .env2/
+.env27/
 .env/
 build/
 develop-eggs/

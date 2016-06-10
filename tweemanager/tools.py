@@ -149,9 +149,9 @@ class GenericTweetProcessor(object):
                         logging.debug("patternstoexclude {} found in tweet id: {}".format(pattern,self.tweetdata['id']))
                         result = False
                 # checking patterns:
-            elif self.PATTERNSTOINCLUDE:
+            if self.PATTERNSTOINCLUDE:
                 logging.debug("PATTERNSTOINCLUDE")
-                result = False
+                # result = False
                 for pattern in self.PATTERNSTOINCLUDE:
                     if textclean(pattern) in self.tweetdata['text_clean']:
                         logging.debug("patternstoinclude {} found in tweet id: {}".format(pattern, self.tweetdata['id']))

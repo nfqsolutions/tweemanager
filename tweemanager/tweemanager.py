@@ -22,11 +22,12 @@ def tweemanager():
 
     Usage:
         tweemanager (listener|searchtweets|getoldtweets)
-                    [--c <cfgfile> | --cfgjsonstr <cfgjsonstr>]
+                    [(--cfgfile <cfgfile> | --cfgjsonstr <cfgjsonstr>)]
                     [options]
         tweemanager genconfig [options]
         tweemanager reporting [options]
         tweemanager --version
+        tweemanager cmdManolo
 
     Options:
         --logfile <logfile>                 log file name:
@@ -52,7 +53,7 @@ def tweemanager():
     #
     # Arguments Handling and Validation
     #
-    args = docopt.docopt(tweemanager.__doc__,version=__version__)
+    args = docopt.docopt(tweemanager.__doc__, version=__version__)
     #
     # Arguments Handling Done
     #
@@ -61,10 +62,6 @@ def tweemanager():
     # Config Handling
     #
     config = cfgmanager()
-    if args['--cfgfile'] and args['--cfgjsonstr']:
-        print(Exception("ERROR: you cannot provide two configuration options\n" +
-                        "       use only one option (--cfgjsonstr | --cfgfile)"))
-        sys.exit(0)
     if args['--cfgjsonstr']:
         # given a jsonstring:
         print('config via json string')

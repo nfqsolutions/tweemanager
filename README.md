@@ -20,7 +20,7 @@ git clone https://github.com/ekergy/tweemanager.git && cd tweemanager
 Paso 1:
 
 ```bash
-virtualenv .env # opcional
+virtualenv2 .env # opcional
 # or
 pyvenv .env # opcional
 source .env/bin/activate && pip install --upgrade pip # optional

@@ -55,6 +55,10 @@ def getoldtweetsGenerator(SearchCriteria):
         result[u'user'] = {u'screen_name': rawtweet[u'username']}
         result[u'favorite_count'] = rawtweet[u'favorites']
         result[u'retweet_count'] = rawtweet[u'retweets']
+        if rawtweet[u'lang'] is None or rawtweet[u'lang'] == '':
+            result[u'lang'] = 'und'
+        else:
+            result[u'lang'] = rawtweet[u'lang']
         # process place full_name
         if rawtweet[u'geoText']:
             result[u'place'] = {u'full_name': rawtweet[u'geoText']}
