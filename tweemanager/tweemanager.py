@@ -6,12 +6,17 @@ import docopt
 import logging
 import traceback
 import mongoengine
+from pymongo import MongoClient
+from bson import json_util as json
+from reportermanager import generateReports
+from .version import __version__
+from .settings import cfgmanager
 from .getoldtweets import setTweetCriteria, getoldtweetsGenerator
 from .searchlistenerAPI import listenertweets, searchtweets
 from .tools import StdoutTweetProcessor, FileTweetProcessor, MongoTweetProcessor
-from bson import json_util as json
-from .settings import cfgmanager
-from .version import __version__
+
+
+
 #
 TweetProcessor = None
 
@@ -86,10 +91,12 @@ def tweemanager():
             args['--cfgfile'] = "tweem.json"
             config.readfromjsonfile(args['--cfgfile'])
         except:
-
             args['--cfgfile'] = "tweem.cfg"
+            print("debug1")
             config.readfromfile(args['--cfgfile'])
+            print("debug2")
     cfgmanager.setconfigassettings(config._sections)
+    print(cfgmanager.MongoDBSpecs)
     #
     # Config Handling
     #
@@ -235,8 +242,19 @@ def tweemanager():
     # command reporting
     #
     if args['reporting']:
-        logging.info('reporting command selected')
-        logging.debug('Not implemented')
+        try:
+            logging.info('reporting command selected')
+            # mongoengine.connect(host=cfgmanager.MongoDBSpecs['host'])
+            print cfgmanager.MongoDBSpecs['host']
+            mongoclient = MongoClient(cfgmanager.MongoDBSpecs['host'])
+            generateReports(mongoclient,cfgmanager.MongoDBSpecs['repocollname'])
+            #logging.debug('Not implemented')
+        # except mongoengine.ConnectionError:
+        #     logging.error('check if connection to mongo is defined')
+        except:
+            raise
+        #
+        logging.info('reporting command Done')
         return
     #
     # command reporting Done
