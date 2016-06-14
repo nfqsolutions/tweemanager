@@ -4,9 +4,9 @@ import datetime
 import json
 
 # IP host should be changed to your MongoDB server
-client = pymongo.MongoClient('mongodb://192.168.80.221:27017/')
+client = pymongo.MongoClient('mongodb://127.0.0.1:27017/')
 db = client.tweets
-coll = db.TweetsRepo
+coll = db.tweem_default # Coll should be changed to the collection that you to report
 name_collection = coll.name
 
 # 1º ListOfdays:
@@ -18,10 +18,12 @@ def genListOfdays(StartDate, EndDate=datetime.datetime.now()):
     EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day)
     delta = EndDate - StartDate
     for i in xrange(delta.days):
-        yield {'Start': StartDate, 'End': StartDate + onedaydelta}
+        yield {'start': StartDate, 'end': StartDate + onedaydelta}
         StartDate += onedaydelta
 
+
 # 2º ListOfWeeks:
+# Semanas laborales!
 def genListOfWeeks(StartDate, EndDate):
     """
     """
@@ -34,18 +36,45 @@ def genListOfWeeks(StartDate, EndDate):
     deltadays = EndDate - StartDate
     deltaweeks = deltadays.days / 7
     for i in xrange(deltaweeks + 1):
-        yield {'Start': StartDate, 'End': StartDate + oneweekdelta}
+        yield {'start': StartDate, 'end': StartDate + oneweekdelta}
+        StartDate += oneweekdelta
+
+# 2º ListOfWeeks:
+# Semanas laborales!
+def genListOfWeeks(StartDate, EndDate):
+    """
+    """
+    onedaydelta = datetime.timedelta(days=1)
+    oneweekdelta = datetime.timedelta(days=7)
+    StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
+    while StartDate.weekday() != 0:
+        StartDate = StartDate - onedaydelta
+    EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day) + onedaydelta
+    deltadays = EndDate - StartDate
+    deltaweeks = deltadays.days / 7
+    for i in xrange(deltaweeks + 1):
+        yield {'start': StartDate, 'end': StartDate + oneweekdelta}
         StartDate += oneweekdelta
 
 # 3º ListOfMonth:
-def genListOfMonth(StartDate, EndDateInp):
+def genListOfMonth(StartDate,EndDateInp):
     """
     """
     StartDate = datetime.datetime(StartDate.year, StartDate.month, 1)
     EndDate = datetime.datetime(StartDate.year, StartDate.month, 1)
+
+    def addMonth(Date):
+        """
+        """
+        #year = Date.year + (Date.month + 2) / 12
+        year = Date.year + (Date.month / 12)
+        month  = ((Date.month) % 12) + 1
+        monthplusone = datetime.datetime(year , month  , Date.day)
+        return monthplusone
+
     while EndDate < EndDateInp:
-        EndDate = datetime.datetime(StartDate.year, StartDate.month + 1, 1)
-        yield {'Start': StartDate, 'End': EndDate}
+        EndDate = addMonth(StartDate)
+        yield {'start': StartDate, 'end': EndDate}
         StartDate = EndDate
 
 
@@ -78,11 +107,11 @@ def report_to_JSON(StartDate, EndDate):
     print("Writing report by days...")
     for values in genListOfdays(StartDate, EndDate):
         linea = {}
-        valor = aggCount(values['Start'], values['End'])
-        linea['Tweets'] = valor['count']
+        valor = aggCount(values['start'], values['end'])
+        linea['tweets'] = valor['count']
         linea['positives'] = valor['npos']
         linea['negatives'] = valor['nneg']
-        linea['Metrica'] = valor['met']
+        linea['metrica'] = valor['met']
         linea = json.dumps(linea)
         outfile.write(linea)
         outfile.write("\n")
@@ -93,11 +122,11 @@ def report_to_JSON(StartDate, EndDate):
     print("Writing report by weeks...")
     for values in genListOfWeeks(StartDate, EndDate):
         linea = {}
-        valor = aggCount(values['Start'], values['End'])
-        linea['Tweets'] = valor['count']
+        valor = aggCount(values['start'], values['end'])
+        linea['tweets'] = valor['count']
         linea['positives'] = valor['npos']
         linea['negatives'] = valor['nneg']
-        linea['Metrica'] = valor['met']
+        linea['metrica'] = valor['met']
         linea = json.dumps(linea)
         outfile.write(linea)
         outfile.write("\n")
@@ -108,11 +137,11 @@ def report_to_JSON(StartDate, EndDate):
     print("Writing report by monts...")
     for values in genListOfMonth(StartDate, EndDate):
         linea = {}
-        valor = aggCount(values['Start'], values['End'])
-        linea['Tweets'] = valor['count']
+        valor = aggCount(values['start'], values['end'])
+        linea['tweets'] = valor['count']
         linea['positives'] = valor['npos']
         linea['negatives'] = valor['nneg']
-        linea['Metrica'] = valor['met']
+        linea['metrica'] = valor['met']
         linea = json.dumps(linea)
         outfile.write(linea)
         outfile.write("\n")
@@ -126,50 +155,53 @@ def report_to_Mongo(StartDate, EndDate, name_collection):
     print("Uploading report by days...")
     for values in genListOfdays(StartDate, EndDate):
         linea = {}
-        valor = aggCount(values['Start'], values['End'])
-        linea['Start'] = values['Start']
-        linea['End'] = values['End']
-        linea['Tweets'] = valor['count']
+        valor = aggCount(values['start'], values['end'])
+        linea['date'] = values['start']
+        linea['start'] = values['start']
+        linea['end'] = values['end']
+        linea['tweets'] = valor['count']
         linea['positives'] = valor['npos']
         linea['negatives'] = valor['nneg']
-        linea['Metrica'] = valor['met']
-        linea['Report'] = {'type':'daily', 'from':name_collection}
-        key = values['Start'].strftime("%Y%m%d") + values['End'].strftime("%Y%m%d")
+        linea['metrica'] = valor['met']
+        linea['report'] = {'type':'daily', 'from':name_collection}
+        key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
         coll.update({"_id":key}, linea, upsert = True)
 
     # 2º ListOfWeeks:
     print("Uploading report by weeks...")
     for values in genListOfWeeks(StartDate, EndDate):
         linea = {}
-        valor = aggCount(values['Start'], values['End'])
-        linea['Start'] = values['Start']
-        linea['End'] = values['End']
-        linea['Tweets'] = valor['count']
+        valor = aggCount(values['start'], values['end'])
+        linea['date'] = values['start']
+        linea['start'] = values['start']
+        linea['end'] = values['end']
+        linea['tweets'] = valor['count']
         linea['positives'] = valor['npos']
         linea['negatives'] = valor['nneg']
-        linea['Metrica'] = valor['met']
-        linea['Report'] = {'type':'weekly', 'from':name_collection}
-        key = values['Start'].strftime("%Y%m%d") + values['End'].strftime("%Y%m%d")
+        linea['metrica'] = valor['met']
+        linea['report'] = {'type':'weekly', 'from':name_collection}
+        key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
         coll.update({"_id":key}, linea, upsert = True)
 
     # 3º ListOfMonth:
     print("Uploading report by monts...")
     for values in genListOfMonth(StartDate, EndDate):
         linea = {}
-        valor = aggCount(values['Start'], values['End'])
-        linea['Start'] = values['Start']
-        linea['End'] = values['End']
-        linea['Tweets'] = valor['count']
+        valor = aggCount(values['start'], values['end'])
+        linea['date'] = values['start']
+        linea['start'] = values['start']
+        linea['end'] = values['end']
+        linea['tweets'] = valor['count']
         linea['positives'] = valor['npos']
         linea['negatives'] = valor['nneg']
-        linea['Metrica'] = valor['met']
-        linea['Report'] = {'type':'monthly', 'from':name_collection}
-        key = values['Start'].strftime("%Y%m%d") + values['End'].strftime("%Y%m%d")
+        linea['metrica'] = valor['met']
+        linea['report'] = {'type':'monthly', 'from':name_collection}
+        key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
         coll.update({"_id":key}, linea, upsert = True)
 
 
 if __name__ == '__main__':
-    ## Example
+
     # 1º get first date
     for tweet in coll.find().sort('created_at', 1).limit(1):
         StartDate = tweet['created_at']
@@ -191,29 +223,29 @@ if __name__ == '__main__':
     # 1º ListOfdays:
     print("Por días")
     for values in genListOfdays(StartDate, EndDate):
-        valor = aggCount(values['Start'], values['End'])
+        valor = aggCount(values['start'], values['end'])
         print("Tweets")
-        print(values['Start'].strftime("%Y-%m-%d"),
-            values['End'].strftime("%Y-%m-%d"))
+        print(values['start'].strftime("%Y-%m-%d"),
+            values['end'].strftime("%Y-%m-%d"))
         print(valor)
         print("")
 
     # 2º ListOfWeeks:
     print("Por semanas")
     for values in genListOfWeeks(StartDate, EndDate):
-        valor = aggCount(values['Start'], values['End'])
+        valor = aggCount(values['start'], values['end'])
         print("Tweets")
-        print(values['Start'].strftime("%Y-%m-%d"),
-              values['End'].strftime("%Y-%m-%d"))
+        print(values['start'].strftime("%Y-%m-%d"),
+              values['end'].strftime("%Y-%m-%d"))
         print(valor)
         print("")
 
     # 3º ListOfMonth:
     print("Por meses")
     for values in genListOfMonth(StartDate, EndDate):
-        valor = aggCount(values['Start'], values['End'])
+        valor = aggCount(values['start'], values['end'])
         print("Tweets")
-        print(values['Start'].strftime("%Y-%m-%d"),
-              values['End'].strftime("%Y-%m-%d"))
+        print(values['start'].strftime("%Y-%m-%d"),
+              values['end'].strftime("%Y-%m-%d"))
         print(valor)
         print("")
