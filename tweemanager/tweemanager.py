@@ -92,11 +92,8 @@ def tweemanager():
             config.readfromjsonfile(args['--cfgfile'])
         except:
             args['--cfgfile'] = "tweem.cfg"
-            print("debug1")
             config.readfromfile(args['--cfgfile'])
-            print("debug2")
     cfgmanager.setconfigassettings(config._sections)
-    print(cfgmanager.MongoDBSpecs)
     #
     # Config Handling
     #
@@ -190,7 +187,7 @@ def tweemanager():
             formatted_traceback = traceback.format_exception(exc_type, exc_value, exc_traceback)
             for traceback_line in formatted_traceback:
                 logging.critical(traceback_line)
-            logging.critical('Error in searchtweets command')
+            logging.critical('Error in listener command')
         return
     # #########################################################################
     #
@@ -245,7 +242,6 @@ def tweemanager():
         try:
             logging.info('reporting command selected')
             # mongoengine.connect(host=cfgmanager.MongoDBSpecs['host'])
-            print cfgmanager.MongoDBSpecs['host']
             mongoclient = MongoClient(cfgmanager.MongoDBSpecs['host'])
             generateReports(mongoclient,cfgmanager.MongoDBSpecs['repocollname'])
             #logging.debug('Not implemented')

@@ -23,24 +23,6 @@ def genListOfdays(StartDate, EndDate=datetime.datetime.now()):
 
 
 # 2º ListOfWeeks:
-# Semanas laborales!
-def genListOfWeeks(StartDate, EndDate):
-    """
-    """
-    onedaydelta = datetime.timedelta(days=1)
-    oneweekdelta = datetime.timedelta(days=7)
-    StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
-    while StartDate.weekday() != 0:
-        StartDate = StartDate - onedaydelta
-    EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day) + onedaydelta
-    deltadays = EndDate - StartDate
-    deltaweeks = deltadays.days / 7
-    for i in xrange(deltaweeks + 1):
-        yield {'start': StartDate, 'end': StartDate + oneweekdelta}
-        StartDate += oneweekdelta
-
-# 2º ListOfWeeks:
-# Semanas laborales!
 def genListOfWeeks(StartDate, EndDate):
     """
     """
