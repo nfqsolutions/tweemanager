@@ -8,7 +8,7 @@ import traceback
 import mongoengine
 from pymongo import MongoClient
 from bson import json_util as json
-from reportermanager import generateReports
+# from reportermanager import generateReports
 from .version import __version__
 from .settings import cfgmanager
 from .getoldtweets import setTweetCriteria, getoldtweetsGenerator
