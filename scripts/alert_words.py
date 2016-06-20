@@ -10,19 +10,19 @@ db = client.tweets
 coll = db.Tweets
 name_collection = coll.name
 
-# List of red words - a set of warning words
-red_words = ["perro", "gato", "cajero", "moneda"]
+# List of alert words - a list of warning words
+alert_words = ["perro", "gato", "cajero", "moneda"]
 
 mapper = Code("""
 	function() {  
     var summary = this.text_clean;
-    var red_words = """
-                  + str(red_words) +
+    var alert_words = """
+                  + str(alert_words) +
                     """
     if (summary) { 
         summary = summary.toLowerCase().split(" "); 
         for (var i = 0; i < summary.length; i++) {
-            if ( red_words.indexOf(summary[i]) != -1){
+            if ( alert_words.indexOf(summary[i]) != -1){
                 if (summary[i])  {
                    emit(summary[i], 1);
                 }
@@ -32,7 +32,7 @@ mapper = Code("""
 }
 """)
 
-reducer = Code("""
+alertucer = Code("""
     function( key, values ) {    
     var count = 0;    
     values.forEach(function(v) {            
@@ -43,6 +43,6 @@ reducer = Code("""
 """)
 
 # It prints the results
-result = coll.map_reduce(mapper, reducer, "word_count")
+result = coll.map_alertuce(mapper, alertucer, "word_count")
 for doc in result.find():
 	print(doc)
