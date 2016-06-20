@@ -84,7 +84,7 @@ class nfqTwitterStreamListener(tweepy.StreamListener):
     def on_error(self, code):
         """On error it won't stop the listener.
         """
-        print("Error while listening with code:" + code)
+        print("Error while listening with code:" + str(code))
 
     def on_status(self, status):
         """Handle recevied tweet:

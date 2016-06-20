@@ -6,12 +6,17 @@ import docopt
 import logging
 import traceback
 import mongoengine
+from pymongo import MongoClient
+from bson import json_util as json
+# from reportermanager import generateReports
+from .version import __version__
+from .settings import cfgmanager
 from .getoldtweets import setTweetCriteria, getoldtweetsGenerator
 from .searchlistenerAPI import listenertweets, searchtweets
 from .tools import StdoutTweetProcessor, FileTweetProcessor, MongoTweetProcessor
-from bson import json_util as json
-from .settings import cfgmanager
-from .version import __version__
+
+
+
 #
 TweetProcessor = None
 
@@ -22,11 +27,12 @@ def tweemanager():
 
     Usage:
         tweemanager (listener|searchtweets|getoldtweets)
-                    [--c <cfgfile> | --cfgjsonstr <cfgjsonstr>]
+                    [(--cfgfile <cfgfile> | --cfgjsonstr <cfgjsonstr>)]
                     [options]
         tweemanager genconfig [options]
         tweemanager reporting [options]
         tweemanager --version
+        tweemanager cmdManolo
 
     Options:
         --logfile <logfile>                 log file name:
@@ -52,7 +58,7 @@ def tweemanager():
     #
     # Arguments Handling and Validation
     #
-    args = docopt.docopt(tweemanager.__doc__,version=__version__)
+    args = docopt.docopt(tweemanager.__doc__, version=__version__)
     #
     # Arguments Handling Done
     #
@@ -61,10 +67,6 @@ def tweemanager():
     # Config Handling
     #
     config = cfgmanager()
-    if args['--cfgfile'] and args['--cfgjsonstr']:
-        print(Exception("ERROR: you cannot provide two configuration options\n" +
-                        "       use only one option (--cfgjsonstr | --cfgfile)"))
-        sys.exit(0)
     if args['--cfgjsonstr']:
         # given a jsonstring:
         print('config via json string')
@@ -89,7 +91,6 @@ def tweemanager():
             args['--cfgfile'] = "tweem.json"
             config.readfromjsonfile(args['--cfgfile'])
         except:
-
             args['--cfgfile'] = "tweem.cfg"
             config.readfromfile(args['--cfgfile'])
     cfgmanager.setconfigassettings(config._sections)
@@ -186,7 +187,7 @@ def tweemanager():
             formatted_traceback = traceback.format_exception(exc_type, exc_value, exc_traceback)
             for traceback_line in formatted_traceback:
                 logging.critical(traceback_line)
-            logging.critical('Error in searchtweets command')
+            logging.critical('Error in listener command')
         return
     # #########################################################################
     #
@@ -238,8 +239,18 @@ def tweemanager():
     # command reporting
     #
     if args['reporting']:
-        logging.info('reporting command selected')
-        logging.debug('Not implemented')
+        try:
+            logging.info('reporting command selected')
+            # mongoengine.connect(host=cfgmanager.MongoDBSpecs['host'])
+            mongoclient = MongoClient(cfgmanager.MongoDBSpecs['host'])
+            generateReports(mongoclient,cfgmanager.MongoDBSpecs['repocollname'])
+            #logging.debug('Not implemented')
+        # except mongoengine.ConnectionError:
+        #     logging.error('check if connection to mongo is defined')
+        except:
+            raise
+        #
+        logging.info('reporting command Done')
         return
     #
     # command reporting Done
