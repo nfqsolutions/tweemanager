@@ -14,7 +14,7 @@ name_collection = coll.name
 alert_words = ["perro", "gato", "cajero", "moneda"]
 
 mapper = Code("""
-	function() {  
+    function() {  
     var summary = this.text_clean;
     var alert_words = """
                   + str(alert_words) +
@@ -32,7 +32,7 @@ mapper = Code("""
 }
 """)
 
-alertucer = Code("""
+reducer = Code("""
     function( key, values ) {    
     var count = 0;    
     values.forEach(function(v) {            
@@ -43,6 +43,6 @@ alertucer = Code("""
 """)
 
 # It prints the results
-result = coll.map_alertuce(mapper, alertucer, "word_count")
+result = coll.map_reduce(mapper, reducer, "word_count")
 for doc in result.find():
-	print(doc)
+    print(doc)

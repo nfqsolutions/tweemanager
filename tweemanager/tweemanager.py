@@ -8,7 +8,7 @@ import traceback
 import mongoengine
 from pymongo import MongoClient
 from bson import json_util as json
-# from reportermanager import generateReports
+from .reportermanager import generateReports
 from .version import __version__
 from .settings import cfgmanager
 from .getoldtweets import setTweetCriteria, getoldtweetsGenerator
@@ -26,13 +26,12 @@ def tweemanager():
     NFQ Solutions: this package is at beta-rc stage.
 
     Usage:
+        tweemanager genconfig [options]
+        tweemanager reporting [(--cfgfile <cfgfile> | --cfgjsonstr <cfgjsonstr>)] [options]
         tweemanager (listener|searchtweets|getoldtweets)
                     [(--cfgfile <cfgfile> | --cfgjsonstr <cfgjsonstr>)]
                     [options]
-        tweemanager genconfig [options]
-        tweemanager reporting [options]
         tweemanager --version
-        tweemanager cmdManolo
 
     Options:
         --logfile <logfile>                 log file name:
@@ -238,12 +237,19 @@ def tweemanager():
     #
     # command reporting
     #
+
     if args['reporting']:
         try:
             logging.info('reporting command selected')
             # mongoengine.connect(host=cfgmanager.MongoDBSpecs['host'])
-            mongoclient = MongoClient(cfgmanager.MongoDBSpecs['host'])
-            generateReports(mongoclient,cfgmanager.MongoDBSpecs['repocollname'])
+
+            host = cfgmanager.MongoDBSpecs['host']
+            alertwords = cfgmanager.TextPatterns['alertwords']
+            print('Alert words to find:',alertwords)
+            name_collection = cfgmanager.MongoDBSpecs['repocollname']
+
+            generateReports(host=host, alertwords = alertwords, name_collection=name_collection)
+
             #logging.debug('Not implemented')
         # except mongoengine.ConnectionError:
         #     logging.error('check if connection to mongo is defined')
