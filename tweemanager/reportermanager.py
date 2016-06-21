@@ -95,8 +95,6 @@ def alertWords(StartDate, EndDate, coll, alert_words):
         aux_list.append(str(textclean(word)))
     alert_words = aux_list
 
-    print(type(StartDate))
-
     mapper = Code("""
         function() {  
         var summary = this.text_clean;
@@ -138,8 +136,7 @@ def alertWords(StartDate, EndDate, coll, alert_words):
             dic_of_results.update({doc[u'_id']: doc[u'value']})
         except:
             dic_of_results = {doc[u'_id']: doc[u'value']}
-    print(dic_of_results)
-    print("")
+
     return dic_of_results
 
 # TODO: Select between reporting to MongoDB or to a JSON file
@@ -195,12 +192,8 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
 
     client = pymongo.MongoClient(host=host)
     db = client.tweets
-    print(name_collection)
-    # name_collection = eval(name_collection)
-    # coll = db.name_collection # Coll should be changed to the collection that you to report
-    coll = db.TweetsRepo
-    # print(db)
-    # coll = db.name_collection
+    coll = db[name_collection]
+
 
     # 1º get first date
     if StartDate == None:
