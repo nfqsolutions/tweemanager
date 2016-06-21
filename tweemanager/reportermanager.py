@@ -191,7 +191,7 @@ def report_to_JSON(StartDate, EndDate):
 def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDate=None, EndDate=None):
 
     client = pymongo.MongoClient(host=host)
-    db = client.tweets
+    db = client.get_default_database()
     coll = db[name_collection]
 
 
