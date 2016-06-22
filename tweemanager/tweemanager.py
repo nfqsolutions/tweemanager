@@ -46,6 +46,8 @@ def tweemanager():
         --cfgjsonstr <cfgjsonstr>           Set a config json string to be used.
         -o <fout> --output <fout>           Set the output file/database.
                                             If not set it will use stdout.
+        --JSON                              Write the report on a JSON file, not
+                                            upload it to MongoDB
 
     Complements:
         --resetall                          Option for reporting. Will reset all reports
@@ -242,13 +244,16 @@ def tweemanager():
         try:
             logging.info('reporting command selected')
             # mongoengine.connect(host=cfgmanager.MongoDBSpecs['host'])
-
+            output_json = False
+            if args['--JSON']:
+                output_json = True
             host = cfgmanager.MongoDBSpecs['host']
             alertwords = cfgmanager.TextPatterns['alertwords']
             print('Alert words to find:',alertwords)
             name_collection = cfgmanager.MongoDBSpecs['repocollname']
 
-            generateReports(host=host, alertwords = alertwords, name_collection=name_collection)
+            generateReports(host=host, alertwords = alertwords,
+                            name_collection=name_collection, output_json= output_json)
 
             #logging.debug('Not implemented')
         # except mongoengine.ConnectionError:
