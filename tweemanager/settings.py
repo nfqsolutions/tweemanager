@@ -20,6 +20,7 @@ class cfgmanager(RawConfigParser):
     MongoDBSpecs = {}
     ElasticSpecs = {}
     LogSpecs = {}
+    AlertWords = {}
 
     def __init__(self, filename=None, jsonstr=None):
         """
@@ -49,6 +50,7 @@ class cfgmanager(RawConfigParser):
         self.add_section('TextPatterns')
         self.set('TextPatterns', 'patternstoexclude', '')
         self.set('TextPatterns', 'patternstoinclude', '')
+        self.set('TextPatterns', 'alertwords', '')
         self.set('TextPatterns', 'langtoinclude', '')
         self.add_section('MongoDBSpecs')
         self.set('MongoDBSpecs', 'repocollname', '')

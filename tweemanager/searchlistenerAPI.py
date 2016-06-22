@@ -19,10 +19,10 @@ def searchtweets(outputclass, query, maxtweets=10):
     for status in tweepy.Cursor(api.get_api().search, q=query).items(maxtweets):
         data = status._json
         # Check if a retweet exists!
-        if data.get(u'retweeted_status',None):
+        if data.get(u'retweeted_status', None):
             retweetdata = data[u'retweeted_status']
             retweetdata[u'created_at'] = status.retweeted_status.created_at
-            retweetpostdata = self.TweetProcessor(retweetdata)
+            retweetpostdata = outputclass(retweetdata)
             retweetpostdata.sendtooutput()
         data[u'created_at'] = status.created_at
         tweetdata = outputclass(data)
@@ -99,7 +99,7 @@ class nfqTwitterStreamListener(tweepy.StreamListener):
         """
         data = status._json
         # Avoid manual parsing datetime and use the one on the Status object.
-        if data.get(u'retweeted_status',None):
+        if data.get(u'retweeted_status', None):
             retweetdata = data[u'retweeted_status']
             retweetdata[u'created_at'] = status.retweeted_status.created_at
             retweetpostdata = self.TweetProcessor(retweetdata)
@@ -108,4 +108,3 @@ class nfqTwitterStreamListener(tweepy.StreamListener):
         data[u'created_at'] = status.created_at
         posttweet = self.TweetProcessor(data)
         posttweet.sendtooutput()
-
