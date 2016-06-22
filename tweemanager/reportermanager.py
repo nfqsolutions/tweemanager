@@ -7,13 +7,6 @@ import datetime as dt
 from bson.code import Code
 from .tools import textclean
 
-
-# class ReportingTwo(mongoengine.DynamicDocument):
-#     """
-#     for the mongodb insert
-#     """
-#     meta = {'collection': 'ReportingTwo'}
-
 # 1º ListOfdays:
 def genListOfdays(StartDate, EndDate=datetime.datetime.now()):
     """
@@ -136,6 +129,11 @@ def alertWords(StartDate, EndDate, coll, alert_words):
             dic_of_results.update({doc[u'_id']: doc[u'value']})
         except:
             dic_of_results = {doc[u'_id']: doc[u'value']}
+
+    # Include alert words with 0 mentions
+    for word in alert_words:
+        if word not in dic_of_results.keys():
+            dic_of_results.update({word: 0})
 
     return dic_of_results
 
