@@ -46,12 +46,8 @@ def tweemanager():
         --cfgjsonstr <cfgjsonstr>           Set a config json string to be used.
         -o <fout> --output <fout>           Set the output file/database.
                                             If not set it will use stdout.
-        --JSON                              Write the report on a JSON file, not
-                                            upload it to MongoDB
 
     Complements:
-        --resetall                          Option for reporting. Will reset all reports
-                                            and generate new ones.
         -h --help                           Show this screen.
         --version                           Show version.
 
@@ -241,26 +237,37 @@ def tweemanager():
     #
 
     if args['reporting']:
+        logging.info('reporting command selected')
+        # mongoengine.connect(host=cfgmanager.MongoDBSpecs['host'])
         try:
-            logging.info('reporting command selected')
-            # mongoengine.connect(host=cfgmanager.MongoDBSpecs['host'])
-            output_json = False
-            if args['--JSON']:
-                output_json = True
             host = cfgmanager.MongoDBSpecs['host']
-            alertwords = cfgmanager.TextPatterns['alertwords']
-            print('Alert words to find:',alertwords)
             name_collection = cfgmanager.MongoDBSpecs['repocollname']
 
-            generateReports(host=host, alertwords = alertwords,
-                            name_collection=name_collection, output_json= output_json)
+            if args['--output']:
 
-            #logging.debug('Not implemented')
-        # except mongoengine.ConnectionError:
-        #     logging.error('check if connection to mongo is defined')
-        except:
-            raise
-        #
+                if args['--output'] == 'mongodb':
+                    logging.info('Setting output to {}'.format(args['--output']))
+                    out = 'mongodb'
+                    outname = 'Reports_' + name_collection 
+                else:
+                    logging.info('Setting default output to {}'.format(args['--output']))
+                    out = 'json'
+                    outname = args['--output']
+            else:
+                logging.info('Setting default output to stdout')
+                out = 'stdout'
+                outname = None
+                
+            alertwords = cfgmanager.TextPatterns['alertwords']
+            print('Alert words to find:',alertwords)
+
+            generateReports(host=host, alertwords=alertwords, name_collection=name_collection,
+                            output=out, output_name=outname)
+
+            
+        except mongoengine.ConnectionError:
+            logging.error('check if connection to mongo is defined')
+        
         logging.info('reporting command Done')
         return
     #

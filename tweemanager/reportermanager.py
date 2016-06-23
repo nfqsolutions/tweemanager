@@ -137,76 +137,9 @@ def alertWords(StartDate, EndDate, coll, alert_words):
 
     return dic_of_results
 
-# TODO: Select between reporting to MongoDB or to a JSON file
-# Reports to a JSON file
-def report_to_JSON(StartDate, EndDate):
-    client = pymongo.MongoClient(host=host)
-    db = client.get_default_database()
-    coll = db[name_collection]
 
-
-    # 1º get first date
-    if StartDate == None:
-        for tweet in coll.find().sort('created_at', 1).limit(1):
-            StartDate = tweet['created_at']
-    print(StartDate)
-
-    # 2º get last date
-    if EndDate == None:
-        for tweet in coll.find().sort('created_at', -1).limit(1):
-            EndDate = tweet['created_at']
-    print(EndDate)
-
-    #cfgmanager.MongoDBSpecs['host'] 
-    collreporting = db.Reporting
-
-    outfile = open('report_days.json', 'w')
-    # 1º ListOfDays:
-    print("Writing report by days...")
-    for values in genListOfdays(StartDate, EndDate):
-        linea = {}
-        valor = aggCount(values['start'], values['end'])
-        linea['tweets'] = valor['count']
-        linea['positives'] = valor['npos']
-        linea['negatives'] = valor['nneg']
-        linea['metrica'] = valor['met']
-        linea = json.dumps(linea)
-        outfile.write(linea)
-        outfile.write("\n")
-    outfile.close()
-
-    outfile = open('report_weeks.json', 'w')
-    # 2º ListOfWeeks:
-    print("Writing report by weeks...")
-    for values in genListOfWeeks(StartDate, EndDate):
-        linea = {}
-        valor = aggCount(values['start'], values['end'])
-        linea['tweets'] = valor['count']
-        linea['positives'] = valor['npos']
-        linea['negatives'] = valor['nneg']
-        linea['metrica'] = valor['met']
-        linea = json.dumps(linea)
-        outfile.write(linea)
-        outfile.write("\n")
-    outfile.close()
-
-    outfile = open('report_months.json', 'w')
-    # 3º ListOfMonth:
-    print("Writing report by monts...")
-    for values in genListOfMonth(StartDate, EndDate):
-        linea = {}
-        valor = aggCount(values['start'], values['end'])
-        linea['tweets'] = valor['count']
-        linea['positives'] = valor['npos']
-        linea['negatives'] = valor['nneg']
-        linea['metrica'] = valor['met']
-        linea = json.dumps(linea)
-        outfile.write(linea)
-        outfile.write("\n")
-    outfile.close()
-
-# Reports to MongoDB
-def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDate=None, EndDate=None, output_json=False):
+# Reports to MongoDB or to a JSON file
+def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDate=None, EndDate=None, output='mongodb', output_name='Reports'):
 
     client = pymongo.MongoClient(host=host)
     db = client.get_default_database()
@@ -224,12 +157,12 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         for tweet in coll.find().sort('created_at', -1).limit(1):
             EndDate = tweet['created_at']
     print(EndDate)
-
-    #cfgmanager.MongoDBSpecs['host'] 
-    collreporting = db.Reporting
     
-    if output_json:
-        outfile = open('report_days.json', 'w')
+    if output=='json':
+        if '.json' not in output_name:
+            output_name = output_name + '.json'
+
+        outfile = open(output_name, 'w')
         # 1º ListOfDays:
         print("Writing report by days...")
         for values in genListOfdays(StartDate, EndDate):
@@ -250,9 +183,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
-        outfile.close()
 
-        outfile = open('report_weeks.json', 'w')
         # 2º ListOfWeeks:
         print("Writing report by weeks...")
         for values in genListOfWeeks(StartDate, EndDate):
@@ -272,9 +203,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
-        outfile.close()
 
-        outfile = open('report_months.json', 'w')
         # 3º ListOfMonth:
         print("Writing report by monts...")
         for values in genListOfMonth(StartDate, EndDate):
@@ -297,7 +226,9 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             outfile.write("\n")
         outfile.close()
 
-    else:
+    elif output == 'mongodb':
+        collreporting = db[output_name]
+
         print("Uploading report by days...")
         # 1º ListOfDays:
         for values in genListOfdays(StartDate, EndDate):
@@ -356,3 +287,63 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
                                                   values['end'].strftime("%Y%m%d"),
                                                   coll, alertwords)
             collreporting.update({"_id":key}, linea, upsert = True)
+    
+    else: #stdout
+        print("Report by days...")
+        # 1º ListOfDays:
+        for values in genListOfdays(StartDate, EndDate):
+            linea = {}
+            valor = aggCount(values['start'], values['end'], coll)
+            linea['start'] = values['start'].strftime("%Y%m%d")
+            linea['end'] = values['end'].strftime("%Y%m%d")
+            linea['tweets'] = valor['count']
+            linea['positives'] = valor['npos']
+            linea['negatives'] = valor['nneg']
+            linea['metrica'] = valor['met']
+            linea['report'] = {'type':'daily', 'from':name_collection}
+            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
+            if alertwords:
+                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, alertwords)
+            print(linea)
+
+        print("Report by weeks...")
+        # 2º ListOfWeeks:
+        for values in genListOfWeeks(StartDate, EndDate):
+            linea = {}
+            valor = aggCount(values['start'], values['end'], coll)
+            linea['date'] = values['start']
+            linea['start'] = values['start']
+            linea['end'] = values['end']
+            linea['tweets'] = valor['count']
+            linea['positives'] = valor['npos']
+            linea['negatives'] = valor['nneg']
+            linea['metrica'] = valor['met']
+            linea['report'] = {'type':'weekly', 'from':name_collection}
+            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
+            if alertwords:
+                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"),
+                                                  coll, alertwords)
+            print(linea)
+
+        print("Report by months...")
+        # 3º ListOfMonth:
+        for values in genListOfMonth(StartDate, EndDate):
+            linea = {}
+            valor = aggCount(values['start'], values['end'], coll)
+            linea['date'] = values['start']
+            linea['start'] = values['start']
+            linea['end'] = values['end']
+            linea['tweets'] = valor['count']
+            linea['positives'] = valor['npos']
+            linea['negatives'] = valor['nneg']
+            linea['metrica'] = valor['met']
+            linea['report'] = {'type':'monthly', 'from':name_collection}
+            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
+            if alertwords:
+                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"),
+                                                  coll, alertwords)
+            print(linea)
