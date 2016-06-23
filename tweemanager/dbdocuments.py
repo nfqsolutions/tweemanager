@@ -16,7 +16,8 @@ def create_collection_name(cls):
     try:
         print(cfgmanager.MongoDBSpecs['repocollname'])
     except:
-        print("No se está ejecutando desde cfgmanager") # TODO: delete this exception
+        # TODO: delete this exception
+        print("No se está ejecutando desde cfgmanager")
     try:
         TweetsRepoCollName = cfgmanager.MongoDBSpecs['repocollname']
         if not TweetsRepoCollName:
@@ -28,7 +29,6 @@ def create_collection_name(cls):
 
 
 class MongoDocument(mongoengine.DynamicDocument):
-
     """
     DynamicDocument for the mongodb insert
     """
