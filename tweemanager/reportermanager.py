@@ -8,7 +8,7 @@ from bson.code import Code
 from .tools import textclean
 
 # 1º ListOfdays:
-def genListOfdays(StartDate, EndDate=datetime.datetime.now()):
+def genListOfDays(StartDate, EndDate=datetime.datetime.now()):
     """
     """
     onedaydelta = datetime.timedelta(days=1)
@@ -165,7 +165,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         outfile = open(output_name, 'w')
         # 1º ListOfDays:
         print("Writing report by days...")
-        for values in genListOfdays(StartDate, EndDate):
+        for values in genListOfDays(StartDate, EndDate):
             linea = {}
             valor = aggCount(values['start'], values['end'], coll)
             # linea['date'] = values['start']
@@ -231,7 +231,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
 
         print("Uploading report by days...")
         # 1º ListOfDays:
-        for values in genListOfdays(StartDate, EndDate):
+        for values in genListOfDays(StartDate, EndDate):
             linea = {}
             valor = aggCount(values['start'], values['end'], coll)
             linea['start'] = values['start'].strftime("%Y%m%d")
@@ -291,7 +291,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
     else: #stdout
         print("Report by days...")
         # 1º ListOfDays:
-        for values in genListOfdays(StartDate, EndDate):
+        for values in genListOfDays(StartDate, EndDate):
             linea = {}
             valor = aggCount(values['start'], values['end'], coll)
             linea['start'] = values['start'].strftime("%Y%m%d")
