@@ -309,8 +309,14 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         for values in genListOfWeeks(StartDate, EndDate):
             linea = {}
             valor = aggCount(values['start'], values['end'], coll)
+<<<<<<< HEAD
             linea['start'] = values['start'].strftime("%Y-%m-%d")
             linea['end'] = values['end'].strftime("%Y-%m-%d")
+=======
+            linea['date'] = values['start'].strftime("%Y%m%d")
+            linea['start'] = values['start'].strftime("%Y%m%d")
+            linea['end'] = values['end']
+>>>>>>> 4d1866826d970e22bb743e3fbd07fba6e503c95c
             linea['tweets'] = valor['count']
             linea['positives'] = valor['npos']
             linea['negatives'] = valor['nneg']
@@ -328,8 +334,14 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         for values in genListOfMonth(StartDate, EndDate):
             linea = {}
             valor = aggCount(values['start'], values['end'], coll)
+<<<<<<< HEAD
             linea['start'] = values['start'].strftime("%Y-%m-%d")
             linea['end'] = values['end'].strftime("%Y-%m-%d")
+=======
+            linea['date'] = values['start'].strftime("%Y%m%d")
+            linea['start'] = values['start'].strftime("%Y%m%d")
+            linea['end'] = values['end']
+>>>>>>> 4d1866826d970e22bb743e3fbd07fba6e503c95c
             linea['tweets'] = valor['count']
             linea['positives'] = valor['npos']
             linea['negatives'] = valor['nneg']
