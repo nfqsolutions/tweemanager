@@ -177,7 +177,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea['metrica'] = valor['met']
             linea['report'] = {'type':'daily', 'from':name_collection}
             if alertwords:
-                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
                                                   coll, alertwords)
             linea = json.dumps(linea)
