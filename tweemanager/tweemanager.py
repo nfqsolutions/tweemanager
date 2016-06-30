@@ -8,7 +8,7 @@ import traceback
 import mongoengine
 from pymongo import MongoClient
 from bson import json_util as json
-from .reportermanager import generateReports
+from .reportermanager import generateReports, genListOfDays
 from .version import __version__
 from .settings import cfgmanager
 from .getoldtweets import setTweetCriteria, getoldtweetsGenerator
@@ -210,24 +210,35 @@ def tweemanager():
     #
     # command getoldtweets
     #
-    if args['getoldtweets']:
-        try:
-            logging.info('getoldtweets command selected')
-            tweetCriteria = setTweetCriteria(
-                username=cfgmanager.GOTSpecs['username'],
-                since=cfgmanager.GOTSpecs['since'],
-                until=cfgmanager.GOTSpecs['until'],
-                querySearch=cfgmanager.GOTSpecs['querysearch'],
-                maxTweets=cfgmanager.GOTSpecs['maxtweets'])
 
-            for tweet in getoldtweetsGenerator(tweetCriteria):
-                posttweet = TweetProcessor(tweet)
-                posttweet.sendtooutput()
-            logging.info('getoldtweets command Done')
-        except:
-            logging.critical('Error in getoldtweets command')
-        finally:
-            return
+    if args['getoldtweets']:
+        # Getting the information to use it in the loop
+        StartDate = cfgmanager.GOTSpecs['since']
+        EndDate = cfgmanager.GOTSpecs['until']
+        user = cfgmanager.GOTSpecs['username']
+        query = cfgmanager.GOTSpecs['querysearch']
+        maxtweets = cfgmanager.GOTSpecs['maxtweets']
+
+        for values in genListOfWeeks(StartDate, EndDate):
+            Start = values['start']
+            End = values['end']
+            try:
+                logging.info('getoldtweets command selected')
+                tweetCriteria = setTweetCriteria(
+                    username=user,
+                    since=Start,
+                    until=End,
+                    querySearch=query,
+                    maxTweets=maxtweets)
+
+                for tweet in getoldtweetsGenerator(tweetCriteria):
+                    posttweet = TweetProcessor(tweet)
+                    posttweet.sendtooutput()
+                logging.info('getoldtweets command Done')
+            except:
+                logging.critical('Error in getoldtweets command')
+            finally:
+                return
     #
     # command getoldtweets Done
     #

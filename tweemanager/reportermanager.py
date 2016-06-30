@@ -130,7 +130,7 @@ def alertWords(StartDate, EndDate, coll, alert_words, db):
     result = coll.map_reduce(mapper, reducer, 'alert_words')
     dic_of_results = {}
     for doc in result.find():
-        # TODO:
+        # TO DO:
         # Instead of this, save with text cleaned as label
         key = aux_dict[doc[u'_id']]
         try:
