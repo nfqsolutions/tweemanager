@@ -77,7 +77,7 @@ def aggCount(StartDate, EndDate, coll):
         result = result
     return result
 
-def alertWords(StartDate, EndDate, coll, alert_words):
+def alertWords(StartDate, EndDate, coll, alert_words, db):
     """
     List of alert words - a list of warning words
     alert_words = cfgmanager.TextPatterns['alertWords']
@@ -127,9 +127,11 @@ def alertWords(StartDate, EndDate, coll, alert_words):
     }
     """)
 
-    result = coll.map_reduce(mapper, reducer, "word_count")
+    result = coll.map_reduce(mapper, reducer, 'alert_words')
     dic_of_results = {}
     for doc in result.find():
+        # TODO:
+        # Instead of this, save with text cleaned as label
         key = aux_dict[doc[u'_id']]
         try:
             dic_of_results.update({key: doc[u'value']})
@@ -142,6 +144,7 @@ def alertWords(StartDate, EndDate, coll, alert_words):
         if word not in dic_of_results.keys():
             dic_of_results.update({word: 0})
 
+    db.drop_collection('alert_words')
     return dic_of_results
 
 
@@ -185,7 +188,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             if alertwords:
                 linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords)
+                                                  coll, alertwords, db)
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -205,7 +208,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             if alertwords:
                 linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords)
+                                                  coll, alertwords, db)
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -225,7 +228,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             if alertwords:
                 linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords)
+                                                  coll, alertwords, db)
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -250,7 +253,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             if alertwords:
                 linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords)
+                                                  coll, alertwords, db)
             collreporting.update({"_id":key}, linea, upsert = True)
 
         print("Uploading report by weeks...")
@@ -269,7 +272,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             if alertwords:
                 linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"),
-                                                  coll, alertwords)
+                                                  coll, alertwords, db)
             collreporting.update({"_id":key}, linea, upsert = True)
 
         print("Uploading report by months...")
@@ -288,7 +291,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             if alertwords:
                 linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"),
-                                                  coll, alertwords)
+                                                  coll, alertwords, db)
             collreporting.update({"_id":key}, linea, upsert = True)
     
     else: #stdout
@@ -308,7 +311,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             if alertwords:
                 linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords)
+                                                  coll, alertwords, db)
             print(linea)
 
         print("Report by weeks...")
@@ -327,7 +330,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             if alertwords:
                 linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"),
-                                                  coll, alertwords)
+                                                  coll, alertwords, db)
             print(linea)
 
         print("Report by months...")
@@ -346,5 +349,5 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             if alertwords:
                 linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"),
-                                                  coll, alertwords)
+                                                  coll, alertwords, db)
             print(linea)
