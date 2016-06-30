@@ -84,9 +84,14 @@ def alertWords(StartDate, EndDate, coll, alert_words):
     """
 
     aux_list = []
+    aux_dict = {}
     for word in alert_words:
         aux_list.append(str(textclean(word)))
-    alert_words = aux_list
+        try:
+            aux_dict.update({str(textclean(word)): word})
+        except:
+            aux_dict = {str(textclean(word)): word}
+
 
     mapper = Code("""
         function() {  
@@ -97,7 +102,7 @@ def alertWords(StartDate, EndDate, coll, alert_words):
         var End   = """ + EndDate   + """;
         var EndDate = ISODate(End);
         var alert_words = """
-                        + str(alert_words) +
+                        + str(aux_list) +
                           """
         if (summary) { 
             summary = summary.toLowerCase().split(" "); 
@@ -125,10 +130,12 @@ def alertWords(StartDate, EndDate, coll, alert_words):
     result = coll.map_reduce(mapper, reducer, "word_count")
     dic_of_results = {}
     for doc in result.find():
+        key = aux_dict[doc[u'_id']]
         try:
-            dic_of_results.update({doc[u'_id']: doc[u'value']})
+            dic_of_results.update({key: doc[u'value']})
         except:
-            dic_of_results = {doc[u'_id']: doc[u'value']}
+            dic_of_results = {key: doc[u'value']}
+
 
     # Include alert words with 0 mentions
     for word in alert_words:
@@ -196,7 +203,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea['metrica'] = valor['met']
             linea['report'] = {'type':'daily', 'from':name_collection}
             if alertwords:
-                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
                                                   coll, alertwords)
             linea = json.dumps(linea)
@@ -216,7 +223,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea['metrica'] = valor['met']
             linea['report'] = {'type':'daily', 'from':name_collection}
             if alertwords:
-                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
                                                   coll, alertwords)
             linea = json.dumps(linea)
@@ -241,7 +248,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea['report'] = {'type':'daily', 'from':name_collection}
             key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
             if alertwords:
-                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
                                                   coll, alertwords)
             collreporting.update({"_id":key}, linea, upsert = True)
@@ -260,7 +267,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea['report'] = {'type':'weekly', 'from':name_collection}
             key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
             if alertwords:
-                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"),
                                                   coll, alertwords)
             collreporting.update({"_id":key}, linea, upsert = True)
@@ -279,7 +286,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea['report'] = {'type':'monthly', 'from':name_collection}
             key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
             if alertwords:
-                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"),
                                                   coll, alertwords)
             collreporting.update({"_id":key}, linea, upsert = True)
@@ -299,7 +306,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea['report'] = {'type':'daily', 'from':name_collection}
             key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
             if alertwords:
-                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
                                                   coll, alertwords)
             print(linea)
@@ -318,7 +325,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea['report'] = {'type':'weekly', 'from':name_collection}
             key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
             if alertwords:
-                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"),
                                                   coll, alertwords)
             print(linea)
@@ -337,7 +344,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
             linea['report'] = {'type':'monthly', 'from':name_collection}
             key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
             if alertwords:
-                linea['alert words'] = alertWords(values['start'].strftime("%Y%m%d"),
+                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"),
                                                   coll, alertwords)
             print(linea)
