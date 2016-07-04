@@ -15,8 +15,6 @@ from .getoldtweets import setTweetCriteria, getoldtweetsGenerator
 from .searchlistenerAPI import listenertweets, searchtweets
 from .tools import StdoutTweetProcessor, FileTweetProcessor, MongoTweetProcessor
 
-
-
 #
 TweetProcessor = None
 

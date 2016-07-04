@@ -2,7 +2,7 @@
 import mongoengine
 from .settings import cfgmanager
 
-TweetsRepoStdName = "TweetsRepo"
+TweetsRepoStdName = None
 
 
 def create_collection_name(cls):
@@ -16,15 +16,13 @@ def create_collection_name(cls):
     try:
         print(cfgmanager.MongoDBSpecs['repocollname'])
     except:
-        # TODO: delete this exception
-        # print("No se está ejecutando desde cfgmanager")
         pass
     try:
         TweetsRepoCollName = cfgmanager.MongoDBSpecs['repocollname']
         if not TweetsRepoCollName:
             raise
     except:
-        TweetsRepoCollName = TweetsRepoStdName
+        TweetsRepoCollName = None
     finally:
         return TweetsRepoCollName
 
