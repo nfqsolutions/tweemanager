@@ -17,7 +17,8 @@ def create_collection_name(cls):
         print(cfgmanager.MongoDBSpecs['repocollname'])
     except:
         # TODO: delete this exception
-        print("No se está ejecutando desde cfgmanager")
+        # print("No se está ejecutando desde cfgmanager")
+        pass
     try:
         TweetsRepoCollName = cfgmanager.MongoDBSpecs['repocollname']
         if not TweetsRepoCollName:
