@@ -29,7 +29,7 @@ install_requires = [
     'simplejson',
     'chardet',
     'tweepy',
-    'mongoengine',
+    'mongoengine'
 ]
 
 lint_requires = [
