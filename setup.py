@@ -24,11 +24,13 @@ data_files = [
 
 install_requires = [
     'pymongo',
+    'datetime',
     'docopt',
     'pyquery',
     'simplejson',
     'chardet',
     'tweepy',
+    'elasticsearch',
     'mongoengine'
 ]
 
