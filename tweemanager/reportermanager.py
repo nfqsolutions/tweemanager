@@ -23,13 +23,15 @@ def genListOfDays(StartDate, EndDate=datetime.datetime.now()):
 def genListOfWeeks(StartDate, EndDate):
     """
     """
-    if type(StartDate) is not dt.date:
-        oldStartDate = StartDate
-        StartDate = dt.datetime.strptime(StartDate, '%Y-%m-%d')
-    if type(EndDate) is not dt.date:
-        oldEndDate = EndDate
-        EndDate = dt.datetime.strptime(EndDate, '%Y-%m-%d')
-
+    try:
+        if type(StartDate) is not dt.date:
+            oldStartDate = StartDate
+            StartDate = dt.datetime.strptime(StartDate, '%Y-%m-%d')
+        if type(EndDate) is not dt.date:
+            oldEndDate = EndDate
+            EndDate = dt.datetime.strptime(EndDate, '%Y-%m-%d')
+    except:
+        pass
     onedaydelta = datetime.timedelta(days=1)
     oneweekdelta = datetime.timedelta(days=7)
     StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
@@ -244,24 +246,24 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
     elif output == 'mongodb':
         collreporting = db[output_name]
 
-        print("Uploading report by days...")
-        # 1º ListOfDays:
-        for values in genListOfDays(StartDate, EndDate):
-            linea = {}
-            valor = aggCount(values['start'], values['end'], coll)
-            linea['start'] = values['start']
-            linea['end'] = values['end']
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type':'daily', 'from':name_collection}
-            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
-            if alertwords:
-                linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords, db)
-            collreporting.update({"_id":key}, linea, upsert = True)
+        # print("Uploading report by days...")
+        # # 1º ListOfDays:
+        # for values in genListOfDays(StartDate, EndDate):
+        #     linea = {}
+        #     valor = aggCount(values['start'], values['end'], coll)
+        #     linea['start'] = values['start']
+        #     linea['end'] = values['end']
+        #     linea['tweets'] = valor['count']
+        #     linea['positives'] = valor['npos']
+        #     linea['negatives'] = valor['nneg']
+        #     linea['metrica'] = valor['met']
+        #     linea['report'] = {'type':'daily', 'from':name_collection}
+        #     key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
+        #     if alertwords:
+        #         linea['alert_words'] = alertWords(values['start'].strftime("%Y%m%d"),
+        #                                           values['end'].strftime("%Y%m%d"), 
+        #                                           coll, alertwords, db)
+        #     collreporting.update({"_id":key}, linea, upsert = True)
 
         print("Uploading report by weeks...")
         # 2º ListOfWeeks:
