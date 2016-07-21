@@ -8,7 +8,7 @@ import traceback
 import mongoengine
 from pymongo import MongoClient
 from bson import json_util as json
-from .reportermanager import generateReports, genListOfDays
+from .reportermanager import generateReports, genListOfDays, genListOfWeeks
 from .version import __version__
 from .settings import cfgmanager
 from .getoldtweets import setTweetCriteria, getoldtweetsGenerator
@@ -228,12 +228,13 @@ def tweemanager():
                     until=End,
                     querySearch=query,
                     maxTweets=maxtweets)
-
                 for tweet in getoldtweetsGenerator(tweetCriteria):
                     posttweet = TweetProcessor(tweet)
                     posttweet.sendtooutput()
                 logging.info('getoldtweets command Done')
-            except:
+            except Exception as e:
+                print("")
+                print(e)
                 logging.critical('Error in getoldtweets command')
             finally:
                 return

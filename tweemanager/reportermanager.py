@@ -23,6 +23,13 @@ def genListOfDays(StartDate, EndDate=datetime.datetime.now()):
 def genListOfWeeks(StartDate, EndDate):
     """
     """
+    if type(StartDate) is not dt.date:
+        oldStartDate = StartDate
+        StartDate = dt.datetime.strptime(StartDate, '%Y-%m-%d')
+    if type(EndDate) is not dt.date:
+        oldEndDate = EndDate
+        EndDate = dt.datetime.strptime(EndDate, '%Y-%m-%d')
+
     onedaydelta = datetime.timedelta(days=1)
     oneweekdelta = datetime.timedelta(days=7)
     StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
