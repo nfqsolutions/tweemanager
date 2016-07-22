@@ -24,17 +24,32 @@ def setTweetCriteria(username=None,
     if username:
         tweetCriteria.username = username
     if since:
+        import datetime as dt
+        if type(since) is not dt.date:
+            since = since.strftime("%Y-%m-%d")
         tweetCriteria.since = since
     if until:
+        import datetime as dt
+        if type(until) is not dt.date:
+            until = until.strftime("%Y-%m-%d")
         tweetCriteria.until = until
     if querySearch:
+        if not isinstance(querySearch,str):
+            newquery = querySearch[0]
+            for element in querySearch[1:len(querySearch)]:
+                newquery += ' OR ' + str(element)
+            querySearch = newquery
+        logging.debug('{}'.format(querySearch))
         tweetCriteria.querySearch = querySearch
     if maxTweets:
         tweetCriteria.maxTweets = int(maxTweets)
     else:
         tweetCriteria.maxTweets = 10
 
-    logging.info("TweetCriteria {}".format(tweetCriteria))
+    # try:
+    #     logging.info("TweetCriteria {}".format(tweetCriteria))
+    # except:
+    #     pass
 
     return tweetCriteria
 
