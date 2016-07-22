@@ -20,7 +20,7 @@ class cfgmanager(RawConfigParser):
     MongoDBSpecs = {}
     ElasticSpecs = {}
     LogSpecs = {}
-    AlertWords = {}
+    # AlertWords = {}
 
     def __init__(self, filename=None, jsonstr=None):
         """
@@ -55,6 +55,7 @@ class cfgmanager(RawConfigParser):
         self.add_section('MongoDBSpecs')
         self.set('MongoDBSpecs', 'repocollname', '')
         self.set('MongoDBSpecs', 'name', '')
+        self.set('MongoDBSpecs', 'fromgot', '')
         self.set('MongoDBSpecs', 'username', '')
         self.set('MongoDBSpecs', 'password', '')
         self.set('MongoDBSpecs', 'host', '')

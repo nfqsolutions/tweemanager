@@ -251,6 +251,12 @@ def tweemanager():
         try:
             host = cfgmanager.MongoDBSpecs['host']
             name_collection = cfgmanager.MongoDBSpecs['repocollname']
+            from_got = cfgmanager.MongoDBSpecs['fromgot']
+
+            if str(from_got) == 'True':
+                from_got = True
+            else:
+                from_got = False    
 
             if args['--output']:
 
@@ -271,7 +277,7 @@ def tweemanager():
             print('Alert words to find:',alertwords)
 
             generateReports(host=host, alertwords=alertwords, name_collection=name_collection,
-                            output=out, output_name=outname)
+                            output=out, output_name=outname, fromgot= from_got)
 
             
         except mongoengine.ConnectionError:
