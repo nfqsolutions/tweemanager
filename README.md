@@ -3,10 +3,6 @@
 
 ## Tweemanager
 
-NFQ es...
-
-Tweemanager es ... Solución de recolectar, almacenar y procesar información desde twitter.
-
 ### Como usar el código:
 
 Código preparado para Python 2.7 Python 3.4 y Python 3.5
