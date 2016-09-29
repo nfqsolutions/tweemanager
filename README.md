@@ -16,7 +16,7 @@ Tweemanager es un paquete escrito en Python que recolecta y almacena informació
 
 La reputación corporativa puede convertirse en un obstáculo para el crecimiento de la empresa. La opinión que una entidad proyecta o transmite dentro de su sistema de negocio consiste en un factor de riesgo actual o futuro para los beneficios, fondos propios o liquidez, derivado de un daño en la reputación de la misma.
 
-[Qdos](qdosapp.com) analiza de forma automática y en tiempo real la reputación corporativa mediante un conjunto de indicadores previamente definidos que nos permite obtener una medida de riesgo.
+[Qdos](http://qdosapp.com/) analiza de forma automática y en tiempo real la reputación corporativa mediante un conjunto de indicadores previamente definidos que nos permite obtener una medida de riesgo.
 
 ### Como usar el código:
 
