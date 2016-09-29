@@ -60,6 +60,6 @@ Puedes encontrar mas información en la carpeta [docs](/docs/)
 
 Tweemanager está distribuido bajo una licencia doble. El código fuente
 es distribuido bajo licencia AGPL version 3, una copia de la licencia
-(en inglés) está incluida con el código fuente. Si esta licencia
+(en inglés) [está incluida](LICENSE.md) con el código fuente. Si esta licencia
 no se adecua a tus necesidades, puedes comprar una licencia comercial
 de [NFQ Solutions](http://nfqsolutions.com).
