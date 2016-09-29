@@ -10,7 +10,7 @@
 
 ## Tweemanager
 
-Tweemanager es un paquete escrito en Python que recolecta y almacena información desde Twitter, al mismo tiempo que permite procesar dicha información. Esta librería es la parte *opensource* que se engloba dentro de la aplicación comercial [Qdos](qdosapp.com).
+Tweemanager es un paquete escrito en Python que recolecta y almacena información desde Twitter, al mismo tiempo que permite procesar dicha información. Esta librería es la parte *opensource* que se engloba dentro de la aplicación comercial [Qdos](http://qdosapp.com/).
 
 ### Qdos
 
