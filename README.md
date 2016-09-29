@@ -1,11 +1,13 @@
 ![Alt text](/docs/images/nfq_solutions.png?raw=true)
-# Ekergy *OpenSource* Software by NFQ solutions S.L.
+# Ekergy *OpenSource* Software by [NFQ solutions S.L.](http://nfq.es/solutions/)
 
-## tweemanager
+## Tweemanager
 
-### Solución de recolectar, almacenar y procesar información desde twitter.
+NFQ es...
 
-#### Como usar el código:
+Tweemanager es ... Solución de recolectar, almacenar y procesar información desde twitter.
+
+### Como usar el código:
 
 Código preparado para Python 2.7 Python 3.4 y Python 3.5
 
@@ -43,6 +45,10 @@ Para un uso rápido [clica aquí](/docs/UsoRapido.md)
 
 Puedes encontrar mas información en la carpeta [docs](/docs/)
 
-#### Licencia:
-https://creativecommons.org/licenses/by-nc/4.0/
+### Licencia:
 
+Tweemanager está distribuido bajo una licencia doble. El código fuente
+es distribuido bajo licencia AGPL version 3, una copia de la licencia
+(en inglés) está incluida con el código fuente. Si esta licencia
+no se adecua a tus necesidades, puedes comprar una licencia comercial
+de [NFQ Solutions](http://nfqsolutions.com).
