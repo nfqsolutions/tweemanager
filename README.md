@@ -1,8 +1,6 @@
-# Tweemanager
-
 ![Alt text](/docs/images/nfq_solutions.png?raw=true)
 
-# *OpenSource Software by [NFQ Solutions S.L.](http://nfq.es/solutions/)*
+# *Tweemanager OpenSource Software by [NFQ Solutions S.L.](http://nfq.es/solutions/)*
 
 ## NFQ Solutions
 
