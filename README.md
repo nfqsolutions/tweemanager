@@ -10,17 +10,17 @@
 
 Tweemanager es un paquete escrito en Python que recolecta y almacena información desde Twitter, al mismo tiempo que permite procesar dicha información. Esta librería es la parte *opensource* que se engloba dentro de la aplicación comercial [Qdos](http://qdosapp.com/).
 
-### Qdos
+## Qdos
 
 La reputación corporativa puede convertirse en un obstáculo para el crecimiento de la empresa. La opinión que una entidad proyecta o transmite dentro de su sistema de negocio consiste en un factor de riesgo actual o futuro para los beneficios, fondos propios o liquidez, derivado de un daño en la reputación de la misma.
 
 [Qdos](http://qdosapp.com/) analiza de forma automática y en tiempo real la reputación corporativa mediante un conjunto de indicadores previamente definidos que nos permite obtener una medida de riesgo.
 
-#### PyCon ES 2016
+### PyCon ES 2016
 
 El trabajo matemático e informático desarrollado para conseguir esta aplicación fue expuesto en la conferencia de Python [PyCon ES 2016](http://2016.es.pycon.org/es/), y la presentación está disponible [aquí](https://github.com/cperales/Riesgo-Reputacional-PyConES2016).
 
-### Como usar el código:
+## Como usar el código de *Tweemanager*:
 
 Código preparado para Python 2.7 Python 3.4 y Python 3.5
 
@@ -58,7 +58,7 @@ Para un uso rápido [clica aquí](/docs/UsoRapido.md)
 
 Puedes encontrar mas información en la carpeta [docs](/docs/)
 
-### Licencia:
+## Licencia:
 
 Tweemanager está distribuido bajo una licencia doble. El código fuente
 es distribuido bajo licencia AGPL version 3, una copia de la licencia
