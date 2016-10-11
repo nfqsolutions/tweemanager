@@ -16,6 +16,10 @@ La reputación corporativa puede convertirse en un obstáculo para el crecimient
 
 [Qdos](http://qdosapp.com/) analiza de forma automática y en tiempo real la reputación corporativa mediante un conjunto de indicadores previamente definidos que nos permite obtener una medida de riesgo.
 
+#### PyCon ES 2016
+
+El trabajo matemático e informático desarrollado para conseguir esta aplicación fue expuesto en la conferencia de Python [PyCon ES 2016](http://2016.es.pycon.org/es/), y la presentación está disponible [aquí](https://github.com/cperales/Riesgo-Reputacional-PyConES2016).
+
 ### Como usar el código:
 
 Código preparado para Python 2.7 Python 3.4 y Python 3.5
