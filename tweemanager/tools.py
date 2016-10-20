@@ -9,7 +9,6 @@ import logging
 
 from bson import json_util as json
 
-
 repunctuacion = re.compile('[%s]' % re.escape(string.punctuation + '¿¡'))
 
 
@@ -231,8 +230,14 @@ class MongoTweetProcessor(GenericTweetProcessor):
     def sendtooutput(self):
         """
         """
+        #
         # Import done here due to cfg.
-        from dbdocuments import MongoDocument
+        #
+        print("here")
+        try: # python 2 3 compaq
+            from .dbdocuments import MongoDocument
+        except:
+            from .dbdocuments import MongoDocument
         if self._checkpatterns():
             logging.debug("writing tweet id: {} in mongodb".format(self.tweetdata['id']))
             # upsert to mongo
