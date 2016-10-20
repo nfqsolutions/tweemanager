@@ -232,7 +232,7 @@ class MongoTweetProcessor(GenericTweetProcessor):
         """
         """
         # Import done here due to cfg.
-        from dbdocuments import MongoDocument
+        from .dbdocuments import MongoDocument
         if self._checkpatterns():
             logging.debug("writing tweet id: {} in mongodb".format(self.tweetdata['id']))
             # upsert to mongo
