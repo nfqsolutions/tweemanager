@@ -233,7 +233,6 @@ class MongoTweetProcessor(GenericTweetProcessor):
         #
         # Import done here due to cfg.
         #
-        print("here")
         try: # python 2 3 compaq
             from .dbdocuments import MongoDocument
         except:
