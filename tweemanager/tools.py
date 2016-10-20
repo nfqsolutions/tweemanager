@@ -237,7 +237,7 @@ class MongoTweetProcessor(GenericTweetProcessor):
         try: # python 2 3 compaq
             from .dbdocuments import MongoDocument
         except:
-            from .dbdocuments import MongoDocument
+            from dbdocuments import MongoDocument
         if self._checkpatterns():
             logging.debug("writing tweet id: {} in mongodb".format(self.tweetdata['id']))
             # upsert to mongo
