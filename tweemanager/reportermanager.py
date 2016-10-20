@@ -15,7 +15,7 @@ def genListOfDays(StartDate, EndDate=datetime.datetime.now()):
     StartDate = datetime.datetime(StartDate.year, StartDate.month, StartDate.day)
     EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day)
     delta = EndDate - StartDate
-    for i in xrange(delta.days):
+    for i in range(delta.days):
         yield {'start': StartDate, 'end': StartDate + onedaydelta}
         StartDate += onedaydelta
 
@@ -41,7 +41,7 @@ def genListOfWeeks(StartDate, EndDate):
     EndDate = datetime.datetime(EndDate.year, EndDate.month, EndDate.day) + onedaydelta
     deltadays = EndDate - StartDate
     deltaweeks = deltadays.days / 7
-    for i in xrange(deltaweeks + 1):
+    for i in range(int(deltaweeks) + 1):
         yield {'start': StartDate, 'end': StartDate + oneweekdelta}
         StartDate += oneweekdelta
 
