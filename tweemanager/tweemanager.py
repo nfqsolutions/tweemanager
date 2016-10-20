@@ -101,46 +101,43 @@ def tweemanager():
         with open('tweeconfig.cfg', 'w') as tweeconfig:
             tweeconfig.write(
 """[TwitterAPIcredentials]
-consumer_key =
-consumer_secret =
-access_key =
-access_secret =
+consumer_key = ""
+consumer_secret = ""
+access_key = ""
+access_secret = ""
 
 [ListenerSpecs]
-usersarray =
-trackarray =
+usersarray = [""]
+trackarray = [""]
 
 [SearchSpecs]
-searchquery =
-maxtweets =
+searchquery = [""]
+maxtweets = ""
 
 [GOTSpecs]
-username =
-since =
-until =
-querysearch =
-maxtweets =
+username = ""
+since = ""
+until = ""
+querysearch = ["]
+maxtweets = 100
 
 [TextPatterns]
-patternstoexclude =
-patternstoinclude =
-langtoinclude =
+patternstoexclude = []
+patternstoinclude = []
+langtoinclude = []
+alertwords = []
 
 [MongoDBSpecs]
-repocollname =
-name =
-username =
-password =
-host =
+host = ""
+repocollname = ""
 
 [ElasticSpecs]
-host =
-index =
-username =
-password =
+host = ""
+index = ""
 """
                 )
         print('Done')
+        print('Check the configuration file. If some fields are not going to use, delete them')
         return
     #
     # command genconfig Done
@@ -278,8 +275,7 @@ password =
                 print("")
                 print(e)
                 logging.critical('Error in getoldtweets command')
-            finally:
-                return
+
     #
     # command getoldtweets Done
     #
@@ -335,7 +331,7 @@ password =
     #
     # command importToMongo
     #
-    if args['importToMongo']:
+    if args.get('importToMongo'):
         logging.info('importToMongo command selected')
         return
     #
@@ -345,7 +341,7 @@ password =
     #
     # command dumpFromMongo
     #
-    if args['dumpCorpusFromMongo']:
+    if args.get('dumpCorpusFromMongo'):
         logging.info('importToMongo command selected')
         logging.debug('Not implemented')
         return
@@ -356,7 +352,7 @@ password =
     #
     # command importToElastic
     #
-    if args['importToElastic']:
+    if args.get('importToElastic'):
         logging.info('importToMongo command selected')
         logging.debug('Not implemented')
         return
@@ -367,7 +363,7 @@ password =
     #
     # command mongo2elastic
     #
-    if args['mongo2elastic']:
+    if args.get('mongo2elastic'):
         logging.info('mongo2elastic command selected')
         logging.debug('Not implemented')
         return
