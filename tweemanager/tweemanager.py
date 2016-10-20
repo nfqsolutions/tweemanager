@@ -98,6 +98,48 @@ def tweemanager():
     #
     if args['genconfig']:
         print('genconfig command activated')
+        with open('tweeconfig.cfg', 'w') as tweeconfig:
+            tweeconfig.write(
+"""[TwitterAPIcredentials]
+consumer_key =
+consumer_secret =
+access_key =
+access_secret =
+
+[ListenerSpecs]
+usersarray =
+trackarray =
+
+[SearchSpecs]
+searchquery =
+maxtweets =
+
+[GOTSpecs]
+username =
+since =
+until =
+querysearch =
+maxtweets =
+
+[TextPatterns]
+patternstoexclude =
+patternstoinclude =
+langtoinclude =
+
+[MongoDBSpecs]
+repocollname =
+name =
+username =
+password =
+host =
+
+[ElasticSpecs]
+host =
+index =
+username =
+password =
+"""
+                )
         print('Done')
         return
     #
