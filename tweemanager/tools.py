@@ -135,10 +135,11 @@ class GenericTweetProcessor(object):
     def _checkpatterns(self):
         """
         """
-        result = True
+        result = False
         logging.debug("checking patterns for tweet id: {}".format(self.tweetdata['id']))
         if (self.PATTERNSTOEXCLUDE is None) and (self.PATTERNSTOINCLUDE is None) and (self.LANGTOINCLUDE is None):
             # All tweets are good to go:
+            result = True
             logging.debug("No patterns to check for tweet id: {}".format(self.tweetdata['id']))
             return result
         else:
