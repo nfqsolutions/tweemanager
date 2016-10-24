@@ -15,7 +15,13 @@
 	db.Tweets.find({"created_at":{$gt: new ISODate('2016-04-25'), $lt: new ISODate('2016-04-25 12:19:08.000Z')}})
 	```
 
-4. Conteo de los hashtags ordenado por ocurrencias:
+4. Buscar una palabra o frase en un campo de los tweets:
+	```javascript
+	db.Tweets.find({"text":{"$regex":"que tal", "$options":"i"}}
+	```
+*$options* permite opciones de búsqueda *regex* como *i* (que significa *sensitive case*).
+
+5. Conteo de los hashtags ordenado por ocurrencias:
 	```javascript
 	db.Tweets.aggregate([
 		{$unwind:"$entities.hashtags"},
@@ -23,7 +29,7 @@
 		{$sort:{total:-1}}])
 	```
 
-5. Contar el número de idiomas distintos ordenados por hashtag:
+6. Contar el número de idiomas distintos ordenados por hashtag:
 
 	5.1 Programático:
 
@@ -37,7 +43,7 @@
 		db.Tweets.aggregate({$group: {_id: "$lang", total: {$sum: 1} }})
 		
 
-6. Contar palabras con stop words (Map-Reduce):
+7. Contar palabras con stop words (Map-Reduce):
 
 	```javascript
 	var map = function() {  
@@ -69,7 +75,7 @@
 	```
 
 
-7. Contar bigramas con stop-bigramas (Map-Reduce):
+8. Contar bigramas con stop-bigramas (Map-Reduce):
 
 	```javascript
 	var map = function() {  
