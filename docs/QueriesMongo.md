@@ -31,14 +31,14 @@
 
 6. Contar el número de idiomas distintos ordenados por hashtag:
 
-	5.1 Programático:
+	6.1 Programático:
 
 		Nlanguages = db.Tweets.distinct("lang");
 		for (i=0; i< Nlanguages.length; i++) {
 		    print(Nlanguages[i], db.Tweets.find({"lang": Nlanguages[i] }).count() );
 		}
 
-	5.2 Aggregación:		
+	6.2 Aggregación:		
 
 		db.Tweets.aggregate({$group: {_id: "$lang", total: {$sum: 1} }})
 		
