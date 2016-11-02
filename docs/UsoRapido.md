@@ -13,7 +13,7 @@ python setup.py install
 > Nota: Opcionalmente instala un venv (o virtualenv) con tu instalación de python. Puedes usar Python 2.7, Python 3.4 o Python 3.5 (si tienes algún problema o encuentras uno pon una issue [*s’il vous plait*](https://github.com/ekergy/tweemanager/issues))
 
 
-3.- Busca unos cuantos tweets (con la API oficiosa **getoldtweets**):
+3.- Busca unos cuantos tweets:
 
 ```bash
 tweemanager getoldtweets -c tweemUsoRapido.cfg -o TestUsoRapido.json
