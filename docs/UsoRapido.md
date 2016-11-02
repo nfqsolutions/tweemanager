@@ -41,7 +41,7 @@ tweemanager importToMongo TestUsoRapido.json
 
 > Nota: podemos realizar el paso anterior directamente para mongo usando la opción *-o mongodb*: ```tweemanager importToMongo TestUsoRapido.json -o mongodb```
 
-En el caso de poseer un clasificador, puedes generar un informe de clasificación:
+En el caso de poseer un clasificador, puedes generar un informe de clasificación. Como ejemplo tonto:
 
 ```bash
  python scripts/dummyClassifier.py
