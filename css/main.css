@@ -51,6 +51,10 @@ header{
 .featured-image-container {
     padding: 20px 0px;
 }
+
+.code-text{
+    font-family: 'Ubuntu Mono', monospace;
+}
 /******************************* NAVBAR ************************************/
 .navbar-default{
     padding-top: 10px;

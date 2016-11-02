@@ -23,6 +23,7 @@
 
     <link href="https://fonts.googleapis.com/css?family=Raleway:300,400,700" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Comfortaa:300,400,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu+Mono" rel="stylesheet">
 
     <!-- Icon credits -->
       <!-- “Filter” icon used on the home page is by Hugo Alberto from the Noun Project.
@@ -133,9 +134,9 @@
                     <p style="font-size: 24px;">Código preparado para Python 2.7, Python 3.4 y Python 3.5</p>
                     <ul>
                         <li style="list-style-type:decimal; margin-bottom: 15px; font-weight: bold;">Clona este repositorio: <br/>
-                            <span class="font-light"> git clone <a href="https://github.com/ekergy/tweemanager.git">https://github.com/ekergy/tweemanager.git</a></span></li>
+                            <span class="font-light"> git clone <a class="code-text" href="https://github.com/ekergy/tweemanager.git">https://github.com/ekergy/tweemanager.git</a></span></li>
                         <li style="list-style-type:decimal; margin-bottom: 15px; font-weight: bold;">Instala el paquete:<br/>
-                            <span class="font-light">python setup.py install<br/></span>
+                            <span class="font-light code-text">python setup.py install<br/></span>
                             <span class="font-light-min">Nota: Opcionalmente instala un venv (o virtualenv) con tu instalación de python. Puedes
                             usar Python 2.7, Python 3.4 o Python 3.5 (si tienes algún problema o encuentras uno crea un issue.
                             (<a href="https://github.com/ekergy/tweemanager/issues">https://github.com/ekergy/tweemanager/issues</a>))</span></li>
@@ -143,10 +144,10 @@
                             <br/><span class="font-light-min"> Nota: Para este caso ni hay que registrar una app en twitter. Consulta la página [CMDgetoldtweets.md](./CMDgetoldtweets.md) para más info del comando.
                             <br/>Ya tenemos unos cuantos tweets. Podriamos procesar la información que hemos obtenido con alguno visualizador/procesador de datos.</span></li>
                         <li style="list-style-type:decimal; margin-bottom: 15px; font-weight: bold;">Inserta los datos en mongodb: <br/><span class="font-light">Añade mongo a tu fichero de configuración: <br/>
-                            [MongoDBSpecs] host="mongodb://127.0.0.1/tweets" repocollname="RepoDeTweets"
-                            <br/>y ejecuta el comando de importación para importar los datos obtenidos anteriormente: <br/>tweemanager importToMongo TestUsoRapido.json</span>
+                            <span class="code-text">[MongoDBSpecs] host="mongodb://127.0.0.1/tweets" repocollname="RepoDeTweets"
+                            <br/>y ejecuta el comando de importación para importar los datos obtenidos anteriormente: <br/>tweemanager importToMongo TestUsoRapido.json</span></span>
                             <br/> <span class="font-light-min">Nota: podemos realizar el paso anterior directamente para mongo usando la opción *-o mongodb*: tweemanager importToMongo TestUsoRapido.json -o mongodb</span></li>
-                        <li style="list-style-type:decimal; margin-bottom: 15px; font-weight: bold;">Genera información de clasificación: <br/><span class="font-light">python scripts/dummyClassifier.py</span></li>
+                        <li style="list-style-type:decimal; margin-bottom: 15px; font-weight: bold;">Genera información de clasificación: <br/><span class="font-light code-text">python scripts/dummyClassifier.py</span></li>
                     </ul>
                 </div>
                 <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12 col-lg-offset-2 col-md-offset-2" style="text-align: center; margin-top: 20px;">
