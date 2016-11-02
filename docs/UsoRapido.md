@@ -10,7 +10,7 @@ git clone https://github.com/ekergy/tweemanager.git
 python setup.py install
 ```
 
-> Nota: Opcionalmente instala un venv (o virtualenv) con tu instalación de python. Puedes usar Python 2.7, Python 3.4 o Python 3.5 (si tienes algún problema o encuentras uno pon una issue [*s’il vous plait*](https://github.com/ekergy/tweemanager/issues))
+> Nota: Opcionalmente instala un venv (o virtualenv) con tu instalación de python. Puedes usar Python 2.7, Python 3.4 o Python 3.5 (si tienes algún problema o encuentras uno [notifica el problema](https://github.com/ekergy/tweemanager/issues))
 
 
 3.- Busca unos cuantos tweets:
@@ -19,7 +19,7 @@ python setup.py install
 tweemanager getoldtweets -c tweemUsoRapido.cfg -o TestUsoRapido.json
 ```
 
-> Nota: Para este caso ni hay que registrar una app en twitter.
+> Nota: Para este caso no hay que registrar una app en twitter.
 
 consulta la página [CMDgetoldtweets.md](./CMDgetoldtweets.md) para más info del comando.
 
