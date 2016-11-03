@@ -42,7 +42,7 @@ source .env/bin/activate && pip install --upgrade pip # optional
 python setup.py install
 ```
 
-> Si encuentras algún problema reclama [aquí](https://github.com/ekergy/tweemanager/issues).
+> Si encuentras algún problema reclama [aquí](https://github.com/nfqsolutions/tweemanager/issues).
   En Windows es posible que haya que instalar alguna dependencia precompilada (ej. lxml).
   Puedes descargar las dependencias [aquí](http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml)
 
