@@ -1,7 +1,7 @@
 1.- Clona este repositorio:
 
 ```bash
-git clone https://github.com/ekergy/tweemanager.git
+git clone https://github.com/nfqsolutions/tweemanager.git
 ```
 
 2.- Instala el paquete:
@@ -10,7 +10,7 @@ git clone https://github.com/ekergy/tweemanager.git
 python setup.py install
 ```
 
-> Nota: Opcionalmente instala un venv (o virtualenv) con tu instalación de python. Puedes usar Python 2.7, Python 3.4 o Python 3.5 (si tienes algún problema o encuentras uno [notifica el problema](https://github.com/ekergy/tweemanager/issues))
+> Nota: Opcionalmente instala un venv (o virtualenv) con tu instalación de python. Puedes usar Python 2.7, Python 3.4 o Python 3.5 (si tienes algún problema o encuentras uno [notifica el problema](https://github.com/nfqsolutions/tweemanager/issues))
 
 
 3.- Busca unos cuantos tweets:
