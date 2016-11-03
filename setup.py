@@ -60,7 +60,7 @@ setup(
     author='Hugo Marrao',
     author_email='hugo.marrao@nfq.es',
     license='MIT',
-    url='https://github.com/ekergy/tweemanager',
+    url='https://github.com/nfqsolutions/tweemanager',
     keywords=['json', 'mongo', 'elasticsearch', 'twitter', 'monitor'],
     packages=find_packages(),
     package_data={},
