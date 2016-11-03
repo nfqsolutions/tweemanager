@@ -1,4 +1,4 @@
-![Alt text](/docs/images/nfq_solutions.png?raw=true)
+![Alt text](/images/nfq_solutions.png?raw=true)
 
 # *Tweemanager OpenSource Software by [NFQ](http://nfq.es/solutions/)*
 
