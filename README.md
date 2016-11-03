@@ -29,7 +29,7 @@ Para instalar el código:
 Paso 0:
 
 ```bash
-git clone https://github.com/ekergy/tweemanager.git && cd tweemanager
+git clone https://github.com/nfqsolutions/tweemanager.git && cd tweemanager
 ```
 
 Paso 1:
