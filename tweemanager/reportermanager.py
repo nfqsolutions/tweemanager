@@ -56,10 +56,9 @@ def genListOfMonth(StartDate,EndDateInp):
         """
         """
         #year = Date.year + (Date.month + 2) / 12
-        year = Date.year + (Date.month / 12)
+        year = int(Date.year + (Date.month / 12))
         month  = ((Date.month) % 12) + 1
-        print(year, month, Date.day)
-        monthplusone = datetime.datetime(int(year) , month  , Date.day)
+        monthplusone = datetime.datetime(year , month  , Date.day)
         return monthplusone
 
     while EndDate < EndDateInp:
@@ -177,7 +176,15 @@ def alertWords(StartDate, EndDate, coll, alert_words, db):
 
 
 # Reports to MongoDB or to a JSON file
-def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDate=None, EndDate=None, output='mongodb', output_name='Reports', fromgot=False):
+def generateReports(host,
+                    name_collection='TweetsRepo',
+                    alertwords=None,
+                    StartDate=None,
+                    EndDate=None,
+                    output='mongodb',
+                    output_name='Reports',
+                    fromgot=False,
+                    classifier='algorithm_1'):
 
 
     client = pymongo.MongoClient(host=host)
@@ -206,7 +213,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         print("Writing report by days...")
         for values in genListOfDays(StartDate, EndDate):
             linea = {}
-            valor = aggCount(values['start'], values['end'], coll, fromgot)
+            valor = aggCount(values['start'], values['end'], coll, fromgot, classifier)
             linea['start'] = values['start']
             linea['end'] = values['end']
             linea['tweets'] = valor['count']
@@ -226,7 +233,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         print("Writing report by weeks...")
         for values in genListOfWeeks(StartDate, EndDate):
             linea = {}
-            valor = aggCount(values['start'], values['end'], coll, fromgot)
+            valor = aggCount(values['start'], values['end'], coll, fromgot, classifier)
             linea['start'] = values['start']
             linea['end'] = values['end']
             linea['tweets'] = valor['count']
@@ -246,7 +253,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         print("Writing report by monts...")
         for values in genListOfMonth(StartDate, EndDate):
             linea = {}
-            valor = aggCount(values['start'], values['end'], coll, fromgot)
+            valor = aggCount(values['start'], values['end'], coll, fromgot, classifier)
             linea['start'] = values['start']
             linea['end'] = values['end']
             linea['tweets'] = valor['count']
@@ -270,7 +277,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         # 1º ListOfDays:
         for values in genListOfDays(StartDate, EndDate):
             linea = {}
-            valor = aggCount(values['start'], values['end'], coll, fromgot)
+            valor = aggCount(values['start'], values['end'], coll, fromgot, classifier)
             linea['start'] = values['start']
             linea['end'] = values['end']
             linea['tweets'] = valor['count']
@@ -289,7 +296,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         # 2º ListOfWeeks:
         for values in genListOfWeeks(StartDate, EndDate):
             linea = {}
-            valor = aggCount(values['start'], values['end'], coll, fromgot)
+            valor = aggCount(values['start'], values['end'], coll, fromgot, classifier)
             linea['start'] = values['start']
             linea['end'] = values['end']
             linea['tweets'] = valor['count']
@@ -308,7 +315,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         # 3º ListOfMonth:
         for values in genListOfMonth(StartDate, EndDate):
             linea = {}
-            valor = aggCount(values['start'], values['end'], coll, fromgot)
+            valor = aggCount(values['start'], values['end'], coll, fromgot, classifier)
             linea['start'] = values['start']
             linea['end'] = values['end']
             linea['tweets'] = valor['count']
@@ -328,7 +335,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         # 1º ListOfDays:
         for values in genListOfDays(StartDate, EndDate):
             linea = {}
-            valor = aggCount(values['start'], values['end'], coll, fromgot)
+            valor = aggCount(values['start'], values['end'], coll, fromgot, classifier)
             linea['start'] = values['start'].strftime("%Y-%m-%d")
             linea['end'] = values['end'].strftime("%Y-%m-%d")
             linea['tweets'] = valor['count']
@@ -347,7 +354,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         # 2º ListOfWeeks:
         for values in genListOfWeeks(StartDate, EndDate):
             linea = {}
-            valor = aggCount(values['start'], values['end'], coll, fromgot)
+            valor = aggCount(values['start'], values['end'], coll, fromgot, classifier)
             linea['start'] = values['start'].strftime("%Y-%m-%d")
             linea['end'] = values['end'].strftime("%Y-%m-%d")
             linea['tweets'] = valor['count']
@@ -366,7 +373,7 @@ def generateReports(host, name_collection='TweetsRepo', alertwords=None, StartDa
         # 3º ListOfMonth:
         for values in genListOfMonth(StartDate, EndDate):
             linea = {}
-            valor = aggCount(values['start'], values['end'], coll, fromgot)
+            valor = aggCount(values['start'], values['end'], coll, fromgot, classifier)
             linea['start'] = values['start'].strftime("%Y-%m-%d")
             linea['end'] = values['end'].strftime("%Y-%m-%d")
             linea['tweets'] = valor['count']
