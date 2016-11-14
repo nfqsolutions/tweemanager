@@ -35,7 +35,7 @@ def listenertweets(outputclass, trackarray):
     api = nfqTwitterAuth(consumer_key=cfgmanager.TwitterAPIcredentials['consumer_key'],
                          consumer_secret=cfgmanager.TwitterAPIcredentials['consumer_secret'],
                          access_key=cfgmanager.TwitterAPIcredentials['access_key'],
-                         access_secret=cfgmanager.TwitterAPIcredentials['access_secret'],
+                         access_secret=cfgmanager.TwitterAPIcredentials['access_secret']
                          )
     NFQlistener = nfqTwitterStreamListener()
     NFQlistener.TweetProcessor = outputclass

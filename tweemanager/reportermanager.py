@@ -58,7 +58,8 @@ def genListOfMonth(StartDate,EndDateInp):
         #year = Date.year + (Date.month + 2) / 12
         year = Date.year + (Date.month / 12)
         month  = ((Date.month) % 12) + 1
-        monthplusone = datetime.datetime(year , month  , Date.day)
+        print(year, month, Date.day)
+        monthplusone = datetime.datetime(int(year) , month  , Date.day)
         return monthplusone
 
     while EndDate < EndDateInp:
@@ -67,7 +68,7 @@ def genListOfMonth(StartDate,EndDateInp):
         StartDate = EndDate
 
 # Agg Functions:
-def aggCount(StartDate, EndDate, coll, fromgot):
+def aggCount(StartDate, EndDate, coll, fromgot, classifier):
     """
     It returns the number of tweets between a time interval
     """
@@ -77,9 +78,9 @@ def aggCount(StartDate, EndDate, coll, fromgot):
             {"$match": {"$and": [{"created_at": {"$gte": StartDate}}, {"created_at": {"$lt": EndDate}}]}},
             {"$group": {"_id": "",
             "count": {"$sum": 1},
-            "npos": {"$sum": {"$cond":[{"$eq":["$valoration.classifier1.value","positive"]},{"$cond":[{"$eq":["$retweet_count",0]},1,"$retweet_count"]},0]}},
-            "nneg": {"$sum": {"$cond":[{"$eq":["$valoration.classifier1.value","negative"]},{"$cond":[{"$eq":["$retweet_count",0]},1,"$retweet_count"]},0]}},
-            "met": {"$sum": {"$multiply": ["$valoration.classifier1.metric", {"$cond":[{"$eq":["$retweet_count",0]},1,"$retweet_count"]}]}}
+            "npos": {"$sum": {"$cond":[{"$eq":["$valuation." + classifier + ".value","positive"]},{"$cond":[{"$eq":["$retweet_count",0]},1,"$retweet_count"]},0]}},
+            "nneg": {"$sum": {"$cond":[{"$eq":["$valuation." + classifier + ".value","negative"]},{"$cond":[{"$eq":["$retweet_count",0]},1,"$retweet_count"]},0]}},
+            "met": {"$sum": {"$multiply": ["$valuation." + classifier + ".metric", {"$cond":[{"$eq":["$retweet_count",0]},1,"$retweet_count"]}]}}
             }},
         ]
 
@@ -93,9 +94,9 @@ def aggCount(StartDate, EndDate, coll, fromgot):
             {"$match": {"$and": [{"created_at": {"$gte": StartDate}}, {"created_at": {"$lt": EndDate}}]}},
             {"$group": {"_id": "",
             "count": {"$sum": 1},
-            "npos": {"$sum": {"$cond":[{"$eq":["$valoration.classifier1.value","positive"]},1,0]}},
-            "nneg": {"$sum": {"$cond":[{"$eq":["$valoration.classifier1.value","negative"]},1,0]}},
-            "met": {"$sum": "$valoration.classifier1.metric"}
+            "npos": {"$sum": {"$cond":[{"$eq":["$valuation." + classifier + ".value","positive"]},1,0]}},
+            "nneg": {"$sum": {"$cond":[{"$eq":["$valuation." + classifier + ".value","negative"]},1,0]}},
+            "met": {"$sum": "$valuation." + classifier + ".metric"}
             }},
         ]
 

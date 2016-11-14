@@ -70,9 +70,9 @@ def aggCount(StartDate, EndDate):
         {"$match": {"$and": [{"created_at": {"$gte": StartDate}}, {"created_at": {"$lt": EndDate}}]}},
         {"$group": {"_id": "",
         "count": {"$sum": 1},
-        "npos": {"$sum": {"$cond":[{"$eq":["$valoration.classifier1.value","positive"]},1,0]}},
-        "nneg": {"$sum": {"$cond":[{"$eq":["$valoration.classifier1.value","negative"]},1,0]}},
-        "met": {"$sum": "$valoration.classifier1.metric"}
+        "npos": {"$sum": {"$cond":[{"$eq":["$valuation.classifier1.value","positive"]},1,0]}},
+        "nneg": {"$sum": {"$cond":[{"$eq":["$valuation.classifier1.value","negative"]},1,0]}},
+        "met": {"$sum": "$valuation.classifier1.metric"}
         }},
     ]
 

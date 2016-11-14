@@ -13,10 +13,10 @@ mongoengine.connect(host="mongodb://192.168.80.221:27017/tweets")
 
 cosas = TweetDocument._get_collection().aggregate(
     [
-{ '$project' : { "source": 1, "valoration": 1, '_id': 0, 'week': { '$week': "$created_at" } } },
+{ '$project' : { "source": 1, "valuation": 1, '_id': 0, 'week': { '$week': "$created_at" } } },
 { '$group' : { '_id': "$week", 
-                 "total_positivos": {"$sum": {"$cond":[{"$eq":["$valoration.algoritmo_1.clasificado","positivo"]},1,0]}},
-                 "total_negativos": {"$sum": {"$cond":[{"$eq":["$valoration.algoritmo_1.clasificado","negativo"]},1,0]}},
+                 "total_positivos": {"$sum": {"$cond":[{"$eq":["$valuation.algoritmo_1.clasificado","positivo"]},1,0]}},
+                 "total_negativos": {"$sum": {"$cond":[{"$eq":["$valuation.algoritmo_1.clasificado","negativo"]},1,0]}},
                  "total": {"$sum": 1},
                }
     },

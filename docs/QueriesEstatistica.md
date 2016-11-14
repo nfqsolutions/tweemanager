@@ -2,14 +2,14 @@
 
 1. Número de tweets valorados manualmente:
 	```javascript
-	db.Tweets.count({"valoration.manual":{"$exists":true}})
+	db.Tweets.count({"valuation.manual":{"$exists":true}})
 	```
 
 2. Número de positivos, negativos y no valorados manualmente:
 	```javascript
 	db.Tweets.group(
 	   {
-	     key: { 'valoration.manual': 1 },
+	     key: { 'valuation.manual': 1 },
 	     reduce: function( curr, result ) {
 	                 result.total += 1;
 	             },
@@ -22,7 +22,7 @@
 	```javascript
 	db.Tweets.group(
 	   {
-	     key: { 'valoration.classifier1.value': 1 },
+	     key: { 'valuation.classifier1.value': 1 },
 	     reduce: function( curr, result ) {
 	                 result.total += 1;
 	             },
@@ -58,10 +58,10 @@
 
 	```javascript
 	db.Tweets.aggregate([
-	{ $project : { "source": 1, "valoration": 1, _id: 0 } },
+	{ $project : { "source": 1, "valuation": 1, _id: 0 } },
 	{ $group : { _id: "$source", 
-                     "total_Good": {"$sum": {"$cond":[{"$eq":["$valoration.classifier1.value","positive"]},1,0]}},
-                     "total_Bad": {"$sum": {"$cond":[{"$eq":["$valoration.classifier1.value","negative"]},1,0]}},
+                     "total_Good": {"$sum": {"$cond":[{"$eq":["$valuation.classifier1.value","positive"]},1,0]}},
+                     "total_Bad": {"$sum": {"$cond":[{"$eq":["$valuation.classifier1.value","negative"]},1,0]}},
                      "total": {"$sum": 1}
                    }
         },
@@ -73,12 +73,12 @@
 
 	```javascript
 	db.Tweets.aggregate([
-	{ $project : { "source": 1, "valoration": 1, _id: 0 } },
+	{ $project : { "source": 1, "valuation": 1, _id: 0 } },
 	{ $group : { _id: {source: "$source",
-	                   valoration : "$valoration.classifier1.value"},
+	                   valuation : "$valuation.classifier1.value"},
                      total:{"$sum":1}}
         },
-    { $project : { source: "$_id.source", valoration: "$_id.valoration",total: "$total", _id: 0 } },
+    { $project : { source: "$_id.source", valuation: "$_id.valuation",total: "$total", _id: 0 } },
     { $sort: {"total": -1}}
 	])
 	```
@@ -87,12 +87,12 @@
 	
 	```javascript
 	db.Tweets.aggregate([
-	{ $project : { "lang": 1, "valoration": 1, _id: 0 } },
+	{ $project : { "lang": 1, "valuation": 1, _id: 0 } },
 	{ $group : { _id: {source: "$lang",
-	                   valoration : "$valoration.classifier1.value"},
+	                   valuation : "$valuation.classifier1.value"},
                      total:{"$sum":1}}
         },
-    { $project : { source: "$_id.source", valoration: "$_id.valoration",total: "$total", _id: 0 } },
+    { $project : { source: "$_id.source", valuation: "$_id.valuation",total: "$total", _id: 0 } },
     { $sort: {"total": -1}}
 	])
 	```
@@ -103,10 +103,10 @@
 
 	```javascript
 	db.Tweets.aggregate([
-	{ '$project' : { "source": 1, "valoration": 1, '_id': 0, 'week': { '$week': "$created_at" } } },
+	{ '$project' : { "source": 1, "valuation": 1, '_id': 0, 'week': { '$week': "$created_at" } } },
 	{ '$group' : { '_id': "$week", 
-	                 "total_positivos": {"$sum": {"$cond":[{"$eq":["$valoration.algoritmo_1.clasificado","positivo"]},1,0]}},
-	                 "total_negativos": {"$sum": {"$cond":[{"$eq":["$valoration.algoritmo_1.clasificado","negativo"]},1,0]}},
+	                 "total_positivos": {"$sum": {"$cond":[{"$eq":["$valuation.algoritmo_1.clasificado","positivo"]},1,0]}},
+	                 "total_negativos": {"$sum": {"$cond":[{"$eq":["$valuation.algoritmo_1.clasificado","negativo"]},1,0]}},
 	                 "total": {"$sum": 1},
 	               }
 	    },

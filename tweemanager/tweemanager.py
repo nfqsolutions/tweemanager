@@ -15,7 +15,7 @@ from .getoldtweets import setTweetCriteria, getoldtweetsGenerator
 from .searchlistenerAPI import listenertweets, searchtweets
 from .tools import StdoutTweetProcessor, FileTweetProcessor, MongoTweetProcessor
 
-#
+
 TweetProcessor = None
 
 
@@ -342,7 +342,7 @@ index = ""
     # command dumpFromMongo
     #
     if args.get('dumpCorpusFromMongo'):
-        logging.info('importToMongo command selected')
+        logging.info('dumpCorpusFromMongo command selected')
         logging.debug('Not implemented')
         return
     #
@@ -353,7 +353,7 @@ index = ""
     # command importToElastic
     #
     if args.get('importToElastic'):
-        logging.info('importToMongo command selected')
+        logging.info('importToElastic command selected')
         logging.debug('Not implemented')
         return
     #

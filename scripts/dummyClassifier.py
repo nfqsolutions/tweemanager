@@ -20,25 +20,25 @@ def classifyTweets(mongouri="mongodb://127.0.0.1:27017/", dbname='tweets', colln
         """
         """
         # It will randomly generate information like this:
-        # {valoration:{manual:positive,
+        # {valuation:{manual:positive,
         #              classifier1:{prob:0.7
         #                           value:positive}}}
         # or
-        # {valoration:{classifier1:{prob:0.7
+        # {valuation:{classifier1:{prob:0.7
         #                           value:positive}}}
         #
         manual = random.uniform(0, 1)
         classifier1 = random.uniform(0, 1)
 
         if manual > 0.7:
-            valoration = {'valoration': {'manual': 'positive' if classifier1 > 0.5 else 'negative',
+            valuation = {'valuation': {'manual': 'positive' if classifier1 > 0.5 else 'negative',
                                         'classifier1': {'prob': classifier1,
                                                        'value': 'positive' if classifier1 > 0.5 else 'negative'}}}
         else:
-            valoration = {'valoration': {'classifier1': {'prob': classifier1,
+            valuation = {'valuation': {'classifier1': {'prob': classifier1,
                                                        'value': 'positive' if classifier1 > 0.5 else 'negative'}}}
 
-        return valoration
+        return valuation
 
     for tweet in coll.find():
         coll.update({'_id': tweet['_id']}, {'$set': getDummyValoration()})
