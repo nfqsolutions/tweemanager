@@ -88,7 +88,7 @@ def aggCount(StartDate, EndDate, coll, fromgot, classifier):
             result = result
         return result
 
-    else: # All tweets are counted
+    else: # Only tweets in database are counted
         pipeline = [
             {"$match": {"$and": [{"created_at": {"$gte": StartDate}}, {"created_at": {"$lt": EndDate}}]}},
             {"$group": {"_id": "",
