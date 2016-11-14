@@ -59,6 +59,7 @@ class cfgmanager(RawConfigParser):
         self.set('MongoDBSpecs', 'username', '')
         self.set('MongoDBSpecs', 'password', '')
         self.set('MongoDBSpecs', 'host', '')
+        self.set('MongoDBSpecs', 'classifier', '')
         self.add_section('ElasticSpecs')
         self.set('ElasticSpecs', 'host', '')
         self.set('ElasticSpecs', 'index', '')

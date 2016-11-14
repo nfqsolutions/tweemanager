@@ -291,6 +291,8 @@ index = ""
             host = cfgmanager.MongoDBSpecs['host']
             name_collection = cfgmanager.MongoDBSpecs['repocollname']
             from_got = cfgmanager.MongoDBSpecs['fromgot']
+            classifier = cfgmanager.MongoDBSpecs['classifier']
+            print('Classifier =', classifier)
             if str(from_got) == 'True':
                 from_got = True
                 logging.info('Setting from_got option to True')
@@ -316,7 +318,7 @@ index = ""
             print('Alert words to find:',alertwords)
 
             generateReports(host=host, alertwords=alertwords, name_collection=name_collection,
-                            output=out, output_name=outname, fromgot= from_got)
+                            output=out, output_name=outname, fromgot=from_got, classifier=classifier)
 
             
         except mongoengine.ConnectionError:
