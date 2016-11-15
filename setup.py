@@ -3,6 +3,7 @@ import sys
 import os
 import re
 import shutil
+from codecs import open as open
 from setuptools import setup, find_packages
 
 
