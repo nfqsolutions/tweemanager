@@ -3,7 +3,7 @@ import re
 from setuptools import setup
 
 def get_version():
-    with open('tweemanager/version.py') as version_file:
+    with open('nfq/tweemanager/version.py') as version_file:
         return re.search(r"""__version__\s+=\s+(['"])(?P<version>.+?)\1""",
                          version_file.read()).group('version')
 
@@ -36,5 +36,5 @@ setup(
     'tweepy',
     'elasticsearch',
     'mongoengine'],
-    entry_points={'console_scripts': ['tweemanager=tweemanager.tweemanager:tweemanager']}
+    entry_points={'console_scripts': ['tweemanager=nfq.tweemanager.tweemanager:tweemanager']}
     )
