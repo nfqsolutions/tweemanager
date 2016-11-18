@@ -5,7 +5,7 @@ import docopt
 import logging
 import traceback
 import mongoengine
-from nfq.tweemanager.reportermanager import generateReports, genListOfWeeks
+from nfq.tweemanager.reportermanager import generateReports, gen_list_of_weeks
 from nfq.tweemanager.version import __version__
 from nfq.tweemanager.settings import cfgmanager
 from nfq.tweemanager.getoldtweets import setTweetCriteria, getoldtweetsGenerator
@@ -253,7 +253,7 @@ index = ""
         query = cfgmanager.GOTSpecs['querysearch']
         maxtweets = cfgmanager.GOTSpecs['maxtweets']
 
-        for values in genListOfWeeks(StartDate, EndDate):
+        for values in gen_list_of_weeks(StartDate, EndDate):
             Start = values['start']
             End = values['end']
             try:
