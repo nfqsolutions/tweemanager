@@ -587,23 +587,20 @@ def source_count(StartDate, EndDate, coll, db, max_sources=30):
     """)
 
     result = coll.map_reduce(mapper, reducer, 'source_count')
-    dic_of_results = {}
+    list_of_results = []
     count = 0
+
     # Words that just are found one time are not searched
     for doc in result.find({"value":{"$gt":1}}).sort('value', pymongo.DESCENDING):
-        key = str(doc[u'_id']).replace(".", "_")
-        try:
-            dic_of_results.update({key: {'source':doc[u'_id'], 'value':doc[u'value']}})
-        except:
-            dic_of_results = {key: {'source':doc[u'_id'], 'value':doc[u'value']}}
+        list_of_results.append({'source': doc[u'_id'], 'value':doc[u'value']})
         count += 1
         if count >= max_sources:
             break
 
     db.drop_collection('source_count')
-    return dic_of_results
+    return list_of_results
 
-def web_count(StartDate, EndDate, coll, db, max_sources=30):
+def url_count(StartDate, EndDate, coll, db, max_sources=30):
     """
     TODO: this operation can be done in pipeline (agregation)
     instead of map reduce (as it is implemented).
@@ -644,23 +641,19 @@ def web_count(StartDate, EndDate, coll, db, max_sources=30):
     }
     """)
 
-    result = coll.map_reduce(mapper, reducer, 'web_count')
+    result = coll.map_reduce(mapper, reducer, 'url_count')
 
-    dic_of_results = {}
+    list_of_results = []
     count = 0
     # Words that just are found one time are not searched
     for doc in result.find({"value":{"$gt":1}}).sort('value', pymongo.DESCENDING):
-        key = str(doc[u'_id']).replace(".", "_")
-        try:
-            dic_of_results.update({key: {'url':doc[u'_id'], 'value':doc[u'value']}})
-        except:
-            dic_of_results = {key: {'url':doc[u'_id'], 'value':doc[u'value']}}
+        list_of_results.append({'url': doc[u'_id'], 'value':doc[u'value']})
         count += 1
         if count >= max_sources:
             break
 
     db.drop_collection('source_count')
-    return dic_of_results
+    return list_of_results
 
 # Reports to MongoDB or to a JSON file
 def generate_reports(host,
@@ -699,7 +692,7 @@ def generate_reports(host,
         linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
                                               values['end'].strftime("%Y%m%d"), 
                                               coll, db, max_elements)
-        linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+        linea['url_count'] = url_count(values['start'].strftime("%Y%m%d"),
                                               values['end'].strftime("%Y%m%d"), 
                                               coll, db, max_elements)
         return linea, key
