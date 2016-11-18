@@ -7,7 +7,8 @@ import datetime as dt
 from bson.code import Code
 from nfq.tweemanager.tools import textclean
 
-stopwords = ['de',
+stopwords = ['…',
+             'de',
              'url',
              'atmention', 
                 'la',
@@ -489,7 +490,8 @@ def alert_words(StartDate, EndDate, coll, alert_words, db):
 
 def word_count(StartDate, EndDate, coll, stopwords, db, max_words=30):
     """
-    This function returns a dictionary with the most 
+    This function returns a dictionary with the most tweeted
+    words.
 
     :param StartDate: Start date to search.
     :param EndDate: End date to search.
@@ -536,7 +538,7 @@ def word_count(StartDate, EndDate, coll, stopwords, db, max_words=30):
     count = 0
     # Words that just are found one time are not searched
     for doc in result.find({"value":{"$gt":1}}).sort('value', pymongo.DESCENDING):
-        key = aux_dict[doc[u'_id']]
+        key = doc[u'_id']
         try:
             dic_of_results.update({key: doc[u'value']})
         except:
@@ -546,6 +548,117 @@ def word_count(StartDate, EndDate, coll, stopwords, db, max_words=30):
             break
 
     db.drop_collection('word_count')
+    return dic_of_results
+
+def source_count(StartDate, EndDate, coll, db, max_sources=30):
+    """
+    TODO: this operation can be done in pipeline (agregation)
+    instead of map reduce (as it is implemented).
+
+    This function returns a dictionary with the sources which
+    the people tweet the most.
+
+    :param StartDate: Start date to search.
+    :param EndDate: End date to search.
+    :param coll: Mongo collection.
+    :param db: Mongo database.
+    :param max_sources: Maximum number of sources
+                        selected.
+    """
+    mapper = Code("""
+        function() {
+        var source = this.source;
+        var lang = this.lang;
+        if (source) {// make sure there's something
+            emit(source, 1);
+        }
+    }
+    """)
+
+    reducer = Code("""
+        function( key, values ) {    
+        var count = 0;    
+        values.forEach(function(v) {            
+            count +=v;    
+        });
+        return count;
+    }
+    """)
+
+    result = coll.map_reduce(mapper, reducer, 'source_count')
+    dic_of_results = {}
+    count = 0
+    # Words that just are found one time are not searched
+    for doc in result.find({"value":{"$gt":1}}).sort('value', pymongo.DESCENDING):
+        key = doc[u'_id']
+        try:
+            dic_of_results.update({key: doc[u'value']})
+        except:
+            dic_of_results = {key: doc[u'value']}
+        count += 1
+        if count >= max_sources:
+            break
+
+    db.drop_collection('source_count')
+    return dic_of_results
+
+def web_count(StartDate, EndDate, coll, db, max_sources=30):
+    """
+    TODO: this operation can be done in pipeline (agregation)
+    instead of map reduce (as it is implemented).
+
+    This function returns a dictionary with the sources which
+    the people tweet the most.
+
+    :param StartDate: Start date to search.
+    :param EndDate: End date to search.
+    :param coll: Mongo collection.
+    :param db: Mongo database.
+    :param max_sources: Maximum number of sources
+                        selected.
+    """
+    mapper = Code("""
+        function() {
+            var entities = this.entities;
+            if (entities) {
+                var urls = entities.urls;
+                if (urls) {
+                    for (var i = 0; i < urls.length; i++)
+                    var url = urls[i].expanded_url
+                    if (url) {
+                    emit(url, 1);
+                    }
+                }
+            }
+        }
+    """)
+
+    reducer = Code("""
+        function( key, values ) {    
+        var count = 0;    
+        values.forEach(function(v) {            
+            count +=v;    
+        });
+        return count;
+    }
+    """)
+
+    result = coll.map_reduce(mapper, reducer, 'web_count')
+
+    dic_of_results = {}
+    count = 0
+    # Words that just are found one time are not searched
+    for doc in result.find({"value":{"$gt":1}}).sort('value', pymongo.DESCENDING):
+        key = doc[u'_id']
+        try:
+            dic_of_results.update({key: doc[u'value']})
+        except:
+            dic_of_results = {key: doc[u'value']}
+        count += 1
+        if count >= max_sources:
+            break
+
+    db.drop_collection('source_count')
     return dic_of_results
 
 # Reports to MongoDB or to a JSON file
@@ -558,7 +671,7 @@ def generateReports(host,
                     output_name='Reports',
                     fromgot=False,
                     classifier='algorithm_1',
-                    max_words=30):
+                    max_elements=20):
 
 
     client = pymongo.MongoClient(host=host)
@@ -602,7 +715,13 @@ def generateReports(host,
             if stopwords:
                 linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_words)
+                                                  coll, stopwords, db, max_elements)
+            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
+            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -626,7 +745,13 @@ def generateReports(host,
             if stopwords:
                 linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_words)
+                                                  coll, stopwords, db, max_elements)
+            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
+            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -650,7 +775,13 @@ def generateReports(host,
             if stopwords:
                 linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_words)
+                                                  coll, stopwords, db, max_elements)
+            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
+            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -679,7 +810,13 @@ def generateReports(host,
             if stopwords:
                 linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_words)
+                                                  coll, stopwords, db, max_elements)
+            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
+            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
             collreporting.update({"_id":key}, linea, upsert = True)
 
         print("Uploading report by weeks...")
@@ -702,7 +839,13 @@ def generateReports(host,
             if stopwords:
                 linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_words)
+                                                  coll, stopwords, db, max_elements)
+            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
+            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
             collreporting.update({"_id":key}, linea, upsert = True)
 
         print("Uploading report by months...")
@@ -725,7 +868,13 @@ def generateReports(host,
             if stopwords:
                 linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_words)
+                                                  coll, stopwords, db, max_elements)
+            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
+            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
             collreporting.update({"_id":key}, linea, upsert = True)
     
     else: #stdout
@@ -749,7 +898,13 @@ def generateReports(host,
             if stopwords:
                 linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_words)
+                                                  coll, stopwords, db, max_elements)
+            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
+            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
             print(linea)
 
         print("Report by weeks...")
@@ -772,7 +927,13 @@ def generateReports(host,
             if stopwords:
                 linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_words)
+                                                  coll, stopwords, db, max_elements)
+            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
+            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
             print(linea)
 
         print("Report by months...")
@@ -795,5 +956,11 @@ def generateReports(host,
             if stopwords:
                 linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
                                                   values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_words)
+                                                  coll, stopwords, db, max_elements)
+            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
+            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                                  values['end'].strftime("%Y%m%d"), 
+                                                  coll, db, max_elements)
             print(linea)
