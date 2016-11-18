@@ -5,7 +5,7 @@ import docopt
 import logging
 import traceback
 import mongoengine
-from nfq.tweemanager.reportermanager import generateReports, gen_list_of_weeks
+from nfq.tweemanager.reportermanager import generate_reports, gen_list_of_weeks
 from nfq.tweemanager.version import __version__
 from nfq.tweemanager.settings import cfgmanager
 from nfq.tweemanager.getoldtweets import setTweetCriteria, getoldtweetsGenerator
@@ -314,7 +314,7 @@ index = ""
             alertwords = cfgmanager.TextPatterns['alertwords']
             print('Alert words to find:',alertwords)
 
-            generateReports(host=host, alertwords=alertwords, name_collection=name_collection,
+            generate_reports(host=host, alertwords=alertwords, name_collection=name_collection,
                             output=out, output_name=outname, fromgot=from_got, classifier=classifier)
 
             
