@@ -662,22 +662,51 @@ def web_count(StartDate, EndDate, coll, db, max_sources=30):
     return dic_of_results
 
 # Reports to MongoDB or to a JSON file
-def generateReports(host,
-                    name_collection='TweetsRepo',
-                    alertwords=None,
-                    StartDate=None,
-                    EndDate=None,
-                    output='mongodb',
-                    output_name='Reports',
-                    fromgot=False,
-                    classifier='algorithm_1',
-                    max_elements=20):
+def generalte_reports(host,
+                      name_collection='TweetsRepo',
+                      alertwords=None,
+                      StartDate=None,
+                      EndDate=None,
+                      output='mongodb',
+                      output_name='Reports',
+                      fromgot=True,
+                      classifier='algorithm_1',
+                      max_elements=20):
 
+    def _generate_reports(values):
+        """
+        To reduce code, repetitive code is grouped in functions.
+        """
+        linea = {}
+        valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
+        linea['start'] = values['start']
+        linea['end'] = values['end']
+        linea['tweets'] = valor['count']
+        linea['positives'] = valor['npos']
+        linea['negatives'] = valor['nneg']
+        linea['metrica'] = valor['met']
+        linea['report'] = {'type':'monthly', 'from':name_collection}
+        key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
+        if alertwords:
+            linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
+                                              values['end'].strftime("%Y%m%d"),
+                                              coll, alertwords, db)
+        if stopwords:
+            linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
+                                              values['end'].strftime("%Y%m%d"), 
+                                              coll, stopwords, db, max_elements)
+        linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
+                                              values['end'].strftime("%Y%m%d"), 
+                                              coll, db, max_elements)
+        linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
+                                              values['end'].strftime("%Y%m%d"), 
+                                              coll, db, max_elements)
+        return linea, key
 
+    # Make connection
     client = pymongo.MongoClient(host=host)
     db = client.get_default_database()
     coll = db[name_collection]
-
 
     # 1º get first date
     if StartDate == None:
@@ -699,29 +728,7 @@ def generateReports(host,
         # 1º ListOfDays:
         print("Writing report by days...")
         for values in gen_list_of_days(StartDate, EndDate):
-            linea = {}
-            valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
-            linea['start'] = values['start']
-            linea['end'] = values['end']
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type':'daily', 'from':name_collection}
-            if alertwords:
-                linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords, db)
-            if stopwords:
-                linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_elements)
-            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
-            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
+            linea, key = _generate_reports(values)
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -729,29 +736,7 @@ def generateReports(host,
         # 2º ListOfWeeks:
         print("Writing report by weeks...")
         for values in gen_list_of_weeks(StartDate, EndDate):
-            linea = {}
-            valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
-            linea['start'] = values['start']
-            linea['end'] = values['end']
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type':'daily', 'from':name_collection}
-            if alertwords:
-                linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords, db)
-            if stopwords:
-                linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_elements)
-            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
-            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
+            linea, key = _generate_reports(values)
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -759,29 +744,7 @@ def generateReports(host,
         # 3º ListOfMonth:
         print("Writing report by monts...")
         for values in gen_list_of_months(StartDate, EndDate):
-            linea = {}
-            valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
-            linea['start'] = values['start']
-            linea['end'] = values['end']
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type':'daily', 'from':name_collection}
-            if alertwords:
-                linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords, db)
-            if stopwords:
-                linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_elements)
-            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
-            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
+            linea, key = _generate_reports(values)
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -793,174 +756,36 @@ def generateReports(host,
         print("Uploading report by days...")
         # 1º ListOfDays:
         for values in gen_list_of_days(StartDate, EndDate):
-            linea = {}
-            valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
-            linea['start'] = values['start']
-            linea['end'] = values['end']
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type':'daily', 'from':name_collection}
-            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
-            if alertwords:
-                linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords, db)
-            if stopwords:
-                linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_elements)
-            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
-            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
+            linea, key = _generate_reports(values)
             collreporting.update({"_id":key}, linea, upsert = True)
 
         print("Uploading report by weeks...")
         # 2º ListOfWeeks:
         for values in gen_list_of_weeks(StartDate, EndDate):
-            linea = {}
-            valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
-            linea['start'] = values['start']
-            linea['end'] = values['end']
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type': 'weekly', 'from': name_collection}
-            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
-            if alertwords:
-                linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"),
-                                                  coll, alertwords, db)
-            if stopwords:
-                linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_elements)
-            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
-            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
+            linea, key = _generate_reports(values)
             collreporting.update({"_id":key}, linea, upsert = True)
 
         print("Uploading report by months...")
         # 3º ListOfMonth:
         for values in gen_list_of_months(StartDate, EndDate):
-            linea = {}
-            valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
-            linea['start'] = values['start']
-            linea['end'] = values['end']
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type':'monthly', 'from':name_collection}
-            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
-            if alertwords:
-                linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"),
-                                                  coll, alertwords, db)
-            if stopwords:
-                linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_elements)
-            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
-            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
+            linea, key = _generate_reports(values)
             collreporting.update({"_id":key}, linea, upsert = True)
     
     else: #stdout
         print("Report by days...")
         # 1º ListOfDays:
         for values in gen_list_of_days(StartDate, EndDate):
-            linea = {}
-            valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
-            linea['start'] = values['start'].strftime("%Y-%m-%d")
-            linea['end'] = values['end'].strftime("%Y-%m-%d")
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type':'daily', 'from':name_collection}
-            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
-            if alertwords:
-                linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, alertwords, db)
-            if stopwords:
-                linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_elements)
-            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
-            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
+            linea, key = _generate_reports(values)
             print(linea)
 
         print("Report by weeks...")
         # 2º ListOfWeeks:
         for values in gen_list_of_weeks(StartDate, EndDate):
-            linea = {}
-            valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
-            linea['start'] = values['start'].strftime("%Y-%m-%d")
-            linea['end'] = values['end'].strftime("%Y-%m-%d")
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type':'weekly', 'from':name_collection}
-            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
-            if alertwords:
-                linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"),
-                                                  coll, alertwords, db)
-            if stopwords:
-                linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_elements)
-            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
-            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
+            linea, key = _generate_reports(values)
             print(linea)
 
         print("Report by months...")
         # 3º ListOfMonth:
         for values in gen_list_of_months(StartDate, EndDate):
-            linea = {}
-            valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
-            linea['start'] = values['start'].strftime("%Y-%m-%d")
-            linea['end'] = values['end'].strftime("%Y-%m-%d")
-            linea['tweets'] = valor['count']
-            linea['positives'] = valor['npos']
-            linea['negatives'] = valor['nneg']
-            linea['metrica'] = valor['met']
-            linea['report'] = {'type':'monthly', 'from':name_collection}
-            key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
-            if alertwords:
-                linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"),
-                                                  coll, alertwords, db)
-            if stopwords:
-                linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, stopwords, db, max_elements)
-            linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
-            linea['web_count'] = web_count(values['start'].strftime("%Y%m%d"),
-                                                  values['end'].strftime("%Y%m%d"), 
-                                                  coll, db, max_elements)
+            linea, key = _generate_reports(values)
             print(linea)
