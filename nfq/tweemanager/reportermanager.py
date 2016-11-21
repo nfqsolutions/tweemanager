@@ -10,6 +10,9 @@ from nfq.tweemanager.tools import textclean
 
 stopwords = ['…',
              'de',
+             'da',
+             'si',
+             'via',
              'url',
              'atmention', 
                 'la',
@@ -338,7 +341,7 @@ def gen_list_of_days(StartDate, EndDate=datetime.datetime.now()):
         yield {'start': StartDate, 'end': StartDate + onedaydelta}
         StartDate += onedaydelta
 
-# 2º ListOfWeeks:
+# 2º List_of_weeks:
 def gen_list_of_weeks(StartDate, EndDate):
     """
     """
@@ -362,7 +365,7 @@ def gen_list_of_weeks(StartDate, EndDate):
         yield {'start': StartDate, 'end': StartDate + oneweekdelta}
         StartDate += oneweekdelta
 
-# 3º ListOfMonth:
+# 3º List_of_months:
 def gen_list_of_months(StartDate,EndDateInp):
     """
     """
@@ -470,24 +473,29 @@ def alert_words(StartDate, EndDate, coll, alert_words, db):
     """)
 
     result = coll.map_reduce(mapper, reducer, 'alert_words')
-    dic_of_results = {}
+    dict_of_results = {}
     for doc in result.find():
         # TO DO:
         # Instead of this, save with text cleaned as label
         key = aux_dict[doc[u'_id']]
         try:
-            dic_of_results.update({key: doc[u'value']})
+            dict_of_results.update({key: doc[u'value']})
         except:
-            dic_of_results = {key: doc[u'value']}
-
+            dict_of_results = {key: doc[u'value']}
 
     # Include alert words with 0 mentions
     for word in alert_words:
-        if word not in dic_of_results.keys():
-            dic_of_results.update({word: 0})
+        if word not in dict_of_results.keys():
+            dict_of_results.update({word: 0})
+
+    # Transform dict into list of dicts
+    list_of_results = []
+    for word in dict_of_results.keys():
+        list_of_results.append({'alert_word': word, 'value': dict_of_results[word]})
+        #{word: dict_of_results[word]})
 
     db.drop_collection('alert_words')
-    return dic_of_results
+    return list_of_results
 
 def word_count(StartDate, EndDate, coll, stopwords, db, max_words=30):
     """
@@ -535,21 +543,17 @@ def word_count(StartDate, EndDate, coll, stopwords, db, max_words=30):
     """)
 
     result = coll.map_reduce(mapper, reducer, 'word_count')
-    dic_of_results = {}
+    list_of_results = []
     count = 0
     # Words that just are found one time are not searched
     for doc in result.find({"value":{"$gt":1}}).sort('value', pymongo.DESCENDING):
-        key = doc[u'_id']
-        try:
-            dic_of_results.update({key: doc[u'value']})
-        except:
-            dic_of_results = {key: doc[u'value']}
+        list_of_results.append({'word': doc[u'_id'], 'value':doc[u'value']})
         count += 1
         if count >= max_words:
             break
 
     db.drop_collection('word_count')
-    return dic_of_results
+    return list_of_results
 
 def source_count(StartDate, EndDate, coll, db, max_sources=30):
     """
@@ -569,7 +573,6 @@ def source_count(StartDate, EndDate, coll, db, max_sources=30):
     mapper = Code("""
         function() {
         var source = this.source;
-        var lang = this.lang;
         if (source) {// make sure there's something
             emit(source, 1);
         }
@@ -667,7 +670,7 @@ def generate_reports(host,
                       classifier='algorithm_1',
                       max_elements=20):
 
-    def _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements):
+    def _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements, report_type):
         """
         To reduce code, repetitive code is grouped in functions.
         """
@@ -679,7 +682,7 @@ def generate_reports(host,
         linea['positives'] = valor['npos']
         linea['negatives'] = valor['nneg']
         linea['metrica'] = valor['met']
-        linea['report'] = {'type':'monthly', 'from':name_collection}
+        linea['report'] = {'type':report_type, 'from':name_collection}
         key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
         if alertwords:
             linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
@@ -719,26 +722,47 @@ def generate_reports(host,
             output_name = output_name + '.json'
 
         outfile = open(output_name, 'w')
-        # 1º ListOfDays:
+        # 1º List_of_days:
         print("Writing report by days...")
         for values in gen_list_of_days(StartDate, EndDate):
-            linea, key = _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements)
+            linea, key = _generate_reports(values,
+                                           db,
+                                           coll,
+                                           fromgot,
+                                           classifier,
+                                           alertwords,
+                                           max_elements,
+                                           'daily')
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
 
-        # 2º ListOfWeeks:
+        # 2º List_of_weeks:
         print("Writing report by weeks...")
         for values in gen_list_of_weeks(StartDate, EndDate):
-            linea, key = _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements)
+            linea, key = _generate_reports(values,
+                                           db,
+                                           coll,
+                                           fromgot,
+                                           classifier,
+                                           alertwords,
+                                           max_elements,
+                                           'weekly')
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
 
-        # 3º ListOfMonth:
+        # 3º List_of_months:
         print("Writing report by monts...")
         for values in gen_list_of_months(StartDate, EndDate):
-            linea, key = _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements)
+            linea, key = _generate_reports(values,
+                                           db,
+                                           coll,
+                                           fromgot,
+                                           classifier,
+                                           alertwords,
+                                           max_elements,
+                                           'monthly')
             linea = json.dumps(linea)
             outfile.write(linea)
             outfile.write("\n")
@@ -748,38 +772,80 @@ def generate_reports(host,
         collreporting = db[output_name]
 
         print("Uploading report by days...")
-        # 1º ListOfDays:
+        # 1º List_of_days:
         for values in gen_list_of_days(StartDate, EndDate):
-            linea, key = _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements)
+            linea, key = _generate_reports(values,
+                                           db,
+                                           coll,
+                                           fromgot,
+                                           classifier,
+                                           alertwords,
+                                           max_elements,
+                                           'daily')
             collreporting.update({"_id":key}, linea, upsert = True)
 
         print("Uploading report by weeks...")
-        # 2º ListOfWeeks:
+        # 2º List_of_weeks:
         for values in gen_list_of_weeks(StartDate, EndDate):
-            linea, key = _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements)
+            linea, key = _generate_reports(values,
+                                           db,
+                                           coll,
+                                           fromgot,
+                                           classifier,
+                                           alertwords,
+                                           max_elements,
+                                           'weekly')
             collreporting.update({"_id":key}, linea, upsert = True)
 
         print("Uploading report by months...")
-        # 3º ListOfMonth:
+        # 3º List_of_months:
         for values in gen_list_of_months(StartDate, EndDate):
-            linea, key = _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements)
+            linea, key = _generate_reports(values,
+                                           db,
+                                           coll,
+                                           fromgot,
+                                           classifier,
+                                           alertwords,
+                                           max_elements,
+                                           'monthly')
             collreporting.update({"_id":key}, linea, upsert = True)
     
     else: #stdout
         print("Report by days...")
-        # 1º ListOfDays:
+        # 1º List_of_days:
         for values in gen_list_of_days(StartDate, EndDate):
-            linea, key = _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements)
+            linea, key = _generate_reports(values,
+                                           db,
+                                           coll,
+                                           fromgot,
+                                           classifier,
+                                           alertwords,
+                                           max_elements,
+                                           'daily')
             print(linea)
 
         print("Report by weeks...")
-        # 2º ListOfWeeks:
+        # 2º List_of_weeks:
         for values in gen_list_of_weeks(StartDate, EndDate):
-            linea, key = _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements)
+            linea, key = _generate_reports(values,
+                                           db,
+                                           coll,
+                                           fromgot,
+                                           classifier,
+                                           alertwords,
+                                           max_elements,
+                                           'weekly')
             print(linea)
 
         print("Report by months...")
-        # 3º ListOfMonth:
+        # 3º List_of_months:
         for values in gen_list_of_months(StartDate, EndDate):
-            linea, key = _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements)
+            linea, key = _generate_reports(values,
+                                           db,
+                                           coll,
+                                           fromgot,
+                                           classifier,
+                                           alertwords,
+                                           max_elements,
+                                           'monthly')
             print(linea)
