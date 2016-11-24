@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-import sys
 import tweepy
-from .settings import cfgmanager
+from nfq.tweemanager.settings import cfgmanager
 
 
 def searchtweets(outputclass, query, maxtweets=10):
