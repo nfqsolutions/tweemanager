@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
-
 import os
 import sys
 import docopt
 import logging
 import traceback
 import mongoengine
-from pymongo import MongoClient
-from bson import json_util as json
-from .reportermanager import generateReports, genListOfDays, genListOfWeeks
-from .version import __version__
-from .settings import cfgmanager
-from .getoldtweets import setTweetCriteria, getoldtweetsGenerator
-from .searchlistenerAPI import listenertweets, searchtweets
-from .tools import StdoutTweetProcessor, FileTweetProcessor, MongoTweetProcessor
+from nfq.tweemanager.reportermanager import generate_reports, gen_list_of_weeks
+from nfq.tweemanager.version import __version__
+from nfq.tweemanager.settings import cfgmanager
+from nfq.tweemanager.getoldtweets import setTweetCriteria, getoldtweetsGenerator
+from nfq.tweemanager.searchlistenerAPI import listenertweets, searchtweets
+from nfq.tweemanager.tools import StdoutTweetProcessor, FileTweetProcessor, MongoTweetProcessor
 
 
 TweetProcessor = None
@@ -256,7 +253,7 @@ index = ""
         query = cfgmanager.GOTSpecs['querysearch']
         maxtweets = cfgmanager.GOTSpecs['maxtweets']
 
-        for values in genListOfWeeks(StartDate, EndDate):
+        for values in gen_list_of_weeks(StartDate, EndDate):
             Start = values['start']
             End = values['end']
             try:
@@ -317,7 +314,7 @@ index = ""
             alertwords = cfgmanager.TextPatterns['alertwords']
             print('Alert words to find:',alertwords)
 
-            generateReports(host=host, alertwords=alertwords, name_collection=name_collection,
+            generate_reports(host=host, alertwords=alertwords, name_collection=name_collection,
                             output=out, output_name=outname, fromgot=from_got, classifier=classifier)
 
             
