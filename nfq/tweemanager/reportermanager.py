@@ -6,7 +6,7 @@ import json
 import datetime as dt
 from bson.code import Code
 from nfq.tweemanager.tools import textclean
-# from pprint import pprint # For debugging
+# from pprint import pprint  # For debugging
 
 stopwords = ['…',
              'de',
@@ -14,7 +14,7 @@ stopwords = ['…',
              'si',
              'via',
              'url',
-             'atmention', 
+             'atmention',
                 'la',
                 'que',
                 'el',
@@ -341,6 +341,7 @@ def gen_list_of_days(StartDate, EndDate=datetime.datetime.now()):
         yield {'start': StartDate, 'end': StartDate + onedaydelta}
         StartDate += onedaydelta
 
+
 # 2º List_of_weeks:
 def gen_list_of_weeks(StartDate, EndDate):
     """
@@ -365,6 +366,7 @@ def gen_list_of_weeks(StartDate, EndDate):
         yield {'start': StartDate, 'end': StartDate + oneweekdelta}
         StartDate += oneweekdelta
 
+
 # 3º List_of_months:
 def gen_list_of_months(StartDate,EndDateInp):
     """
@@ -385,6 +387,7 @@ def gen_list_of_months(StartDate,EndDateInp):
         yield {'start': StartDate, 'end': EndDate}
         StartDate = EndDate
 
+
 # Agg Functions:
 def agg_count(StartDate, EndDate, coll, fromgot, classifier):
     """
@@ -402,7 +405,7 @@ def agg_count(StartDate, EndDate, coll, fromgot, classifier):
             }},
         ]
 
-        result = {'count':0, 'npos':0, 'nneg':0, 'met':0}
+        result = {'count': 0, 'npos': 0, 'nneg': 0, 'met': 0}
         for result in coll.aggregate(pipeline):
             result = result
         return result
@@ -423,6 +426,7 @@ def agg_count(StartDate, EndDate, coll, fromgot, classifier):
             result = result
         return result
 
+
 def alert_words(StartDate, EndDate, coll, alert_words, db):
     """
     List of alert words - a list of warning words
@@ -437,7 +441,6 @@ def alert_words(StartDate, EndDate, coll, alert_words, db):
         except:
             aux_dict = {str(textclean(word)): word}
 
-
     mapper = Code("""
         function() {  
         var summary = this.text_clean;
@@ -449,8 +452,8 @@ def alert_words(StartDate, EndDate, coll, alert_words, db):
         var alert_words = """
                         + str(aux_list) +
                           """
-        if (summary) { 
-            summary = summary.toLowerCase().split(" "); 
+        if (summary) {
+            summary = summary.toLowerCase().split(" ");
             for (var i = 0; i < summary.length; i++) {
                 if ( alert_words.indexOf(summary[i]) != -1){
                     if (fecha >= StartDate && fecha < EndDate)  {
@@ -497,6 +500,7 @@ def alert_words(StartDate, EndDate, coll, alert_words, db):
     db.drop_collection('alert_words')
     return list_of_results
 
+
 def word_count(StartDate, EndDate, coll, stopwords, db, max_words=30):
     """
     This function returns a dictionary with the most tweeted
@@ -514,16 +518,24 @@ def word_count(StartDate, EndDate, coll, stopwords, db, max_words=30):
         function() {  
         var summary = this.text_clean;
         var lang = this.lang;
+        var fecha = this.created_at;
+        var Start = """ + StartDate + """;
+        var StartDate = ISODate(Start);
+        var End   = """ + EndDate   + """;
+        var EndDate = ISODate(End);
         var stopwords = """ + str(stopwords) + """
-
         if (summary) { 
             if (lang == "es") {
                 // quick lowercase to normalize per your requirements
                 summary = summary.toLowerCase().split(" "); 
                 for (var i = 0; i < summary.length; i++) {
-                    if ( stopwords.indexOf(summary[i]) == -1){ // stopwords are avoided                     
+                    if ( stopwords.indexOf(summary[i]) == -1){ // stopwords are avoided
                         if (summary[i])  {      // make sure there's something
-                           emit(summary[i], 1);
+                            if (fecha >= StartDate && fecha < EndDate)  {
+                                if (isNaN(parseInt(summary[i]))) {
+                                    emit(summary[i], 1);
+                                }
+                            }
                         }
                     }
                 }
@@ -555,6 +567,7 @@ def word_count(StartDate, EndDate, coll, stopwords, db, max_words=30):
     db.drop_collection('word_count')
     return list_of_results
 
+
 def source_count(StartDate, EndDate, coll, db, max_sources=30):
     """
     TODO: this operation can be done in pipeline (agregation)
@@ -573,8 +586,15 @@ def source_count(StartDate, EndDate, coll, db, max_sources=30):
     mapper = Code("""
         function() {
         var source = this.source;
+        var fecha = this.created_at;
+        var Start = """ + StartDate + """;
+        var StartDate = ISODate(Start);
+        var End   = """ + EndDate + """;
+        var EndDate = ISODate(End);
         if (source) {// make sure there's something
-            emit(source, 1);
+            if (fecha >= StartDate && fecha < EndDate) {
+                emit(source, 1);
+            }
         }
     }
     """)
@@ -594,14 +614,15 @@ def source_count(StartDate, EndDate, coll, db, max_sources=30):
     count = 0
 
     # Words that just are found one time are not searched
-    for doc in result.find({"value":{"$gt":1}}).sort('value', pymongo.DESCENDING):
-        list_of_results.append({'source': doc[u'_id'], 'value':doc[u'value']})
+    for doc in result.find({"value": {"$gt": 1}}).sort('value', pymongo.DESCENDING):
+        list_of_results.append({'source': doc[u'_id'], 'value': doc[u'value']})
         count += 1
         if count >= max_sources:
             break
 
     db.drop_collection('source_count')
     return list_of_results
+
 
 def url_count(StartDate, EndDate, coll, db, max_sources=30):
     """
@@ -621,13 +642,20 @@ def url_count(StartDate, EndDate, coll, db, max_sources=30):
     mapper = Code("""
         function() {
             var entities = this.entities;
+            var fecha = this.created_at;
+            var Start = """ + StartDate + """;
+            var StartDate = ISODate(Start);
+            var End   = """ + EndDate + """;
+            var EndDate = ISODate(End);
             if (entities) {
                 var urls = entities.urls;
                 if (urls) {
                     for (var i = 0; i < urls.length; i++)
                     var url = urls[i].expanded_url
                     if (url) {
-                    emit(url, 1);
+                        if (fecha >= StartDate && fecha < EndDate) {
+                            emit(url, 1);
+                        }
                     }
                 }
             }
@@ -635,10 +663,10 @@ def url_count(StartDate, EndDate, coll, db, max_sources=30):
     """)
 
     reducer = Code("""
-        function( key, values ) {    
-        var count = 0;    
-        values.forEach(function(v) {            
-            count +=v;    
+        function( key, values ) {
+        var count = 0;
+        values.forEach(function(v) {
+            count +=v;
         });
         return count;
     }
@@ -649,14 +677,15 @@ def url_count(StartDate, EndDate, coll, db, max_sources=30):
     list_of_results = []
     count = 0
     # Words that just are found one time are not searched
-    for doc in result.find({"value":{"$gt":1}}).sort('value', pymongo.DESCENDING):
-        list_of_results.append({'url': doc[u'_id'], 'value':doc[u'value']})
+    for doc in result.find({"value": {"$gt": 1}}).sort('value', pymongo.DESCENDING):
+        list_of_results.append({'url': doc[u'_id'], 'value': doc[u'value']})
         count += 1
         if count >= max_sources:
             break
 
-    db.drop_collection('source_count')
+    db.drop_collection('url_count')
     return list_of_results
+
 
 # Reports to MongoDB or to a JSON file
 def generate_reports(host,
@@ -670,11 +699,20 @@ def generate_reports(host,
                       classifier='algorithm_1',
                       max_elements=20):
 
-    def _generate_reports(values, db, coll, fromgot, classifier, alertwords, max_elements, report_type):
+    def _generate_reports(values,
+                          db,
+                          coll,
+                          fromgot,
+                          classifier,
+                          alertwords,
+                          max_elements,
+                          report_type):
         """
         To reduce code, repetitive code is grouped in functions.
         """
         linea = {}
+        start_date_string = values['start'].strftime("%Y%m%d")
+        end_date_string = values['end'].strftime("%Y%m%d")
         valor = agg_count(values['start'], values['end'], coll, fromgot, classifier)
         linea['start'] = values['start']
         linea['end'] = values['end']
@@ -682,21 +720,21 @@ def generate_reports(host,
         linea['positives'] = valor['npos']
         linea['negatives'] = valor['nneg']
         linea['metrica'] = valor['met']
-        linea['report'] = {'type':report_type, 'from':name_collection}
+        linea['report'] = {'type': report_type, 'from': name_collection}
         key = values['start'].strftime("%Y%m%d") + values['end'].strftime("%Y%m%d")
         if alertwords:
-            linea['alert_words'] = alert_words(values['start'].strftime("%Y%m%d"),
-                                              values['end'].strftime("%Y%m%d"),
-                                              coll, alertwords, db)
+            linea['alert_words'] = alert_words(start_date_string,
+                                               end_date_string,
+                                               coll, alertwords, db)
         if stopwords:
-            linea['word_count'] = word_count(values['start'].strftime("%Y%m%d"),
-                                              values['end'].strftime("%Y%m%d"), 
+            linea['word_count'] = word_count(start_date_string,
+                                              end_date_string,
                                               coll, stopwords, db, max_elements)
-        linea['source_count'] = source_count(values['start'].strftime("%Y%m%d"),
-                                              values['end'].strftime("%Y%m%d"), 
+        linea['source_count'] = source_count(start_date_string,
+                                              end_date_string,
                                               coll, db, max_elements)
-        linea['url_count'] = url_count(values['start'].strftime("%Y%m%d"),
-                                              values['end'].strftime("%Y%m%d"), 
+        linea['url_count'] = url_count(start_date_string,
+                                              end_date_string,
                                               coll, db, max_elements)
         return linea, key
 
