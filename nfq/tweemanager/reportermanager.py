@@ -396,12 +396,28 @@ def agg_count(StartDate, EndDate, coll, fromgot, classifier):
     # Classifier and values should be change to use your owns
     if fromgot: # retweeted tweets are considered
         pipeline = [
-            {"$match": {"$and": [{"created_at": {"$gte": StartDate}}, {"created_at": {"$lt": EndDate}}]}},
+            {"$match": {"$and": [{"created_at": {"$gte": StartDate}},
+                                 {"created_at": {"$lt": EndDate}},
+                                 # WARNING, this is hardcoded!
+                                 # Other languages can be used
+                                 {"lang": "es"}]}},  # This is hardcoded!
             {"$group": {"_id": "",
-            "count": {"$sum": 1},
-            "npos": {"$sum": {"$cond":[{"$eq":["$valuation." + classifier + ".value","positive"]},{"$cond":[{"$eq":["$retweet_count",0]},1,"$retweet_count"]},0]}},
-            "nneg": {"$sum": {"$cond":[{"$eq":["$valuation." + classifier + ".value","negative"]},{"$cond":[{"$eq":["$retweet_count",0]},1,"$retweet_count"]},0]}},
-            "met": {"$sum": {"$multiply": ["$valuation." + classifier + ".metric", {"$cond":[{"$eq":["$retweet_count",0]},1,"$retweet_count"]}]}}
+             "count": {"$sum": 1},
+             "npos": {"$sum": {"$cond":[{"$eq": ["$valuation."\
+                                                 + classifier +\
+                                                 ".value", "positive"]},
+                                                 {"$cond":
+                                                  [{"$eq": ["$retweet_count", 0]},
+                                                    1, "$retweet_count"]}, 0]}},
+             "nneg": {"$sum": {"$cond": [{"$eq": ["$valuation."\
+                                                  + classifier +\
+                                                  ".value", "negative"]},
+                                                  {"$cond":
+                                                   [{"$eq": ["$retweet_count", 0]},
+                                                    1, "$retweet_count"]}, 0]}},
+             "met": {"$sum": {"$multiply": ["$valuation." + classifier + ".metric",\
+                                            {"$cond": [{"$eq": ["$retweet_count", 0]},
+                                                        1, "$retweet_count"]}]}}
             }},
         ]
 
@@ -410,18 +426,29 @@ def agg_count(StartDate, EndDate, coll, fromgot, classifier):
             result = result
         return result
 
-    else: # Only tweets in database are counted
+    else:  # Only tweets in database are counted
         pipeline = [
-            {"$match": {"$and": [{"created_at": {"$gte": StartDate}}, {"created_at": {"$lt": EndDate}}]}},
+            {"$match": {"$and": [{"created_at": {"$gte": StartDate}},
+                                 {"created_at": {"$lt": EndDate}},
+                                 # WARNING, this is hardcoded!
+                                 # Other languages can be used
+                                 {"lang": "es"}]}},
             {"$group": {"_id": "",
-            "count": {"$sum": 1},
-            "npos": {"$sum": {"$cond":[{"$eq":["$valuation." + classifier + ".value","positive"]},1,0]}},
-            "nneg": {"$sum": {"$cond":[{"$eq":["$valuation." + classifier + ".value","negative"]},1,0]}},
-            "met": {"$sum": "$valuation." + classifier + ".metric"}
+             "count": {"$sum": 1},
+             "npos": {"$sum": {"$cond": [{"$eq": ["$valuation."\
+                                                  + classifier +\
+                                                  ".value", "positive"]},
+                                                  1, 0]}},
+             "nneg": {"$sum": {"$cond": [{"$eq": ["$valuation."\
+                                                  + classifier +\
+                                                  ".value", "negative"]},
+                                                  1, 0]}},
+             "met": {"$sum": "$valuation." + classifier + ".metric"}
             }},
         ]
 
-        result = {'count':0, 'npos':0, 'nneg':0, 'met':0}
+        result = {'count': 0, 'npos': 0, 'nneg': 0, 'met': 0}
+
         for result in coll.aggregate(pipeline):
             result = result
         return result
