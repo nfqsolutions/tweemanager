@@ -28,7 +28,6 @@ setup(
     author="NFQ Solutions",
     author_email="solutions@nfq.es",
     packages=[
-        'nfq'
         'nfq.tweemanager',
         'nfq.tweemanager.getoldtweets',
     ],
