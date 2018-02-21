@@ -28,12 +28,13 @@ setup(
     author="NFQ Solutions",
     author_email="solutions@nfq.es",
     packages=[
-        'nfq'
+        'nfq',
         'nfq.tweemanager',
         'nfq.tweemanager.getoldtweets',
     ],
     zip_safe=False,
     setup_requires=[
+        'nfq',
         'pymongo',
         'datetime',
         'docopt',
